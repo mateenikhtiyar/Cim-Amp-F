@@ -1675,15 +1675,15 @@ export default function AcquireProfilePage() {
                   I have read and agree to the fee agreement
                 </Label>
               </div>
-               {/* Submit Button */}
+           
+            </div>
+          </div>
+    {/* Submit Button */}
           <div className="flex justify-end">
             <Button type="submit" className="bg-[#3aafa9] hover:bg-[#2a9d8f] text-white" disabled={isSubmitting}>
               {isSubmitting ? "Submitting..." : "Submit Profile"}
             </Button>
           </div>
-            </div>
-          </div>
-
          
         </form>
 
