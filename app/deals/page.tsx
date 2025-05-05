@@ -302,7 +302,7 @@ export default function DealsPage() {
       }
 
       // Get API URL from localStorage or use default
-      const apiUrl = localStorage.getItem("apiUrl") || "http://localhost:3001"
+      const apiUrl = localStorage.getItem("apiUrl") || "https://cim-amp.onrender.com"
 
       // Make API call to check if profile exists
       // Use the endpoint you have available - adjust this to match your API
@@ -345,7 +345,7 @@ export default function DealsPage() {
       }
 
       // Get API URL from localStorage or use default
-      const apiUrl = localStorage.getItem("apiUrl") || "http://localhost:3001"
+      const apiUrl = localStorage.getItem("apiUrl") || "https://cim-amp.onrender.com"
 
       // Fetch buyer profile
       const response = await fetch(`${apiUrl}/buyers/profile`, {
@@ -548,7 +548,7 @@ export default function DealsPage() {
   const getProfilePictureUrl = (path: string | null) => {
     if (!path) return null
 
-    const apiUrl = localStorage.getItem("apiUrl") || "http://localhost:3001"
+    const apiUrl = localStorage.getItem("apiUrl") || "https://cim-amp.onrender.com"
 
     // If the path already has http/https, return it as is
     if (path.startsWith("http://") || path.startsWith("https://")) {
