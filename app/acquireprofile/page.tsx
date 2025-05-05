@@ -800,6 +800,7 @@ export default function AcquireProfilePage() {
         },
         body: JSON.stringify(profileData),
       })
+      
 
       console.log("Acquire Profile - Response status:", response.status)
 

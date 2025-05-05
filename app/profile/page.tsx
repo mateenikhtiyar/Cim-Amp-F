@@ -201,6 +201,24 @@ export default function ProfilePage() {
     }).format(value)
   }
 
+  // Function to get the complete profile picture URL
+  const getProfilePictureUrl = (path: string | null) => {
+    if (!path) return null
+    
+    const apiUrl = localStorage.getItem("apiUrl") || "http://localhost:3001"
+    
+    // If the path already has http/https, return it as is
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path
+    }
+    
+    // Replace backslashes with forward slashes for URL compatibility
+    const formattedPath = path.replace(/\\/g, '/')
+    
+    // Check if path already starts with a slash
+    return `${apiUrl}/${formattedPath.startsWith('/') ? formattedPath.substring(1) : formattedPath}`
+  }
+
   // Update the handleProfilePictureUpload function to use 'file' as the form field name
   const handleProfilePictureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -339,19 +357,23 @@ export default function ProfilePage() {
             <div className="flex items-center">
               <div className="mr-2 text-right">
                 <div className="text-sm font-medium">{buyerProfile?.fullName || "User"}</div>
-                <div className="text-xs text-gray-500">{buyerId ? `ID: ${buyerId.substring(0, 8)}...` : "No ID"}</div>
+                {/* <div className="text-xs text-gray-500">{buyerId ? `ID: ${buyerId.substring(0, 8)}...` : "No ID"}</div> */}
               </div>
               <div className="relative">
                 <button className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">
                   {buyerProfile?.profilePicture ? (
                     <img
-                      src={buyerProfile.profilePicture || "/placeholder.svg"}
+                      src={getProfilePictureUrl(buyerProfile.profilePicture) || "/placeholder.svg"}
                       alt={buyerProfile.fullName}
-                      className="h-8 w-8 rounded-full"
+                      className="h-8 w-8 rounded-full object-cover"
+                      onError={(e) => {
+                        // Fallback to placeholder on error
+                        (e.target as HTMLImageElement).src = "/placeholder.svg";
+                      }}
                     />
                   ) : (
                     <img
-                      src="https://randomuser.me/api/portraits/women/44.jpg"
+                      src="/placeholder.svg"
                       alt="User"
                       className="h-8 w-8 rounded-full"
                     />
@@ -418,13 +440,17 @@ export default function ProfilePage() {
                 <div className="mr-8 relative">
                   {buyerProfile?.profilePicture ? (
                     <img
-                      src={buyerProfile.profilePicture || "/placeholder.svg"}
+                      src={getProfilePictureUrl(buyerProfile.profilePicture) || "/placeholder.svg"}
                       alt={buyerProfile.fullName}
                       className="h-40 w-40 rounded-md object-cover"
+                      onError={(e) => {
+                        // Fallback to placeholder on error
+                        (e.target as HTMLImageElement).src = "/placeholder.svg";
+                      }}
                     />
                   ) : (
                     <img
-                      src="https://randomuser.me/api/portraits/women/44.jpg"
+                      src="/placeholder.svg"
                       alt="Profile"
                       className="h-40 w-40 rounded-md object-cover"
                     />
