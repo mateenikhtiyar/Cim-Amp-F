@@ -48,7 +48,7 @@ export default function AuthCallbackPage() {
         }
 
         // Get API URL from localStorage or use default
-        const apiUrl = localStorage.getItem("apiUrl") || "http://localhost:3001"
+        const apiUrl = localStorage.getItem("apiUrl") || "https://cim-amp.onrender.com"
 
         console.log("Auth callback - Exchanging code for token at:", `${apiUrl}/buyers/google/callback?code=${code}`)
 

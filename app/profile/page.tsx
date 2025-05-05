@@ -121,7 +121,7 @@ export default function ProfilePage() {
 
       try {
         // Get API URL from localStorage or use default
-        const apiUrl = localStorage.getItem("apiUrl") || "http://localhost:3001"
+        const apiUrl = localStorage.getItem("apiUrl") || "https://cim-amp.onrender.com"
 
         // Fetch buyer profile
         const buyerResponse = await fetch(`${apiUrl}/buyers/profile`, {
@@ -205,7 +205,7 @@ export default function ProfilePage() {
   const getProfilePictureUrl = (path: string | null) => {
     if (!path) return null
     
-    const apiUrl = localStorage.getItem("apiUrl") || "http://localhost:3001"
+    const apiUrl = localStorage.getItem("apiUrl") || "https://cim-amp.onrender.com"
     
     // If the path already has http/https, return it as is
     if (path.startsWith('http://') || path.startsWith('https://')) {
@@ -249,7 +249,7 @@ export default function ProfilePage() {
 
     try {
       // Get API URL from localStorage or use default
-      const apiUrl = localStorage.getItem("apiUrl") || "http://localhost:3001"
+      const apiUrl = localStorage.getItem("apiUrl") || "https://cim-amp.onrender.com"
 
       // Create form data with 'file' as the field name
       const formData = new FormData()
@@ -310,7 +310,7 @@ export default function ProfilePage() {
     if (!authToken) return
 
     try {
-      const apiUrl = localStorage.getItem("apiUrl") || "http://localhost:3001"
+      const apiUrl = localStorage.getItem("apiUrl") || "https://cim-amp.onrender.com"
 
       const buyerResponse = await fetch(`${apiUrl}/buyers/profile`, {
         headers: {
