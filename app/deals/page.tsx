@@ -544,6 +544,24 @@ export default function DealsPage() {
     })
   }
 
+  // Function to get the complete profile picture URL
+  const getProfilePictureUrl = (path: string | null) => {
+    if (!path) return null
+
+    const apiUrl = localStorage.getItem("apiUrl") || "http://localhost:3001"
+
+    // If the path already has http/https, return it as is
+    if (path.startsWith("http://") || path.startsWith("https://")) {
+      return path
+    }
+
+    // Replace backslashes with forward slashes for URL compatibility
+    const formattedPath = path.replace(/\\/g, "/")
+
+    // Check if path already starts with a slash
+    return `${apiUrl}/${formattedPath.startsWith("/") ? formattedPath.substring(1) : formattedPath}`
+  }
+
   // Helper function to get status indicator color
   const getStatusIndicator = (status: string) => {
     switch (status) {
@@ -624,16 +642,18 @@ export default function DealsPage() {
               <div className="relative">
                 {buyerProfile?.profilePicture ? (
                   <img
-                    src={buyerProfile.profilePicture || "/placeholder.svg"}
+                    src={getProfilePictureUrl(buyerProfile.profilePicture) || "/placeholder.svg"}
                     alt={buyerProfile.fullName}
                     className="h-8 w-8 rounded-full object-cover"
+                    onError={(e) => {
+                      // Fallback to placeholder on error
+                      ;(e.target as HTMLImageElement).src = "/placeholder.svg"
+                    }}
                   />
                 ) : (
-                  <img
-                    src="https://randomuser.me/api/portraits/women/44.jpg"
-                    alt="User"
-                    className="h-8 w-8 rounded-full"
-                  />
+                  <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                    <span className="text-gray-600 text-sm">{buyerProfile?.fullName?.charAt(0) || "U"}</span>
+                  </div>
                 )}
               </div>
               <ChevronDown className="ml-1 h-4 w-4 text-gray-500" />
