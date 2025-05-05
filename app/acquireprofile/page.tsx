@@ -43,7 +43,7 @@ const BUSINESS_MODELS = ["Recurring Revenue", "Project-Based", "Asset Light", "A
 const MANAGEMENT_PREFERENCES = ["Owner(s) Departing", "Owner(s) Staying", "Management Team Staying", "No Preference"]
 
 // Default API URL
-const DEFAULT_API_URL = "http://localhost:3001/"
+const DEFAULT_API_URL = "http://localhost:3001"
 
 // Type for hierarchical selection
 interface HierarchicalSelection {
