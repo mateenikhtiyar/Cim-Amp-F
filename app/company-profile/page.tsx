@@ -64,7 +64,7 @@ const INDUSTRIES = [
 ]
 
 // Default API URL
-const DEFAULT_API_URL = "https://cim-amp.onrender.com"
+const DEFAULT_API_URL = "http://localhost:3001/"
 
 export default function CompanyProfilePage() {
   const router = useRouter()

@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       // Get API URL from localStorage or use default
-      const apiUrl = localStorage.getItem("apiUrl") || "https://cim-amp.onrender.com"
+      const apiUrl = localStorage.getItem("apiUrl") || "http://localhost:3001/"
 
       console.log("Auth context - Attempting login with:", email)
 

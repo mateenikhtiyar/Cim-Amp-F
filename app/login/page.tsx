@@ -82,7 +82,7 @@ export default function LoginPage() {
       console.log("Login page - Attempting login with:", email)
 
       // Get API URL from localStorage or use default
-      const apiUrl = localStorage.getItem("apiUrl") || "https://cim-amp.onrender.com"
+      const apiUrl = localStorage.getItem("apiUrl") || "http://localhost:3001/"
 
       // Use fetch directly for more control
       const response = await fetch(`${apiUrl}/auth/login`, {
@@ -148,7 +148,7 @@ export default function LoginPage() {
   // Handle Google OAuth login
   const handleGoogleLogin = () => {
     // Get API URL from localStorage or use default
-    const apiUrl = localStorage.getItem("apiUrl") || "https://cim-amp.onrender.com"
+    const apiUrl = localStorage.getItem("apiUrl") || "http://localhost:3001/"
     console.log("Login page - Redirecting to Google OAuth:", `${apiUrl}/buyers/google`)
 
     // Redirect to Google OAuth endpoint
