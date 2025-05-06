@@ -8,7 +8,6 @@ import type { CompanyProfile } from "@/types/company-profile"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -27,13 +26,22 @@ import {
   type SubIndustry,
 } from "@/lib/industry-data"
 
+// Extend the CompanyProfile type to include selectedCurrency
+// declare module "@/types/company-profile" {
+//   interface CompanyProfile {
+//     selectedCurrency: string;
+//   }
+// }
+
 const COMPANY_TYPES = [
   "Private Equity",
-  "Venture Capital",
+  "Holding Company",
   "Family Office",
-  "Corporate",
-  "Investment Bank",
-  "Individual Investor",
+  "Independent Sponsor",
+  "Entrepreneurship through Acquisition",
+  "Single Acquisition Search",
+  "Strategic Operating Company",
+  "Buy Side Mandate",
 ]
 
 const CAPITAL_ENTITIES = ["Fund", "Holding Company", "SPV", "Direct Investment"]
@@ -57,6 +65,12 @@ interface IndustrySelection {
   industryGroups: Record<string, boolean>
   industries: Record<string, boolean>
   subIndustries: Record<string, boolean>
+}
+
+// Store selected management preferences separately from the form data
+// to avoid TypeScript errors with the CompanyProfile type
+interface ExtendedFormState {
+  selectedManagementPreferences: string[]
 }
 
 export default function AcquireProfilePage() {
@@ -100,6 +114,20 @@ export default function AcquireProfilePage() {
   // Search terms
   const [countrySearchTerm, setCountrySearchTerm] = useState("")
   const [industrySearchTerm, setIndustrySearchTerm] = useState("")
+
+  // Available currencies
+  const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD"]
+
+  // Extended form state for fields not in the CompanyProfile type
+  const [extendedFormState, setExtendedFormState] = useState<ExtendedFormState>({
+    selectedManagementPreferences: [],
+  })
+
+  // Format number with commas
+  const formatNumberWithCommas = (value: number | undefined) => {
+    if (value === undefined) return ""
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+  }
 
   // Check for token on mount and from URL parameters
   useEffect(() => {
@@ -190,8 +218,11 @@ export default function AcquireProfilePage() {
     fetchData()
   }, [])
 
+  // Let's add a more robust type definition for the CompanyProfile type
+  // Replace the existing form state initialization with this updated version that includes proper type handling
+
   // Form state
-  const [formData, setFormData] = useState<CompanyProfile>({
+  const [formData, setFormData] = useState<CompanyProfile & { selectedCurrency: string }>({
     companyName: "",
     website: "",
     contacts: [{ name: "", email: "", phone: "" }],
@@ -217,7 +248,7 @@ export default function AcquireProfilePage() {
       minStakePercent: undefined,
       minYearsInBusiness: undefined,
       preferredBusinessModels: [],
-      managementTeamPreference: undefined,
+      managementTeamPreference: [], // Changed to empty array
       description: "",
     },
     agreements: {
@@ -225,6 +256,7 @@ export default function AcquireProfilePage() {
       ndaAccepted: false,
       feeAgreementAccepted: false,
     },
+    selectedCurrency: "USD", // Add this field
   })
 
   // Handle form field changes
@@ -289,6 +321,32 @@ export default function AcquireProfilePage() {
     }
   }
 
+  // Toggle management preference selection
+  const toggleManagementPreference = (preference: string) => {
+    const currentPreferences = [...extendedFormState.selectedManagementPreferences]
+    const preferenceIndex = currentPreferences.indexOf(preference)
+
+    if (preferenceIndex >= 0) {
+      // Remove preference if already selected
+      currentPreferences.splice(preferenceIndex, 1)
+    } else {
+      // Add preference if not selected
+      currentPreferences.push(preference)
+    }
+
+    setExtendedFormState({
+      ...extendedFormState,
+      selectedManagementPreferences: currentPreferences,
+    })
+
+    // Update the managementTeamPreference array in the form data
+    handleNestedChange(
+      "targetCriteria",
+      "managementTeamPreference",
+      [...currentPreferences], // Use the full array of preferences
+    )
+  }
+
   // Geography selection handlers
   const toggleContinent = (continent: Continent) => {
     const newGeoSelection = { ...geoSelection }
@@ -351,38 +409,29 @@ export default function AcquireProfilePage() {
     const newGeoSelection = { ...geoSelection }
     const isSelected = !geoSelection.subRegions[subRegion.id]
 
-    // Update subregion selection
+    // Update only the subregion selection
     newGeoSelection.subRegions[subRegion.id] = isSelected
 
-    // Check if all subregions in the region are selected/deselected
+    // Update parent region selection based on all subregions
     const allSubRegionsSelected = region.subRegions?.every((sr) =>
       sr.id === subRegion.id ? isSelected : newGeoSelection.subRegions[sr.id],
     )
 
-    const allSubRegionsDeselected = region.subRegions?.every((sr) =>
-      sr.id === subRegion.id ? !isSelected : !newGeoSelection.subRegions[sr.id],
-    )
-
-    // Update region selection based on subregions
+    // Only mark region as selected if ALL subregions are selected
     if (allSubRegionsSelected) {
       newGeoSelection.regions[region.id] = true
-    } else if (allSubRegionsDeselected) {
+    } else {
+      // If any subregion is deselected, the region is not fully selected
       newGeoSelection.regions[region.id] = false
     }
 
-    // Check if all regions in the continent are selected/deselected
-    const allRegionsSelected = continent.regions.every((r) =>
-      r.id === region.id ? newGeoSelection.regions[r.id] : newGeoSelection.regions[r.id],
-    )
+    // Update continent selection based on all regions
+    const allRegionsSelected = continent.regions.every((r) => newGeoSelection.regions[r.id])
 
-    const allRegionsDeselected = continent.regions.every((r) =>
-      r.id === region.id ? !newGeoSelection.regions[r.id] : !newGeoSelection.regions[r.id],
-    )
-
-    // Update continent selection based on regions
+    // Only mark continent as selected if ALL regions are selected
     if (allRegionsSelected) {
       newGeoSelection.continents[continent.id] = true
-    } else if (allRegionsDeselected) {
+    } else {
       newGeoSelection.continents[continent.id] = false
     }
 
@@ -396,11 +445,26 @@ export default function AcquireProfilePage() {
 
     const selectedCountries: string[] = []
 
-    // Add all selected regions (countries)
+    // Add all selected continents, regions, and subregions
     geoData.continents.forEach((continent) => {
+      // Add continent if selected
+      if (selection.continents[continent.id]) {
+        selectedCountries.push(continent.name)
+      }
+
       continent.regions.forEach((region) => {
+        // Add region if selected
         if (selection.regions[region.id]) {
           selectedCountries.push(region.name)
+        }
+
+        // Add subregions if selected
+        if (region.subRegions) {
+          region.subRegions.forEach((subRegion) => {
+            if (selection.subRegions[subRegion.id]) {
+              selectedCountries.push(subRegion.name)
+            }
+          })
         }
       })
     })
@@ -408,7 +472,41 @@ export default function AcquireProfilePage() {
     handleNestedChange("targetCriteria", "countries", selectedCountries)
   }
 
+  const removeCountry = (countryToRemove: string) => {
+    if (!geoData) return
+
+    const newGeoSelection = { ...geoSelection }
+
+    // Find and unselect the region that matches this country
+    geoData.continents.forEach((continent) => {
+      if (continent.name === countryToRemove) {
+        newGeoSelection.continents[continent.id] = false
+      }
+
+      continent.regions.forEach((region) => {
+        if (region.name === countryToRemove) {
+          newGeoSelection.regions[region.id] = false
+        }
+
+        // Check subregions
+        if (region.subRegions) {
+          region.subRegions.forEach((subRegion) => {
+            if (subRegion.name === countryToRemove) {
+              newGeoSelection.subRegions[subRegion.id] = false
+            }
+          })
+        }
+      })
+    })
+
+    setGeoSelection(newGeoSelection)
+    updateCountriesInFormData(newGeoSelection)
+  }
+
   // Industry selection handlers
+  // Let's also update the industry selection functions to cascade selections
+
+  // Update the toggleSector function to select all children when a sector is selected
   const toggleSector = (sector: Sector) => {
     const newIndustrySelection = { ...industrySelection }
     const isSelected = !industrySelection.sectors[sector.id]
@@ -435,6 +533,7 @@ export default function AcquireProfilePage() {
     updateIndustriesInFormData(newIndustrySelection)
   }
 
+  // Update the toggleIndustryGroup function to select all children when a group is selected
   const toggleIndustryGroup = (group: IndustryGroup, sector: Sector) => {
     const newIndustrySelection = { ...industrySelection }
     const isSelected = !industrySelection.industryGroups[group.id]
@@ -472,6 +571,7 @@ export default function AcquireProfilePage() {
     updateIndustriesInFormData(newIndustrySelection)
   }
 
+  // Update the toggleIndustry function to select all children when an industry is selected
   const toggleIndustry = (industry: Industry, group: IndustryGroup, sector: Sector) => {
     const newIndustrySelection = { ...industrySelection }
     const isSelected = !industrySelection.industries[industry.id]
@@ -613,6 +713,125 @@ export default function AcquireProfilePage() {
     handleNestedChange("targetCriteria", "industrySectors", selectedIndustries)
   }
 
+  const removeIndustry = (industryToRemove: string) => {
+    if (!industryData) return
+
+    const newIndustrySelection = { ...industrySelection }
+    let found = false
+
+    // Search through all levels to find and unselect the matching item
+    industryData.sectors.forEach((sector) => {
+      if (sector.name === industryToRemove) {
+        newIndustrySelection.sectors[sector.id] = false
+        found = true
+
+        // Unselect all children
+        sector.industryGroups.forEach((group) => {
+          newIndustrySelection.industryGroups[group.id] = false
+
+          group.industries.forEach((industry) => {
+            newIndustrySelection.industries[industry.id] = false
+
+            industry.subIndustries.forEach((subIndustry) => {
+              newIndustrySelection.subIndustries[subIndustry.id] = false
+            })
+          })
+        })
+      }
+
+      if (!found) {
+        sector.industryGroups.forEach((group) => {
+          if (group.name === industryToRemove) {
+            newIndustrySelection.industryGroups[group.id] = false
+            found = true
+
+            // Unselect all children
+            group.industries.forEach((industry) => {
+              newIndustrySelection.industries[industry.id] = false
+
+              industry.subIndustries.forEach((subIndustry) => {
+                newIndustrySelection.subIndustries[subIndustry.id] = false
+              })
+            })
+
+            // Check if all groups in the sector are now deselected
+            const allGroupsDeselected = sector.industryGroups.every((g) => !newIndustrySelection.industryGroups[g.id])
+
+            if (allGroupsDeselected) {
+              newIndustrySelection.sectors[sector.id] = false
+            }
+          }
+
+          if (!found) {
+            group.industries.forEach((industry) => {
+              if (industry.name === industryToRemove) {
+                newIndustrySelection.industries[industry.id] = false
+                found = true
+
+                // Unselect all children
+                industry.subIndustries.forEach((subIndustry) => {
+                  newIndustrySelection.subIndustries[subIndustry.id] = false
+                })
+
+                // Check parent selections
+                const allIndustriesDeselected = group.industries.every((i) => !newIndustrySelection.industries[i.id])
+
+                if (allIndustriesDeselected) {
+                  newIndustrySelection.industryGroups[group.id] = false
+
+                  const allGroupsDeselected = sector.industryGroups.every(
+                    (g) => !newIndustrySelection.industryGroups[g.id],
+                  )
+
+                  if (allGroupsDeselected) {
+                    newIndustrySelection.sectors[sector.id] = false
+                  }
+                }
+              }
+
+              if (!found) {
+                industry.subIndustries.forEach((subIndustry) => {
+                  if (subIndustry.name === industryToRemove) {
+                    newIndustrySelection.subIndustries[subIndustry.id] = false
+                    found = true
+
+                    // Check parent selections
+                    const allSubIndustriesDeselected = industry.subIndustries.every(
+                      (si) => !newIndustrySelection.subIndustries[si.id],
+                    )
+
+                    if (allSubIndustriesDeselected) {
+                      newIndustrySelection.industries[industry.id] = false
+
+                      const allIndustriesDeselected = group.industries.every(
+                        (i) => !newIndustrySelection.industries[i.id],
+                      )
+
+                      if (allIndustriesDeselected) {
+                        newIndustrySelection.industryGroups[group.id] = false
+
+                        const allGroupsDeselected = sector.industryGroups.every(
+                          (g) => !newIndustrySelection.industryGroups[g.id],
+                        )
+
+                        if (allGroupsDeselected) {
+                          newIndustrySelection.sectors[sector.id] = false
+                        }
+                      }
+                    }
+                  }
+                })
+              }
+            })
+          }
+        })
+      }
+    })
+
+    setIndustrySelection(newIndustrySelection)
+    updateIndustriesInFormData(newIndustrySelection)
+  }
+
   // Toggle expansion of UI sections
   const toggleContinentExpansion = (continentId: string) => {
     setExpandedContinents((prev) => ({
@@ -622,10 +841,13 @@ export default function AcquireProfilePage() {
   }
 
   const toggleRegionExpansion = (regionId: string) => {
-    setExpandedRegions((prev) => ({
-      ...prev,
-      [regionId]: !prev[regionId],
-    }))
+    setExpandedRegions((prev) => {
+      const newState = {
+        ...prev,
+        [regionId]: !prev[regionId],
+      }
+      return newState
+    })
   }
 
   const toggleSectorExpansion = (sectorId: string) => {
@@ -721,17 +943,33 @@ export default function AcquireProfilePage() {
   // Form validation
   const validateForm = () => {
     // Basic validation
-    if (!formData.companyName) return "Company name is required"
-    if (!formData.website) return "Website is required"
+    if (!formData.companyName?.trim()) return "Company name is required"
+    if (!formData.website?.trim()) return "Website is required"
     if (!formData.companyType) return "Company type is required"
     if (!formData.capitalEntity) return "Capital entity is required"
+
+    // Website validation
+    try {
+      const websiteUrl = new URL(formData.website.startsWith("http") ? formData.website : `https://${formData.website}`)
+      if (!websiteUrl.hostname.includes(".")) {
+        return "Please enter a valid website URL"
+      }
+    } catch (e) {
+      return "Please enter a valid website URL"
+    }
 
     // Contact validation
     if (formData.contacts.length === 0) return "At least one contact is required"
     for (const contact of formData.contacts) {
-      if (!contact.name) return "Contact name is required"
-      if (!contact.email) return "Contact email is required"
-      if (!contact.phone) return "Contact phone is required"
+      if (!contact.name?.trim()) return "Contact name is required"
+      if (!contact.email?.trim()) return "Contact email is required"
+      if (!contact.phone?.trim()) return "Contact phone is required"
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(contact.email)) {
+        return `Invalid email format for contact: ${contact.name}`
+      }
     }
 
     // Agreements validation
@@ -743,6 +981,31 @@ export default function AcquireProfilePage() {
     }
     if (!formData.agreements.feeAgreementAccepted) {
       return "You must accept the fee agreement"
+    }
+
+    // Number range validations
+    if (
+      formData.targetCriteria.revenueMin !== undefined &&
+      formData.targetCriteria.revenueMax !== undefined &&
+      formData.targetCriteria.revenueMin > formData.targetCriteria.revenueMax
+    ) {
+      return "Minimum revenue cannot be greater than maximum revenue"
+    }
+
+    if (
+      formData.targetCriteria.ebitdaMin !== undefined &&
+      formData.targetCriteria.ebitdaMax !== undefined &&
+      formData.targetCriteria.ebitdaMin > formData.targetCriteria.ebitdaMax
+    ) {
+      return "Minimum EBITDA cannot be greater than maximum EBITDA"
+    }
+
+    if (
+      formData.targetCriteria.transactionSizeMin !== undefined &&
+      formData.targetCriteria.transactionSizeMax !== undefined &&
+      formData.targetCriteria.transactionSizeMin > formData.targetCriteria.transactionSizeMax
+    ) {
+      return "Minimum transaction size cannot be greater than maximum transaction size"
     }
 
     return null
@@ -800,7 +1063,6 @@ export default function AcquireProfilePage() {
         },
         body: JSON.stringify(profileData),
       })
-      
 
       console.log("Acquire Profile - Response status:", response.status)
 
@@ -863,7 +1125,7 @@ export default function AcquireProfilePage() {
     if (!filteredData) return <div>Loading geography data...</div>
 
     return (
-      <div className="space-y-2 max-h-[400px] overflow-y-auto font-poppins">
+      <div className="space-y-2 font-poppins">
         {filteredData.continents.map((continent) => (
           <div key={continent.id} className="border-b border-gray-100 pb-1">
             <div className="flex items-center">
@@ -962,7 +1224,7 @@ export default function AcquireProfilePage() {
     if (!filteredData) return <div>Loading industry data...</div>
 
     return (
-      <div className="space-y-2 max-h-[400px] overflow-y-auto">
+      <div className="space-y-2">
         {filteredData.sectors.map((sector) => (
           <div key={sector.id} className="border-b border-gray-100 pb-1">
             <div className="flex items-center">
@@ -1082,7 +1344,7 @@ export default function AcquireProfilePage() {
     <div className="min-h-screen bg-[#f0f4f8] py-8 px-4 font-poppins">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-semibold text-[#2f2b43]  font-poppins">Company Profile</h1>
+          <h1 className="text-3xl font-semibold text-[#2f2b43]  font-poppins">Buyer Profile Form</h1>
         </div>
 
         {submitStatus === "success" && (
@@ -1104,7 +1366,7 @@ export default function AcquireProfilePage() {
         )}
 
         <form onSubmit={handleSubmit}>
-          {/* General Preferences */}
+          {/* General Preferences
           <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
             <h2 className="text-[#2f2b43] text-lg font-medium mb-4">General Preferences</h2>
             <div className="space-y-4">
@@ -1160,11 +1422,11 @@ export default function AcquireProfilePage() {
                 </Label>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Company Information */}
           <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-            <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Company Information</h2>
+            <h2 className="text-[#2f2b43] text-lg font-poppins font-seminold mb-4">About Your Company</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
@@ -1195,7 +1457,72 @@ export default function AcquireProfilePage() {
               </div>
             </div>
 
-            <div className="mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <Label htmlFor="companyType" className="text-[#667085] text-sm mb-1.5 block">
+                  Company Type <span className="text-red-500">*</span>
+                </Label>
+                <Select value={formData.companyType} onValueChange={(value) => handleChange("companyType", value)}>
+                  <SelectTrigger className="border-[#d0d5dd]">
+                    <SelectValue placeholder="Select Company Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COMPANY_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="capitalEntity" className="text-[#667085] text-sm mb-1.5 block">
+                  Capital Availability <span className="text-red-500">*</span>
+                </Label>
+                <Select value={formData.capitalEntity} onValueChange={(value) => handleChange("capitalEntity", value)}>
+                  <SelectTrigger className="border-[#d0d5dd]">
+                    <SelectValue placeholder="Select Capital Entity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CAPITAL_ENTITIES.map((entity) => (
+                      <SelectItem key={entity} value={entity}>
+                        {entity}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="dealsCompletedLast5Years" className="text-[#667085] text-sm mb-1.5 block">
+                  Number of deals completed in last 5 years
+                </Label>
+                <Input
+                  id="dealsCompletedLast5Years"
+                  type="number"
+                  className="border-[#d0d5dd]"
+                  value={formData.dealsCompletedLast5Years || ""}
+                  onChange={(e) =>
+                    handleChange("dealsCompletedLast5Years", e.target.value ? Number(e.target.value) : undefined)
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="averageDealSize" className="text-[#667085] text-sm mb-1.5 block">
+                  Average deal size ($)
+                </Label>
+                <Input
+                  id="averageDealSize"
+                  type="number"
+                  className="border-[#d0d5dd]"
+                  value={formData.averageDealSize || ""}
+                  onChange={(e) => handleChange("averageDealSize", e.target.value ? Number(e.target.value) : undefined)}
+                />
+              </div>
+            </div>
+            <div className="mb-4 mt-4">
               <Label className="text-[#667085] text-sm mb-1.5 block">
                 Contact Information (up to 3 contacts) <span className="text-red-500">*</span>
               </Label>
@@ -1272,72 +1599,6 @@ export default function AcquireProfilePage() {
                 )}
               </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <Label htmlFor="companyType" className="text-[#667085] text-sm mb-1.5 block">
-                  Company Type <span className="text-red-500">*</span>
-                </Label>
-                <Select value={formData.companyType} onValueChange={(value) => handleChange("companyType", value)}>
-                  <SelectTrigger className="border-[#d0d5dd]">
-                    <SelectValue placeholder="Select Company Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {COMPANY_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="capitalEntity" className="text-[#667085] text-sm mb-1.5 block">
-                  Capital Entity <span className="text-red-500">*</span>
-                </Label>
-                <Select value={formData.capitalEntity} onValueChange={(value) => handleChange("capitalEntity", value)}>
-                  <SelectTrigger className="border-[#d0d5dd]">
-                    <SelectValue placeholder="Select Capital Entity" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CAPITAL_ENTITIES.map((entity) => (
-                      <SelectItem key={entity} value={entity}>
-                        {entity}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="dealsCompletedLast5Years" className="text-[#667085] text-sm mb-1.5 block">
-                  Number of deals completed in last 5 years
-                </Label>
-                <Input
-                  id="dealsCompletedLast5Years"
-                  type="number"
-                  className="border-[#d0d5dd]"
-                  value={formData.dealsCompletedLast5Years || ""}
-                  onChange={(e) =>
-                    handleChange("dealsCompletedLast5Years", e.target.value ? Number(e.target.value) : undefined)
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="averageDealSize" className="text-[#667085] text-sm mb-1.5 block">
-                  Average deal size ($)
-                </Label>
-                <Input
-                  id="averageDealSize"
-                  type="number"
-                  className="border-[#d0d5dd]"
-                  value={formData.averageDealSize || ""}
-                  onChange={(e) => handleChange("averageDealSize", e.target.value ? Number(e.target.value) : undefined)}
-                />
-              </div>
-            </div>
           </div>
 
           {/* Target Criteria */}
@@ -1347,7 +1608,7 @@ export default function AcquireProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
                 <Label className="text-[#667085] text-sm mb-1.5 block">Countries</Label>
-                <div className="border border-[#d0d5dd] rounded-md p-4 h-80 overflow-y-auto">
+                <div className="border border-[#d0d5dd] rounded-md p-4 h-80 flex flex-col">
                   <div className="relative mb-4">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-[#667085]" />
                     <Input
@@ -1361,26 +1622,44 @@ export default function AcquireProfilePage() {
                   {formData.targetCriteria.countries.length > 0 && (
                     <div className="mb-4">
                       <div className="text-sm text-[#667085] mb-1">Selected Countries</div>
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
                         {formData.targetCriteria.countries.map((country, index) => (
                           <span
                             key={`selected-country-${index}`}
-                            className="bg-gray-100 text-[#344054] text-xs rounded-full px-2 py-0.5 flex items-center"
+                            className="bg-gray-100 text-[#344054] text-xs rounded-full px-2 py-0.5 flex items-center group"
                           >
                             {country}
+                            <button
+                              type="button"
+                              onClick={() => removeCountry(country)}
+                              className="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-3 w-3"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </button>
                           </span>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {renderGeographySelection()}
+                  <div className="flex-1 overflow-y-auto">{renderGeographySelection()}</div>
                 </div>
               </div>
 
               <div>
                 <Label className="text-[#667085] text-sm mb-1.5 block">Industry Sectors</Label>
-                <div className="border border-[#d0d5dd] rounded-md p-4 h-80 overflow-y-auto">
+                <div className="border border-[#d0d5dd] rounded-md p-4 h-80 flex flex-col">
                   <div className="relative mb-4">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-[#667085]" />
                     <Input
@@ -1394,147 +1673,250 @@ export default function AcquireProfilePage() {
                   {formData.targetCriteria.industrySectors.length > 0 && (
                     <div className="mb-4">
                       <div className="text-sm text-[#667085] mb-1">Selected Industries</div>
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
                         {formData.targetCriteria.industrySectors.map((industry, index) => (
                           <span
                             key={`selected-industry-${index}`}
-                            className="bg-gray-100 text-[#344054] text-xs rounded-full px-2 py-0.5 flex items-center"
+                            className="bg-gray-100 text-[#344054] text-xs rounded-full px-2 py-0.5 flex items-center group"
                           >
                             {industry}
+                            <button
+                              type="button"
+                              onClick={() => removeIndustry(industry)}
+                              className="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-3 w-3"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </button>
                           </span>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {renderIndustrySelection()}
+                  <div className="flex-1 overflow-y-auto">{renderIndustrySelection()}</div>
                 </div>
               </div>
             </div>
 
             <div className="space-y-6">
               <div>
-                <Label className="text-[#667085] text-sm mb-1.5 block">Revenue Size Range ($)</Label>
+                <div className="flex justify-between items-center mb-1.5">
+                  <Label className="text-[#667085] text-sm">Revenue Size Range</Label>
+                  <Select
+                    value={formData.selectedCurrency}
+                    onValueChange={(value) => handleChange("selectedCurrency", value)}
+                  >
+                    <SelectTrigger className="w-24 h-8">
+                      <SelectValue placeholder="Currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCIES.map((currency) => (
+                        <SelectItem key={currency} value={currency}>
+                          {currency}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center">
                     <Label htmlFor="revenueMin" className="text-[#667085] text-sm w-10">
                       Min
                     </Label>
-                    <Input
-                      id="revenueMin"
-                      type="number"
-                      className="border-[#d0d5dd]"
-                      value={formData.targetCriteria.revenueMin || ""}
-                      onChange={(e) =>
-                        handleNestedChange(
-                          "targetCriteria",
-                          "revenueMin",
-                          e.target.value ? Number(e.target.value) : undefined,
-                        )
-                      }
-                    />
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                        {formData.selectedCurrency === "USD"
+                          ? "$"
+                          : formData.selectedCurrency === "EUR"
+                            ? "€"
+                            : formData.selectedCurrency === "GBP"
+                              ? "£"
+                              : formData.selectedCurrency}
+                      </div>
+                      <Input
+                        id="revenueMin"
+                        type="text"
+                        className="border-[#d0d5dd] pl-8"
+                        value={formatNumberWithCommas(formData.targetCriteria.revenueMin)}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/,/g, "")
+                          if (value === "" || /^\d+$/.test(value)) {
+                            handleNestedChange("targetCriteria", "revenueMin", value ? Number(value) : undefined)
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                   <div className="flex items-center">
                     <Label htmlFor="revenueMax" className="text-[#667085] text-sm w-10">
                       Max
                     </Label>
-                    <Input
-                      id="revenueMax"
-                      type="number"
-                      className="border-[#d0d5dd]"
-                      value={formData.targetCriteria.revenueMax || ""}
-                      onChange={(e) =>
-                        handleNestedChange(
-                          "targetCriteria",
-                          "revenueMax",
-                          e.target.value ? Number(e.target.value) : undefined,
-                        )
-                      }
-                    />
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                        {formData.selectedCurrency === "USD"
+                          ? "$"
+                          : formData.selectedCurrency === "EUR"
+                            ? "€"
+                            : formData.selectedCurrency === "GBP"
+                              ? "£"
+                              : formData.selectedCurrency}
+                      </div>
+                      <Input
+                        id="revenueMax"
+                        type="text"
+                        className="border-[#d0d5dd] pl-8"
+                        value={formatNumberWithCommas(formData.targetCriteria.revenueMax)}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/,/g, "")
+                          if (value === "" || /^\d+$/.test(value)) {
+                            handleNestedChange("targetCriteria", "revenueMax", value ? Number(value) : undefined)
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
               <div>
-                <Label className="text-[#667085] text-sm mb-1.5 block">EBITDA Range ($)</Label>
+                <Label className="text-[#667085] text-sm mb-1.5 block">EBITDA Range</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center">
                     <Label htmlFor="ebitdaMin" className="text-[#667085] text-sm w-10">
                       Min
                     </Label>
-                    <Input
-                      id="ebitdaMin"
-                      type="number"
-                      className="border-[#d0d5dd]"
-                      value={formData.targetCriteria.ebitdaMin || ""}
-                      onChange={(e) =>
-                        handleNestedChange(
-                          "targetCriteria",
-                          "ebitdaMin",
-                          e.target.value ? Number(e.target.value) : undefined,
-                        )
-                      }
-                    />
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                        {formData.selectedCurrency === "USD"
+                          ? "$"
+                          : formData.selectedCurrency === "EUR"
+                            ? "€"
+                            : formData.selectedCurrency === "GBP"
+                              ? "£"
+                              : formData.selectedCurrency}
+                      </div>
+                      <Input
+                        id="ebitdaMin"
+                        type="text"
+                        className="border-[#d0d5dd] pl-8"
+                        value={formatNumberWithCommas(formData.targetCriteria.ebitdaMin)}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/,/g, "")
+                          if (value === "" || /^\d+$/.test(value)) {
+                            handleNestedChange("targetCriteria", "ebitdaMin", value ? Number(value) : undefined)
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                   <div className="flex items-center">
                     <Label htmlFor="ebitdaMax" className="text-[#667085] text-sm w-10">
                       Max
                     </Label>
-                    <Input
-                      id="ebitdaMax"
-                      type="number"
-                      className="border-[#d0d5dd]"
-                      value={formData.targetCriteria.ebitdaMax || ""}
-                      onChange={(e) =>
-                        handleNestedChange(
-                          "targetCriteria",
-                          "ebitdaMax",
-                          e.target.value ? Number(e.target.value) : undefined,
-                        )
-                      }
-                    />
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                        {formData.selectedCurrency === "USD"
+                          ? "$"
+                          : formData.selectedCurrency === "EUR"
+                            ? "€"
+                            : formData.selectedCurrency === "GBP"
+                              ? "£"
+                              : formData.selectedCurrency}
+                      </div>
+                      <Input
+                        id="ebitdaMax"
+                        type="text"
+                        className="border-[#d0d5dd] pl-8"
+                        value={formatNumberWithCommas(formData.targetCriteria.ebitdaMax)}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/,/g, "")
+                          if (value === "" || /^\d+$/.test(value)) {
+                            handleNestedChange("targetCriteria", "ebitdaMax", value ? Number(value) : undefined)
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
               <div>
-                <Label className="text-[#667085] text-sm mb-1.5 block">Transaction Size Range ($)</Label>
+                <Label className="text-[#667085] text-sm mb-1.5 block">Transaction Size Range</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center">
                     <Label htmlFor="transactionSizeMin" className="text-[#667085] text-sm w-10">
                       Min
                     </Label>
-                    <Input
-                      id="transactionSizeMin"
-                      type="number"
-                      className="border-[#d0d5dd]"
-                      value={formData.targetCriteria.transactionSizeMin || ""}
-                      onChange={(e) =>
-                        handleNestedChange(
-                          "targetCriteria",
-                          "transactionSizeMin",
-                          e.target.value ? Number(e.target.value) : undefined,
-                        )
-                      }
-                    />
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                        {formData.selectedCurrency === "USD"
+                          ? "$"
+                          : formData.selectedCurrency === "EUR"
+                            ? "€"
+                            : formData.selectedCurrency === "GBP"
+                              ? "£"
+                              : formData.selectedCurrency}
+                      </div>
+                      <Input
+                        id="transactionSizeMin"
+                        type="text"
+                        className="border-[#d0d5dd] pl-8"
+                        value={formatNumberWithCommas(formData.targetCriteria.transactionSizeMin)}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/,/g, "")
+                          if (value === "" || /^\d+$/.test(value)) {
+                            handleNestedChange(
+                              "targetCriteria",
+                              "transactionSizeMin",
+                              value ? Number(value) : undefined,
+                            )
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                   <div className="flex items-center">
                     <Label htmlFor="transactionSizeMax" className="text-[#667085] text-sm w-10">
                       Max
                     </Label>
-                    <Input
-                      id="transactionSizeMax"
-                      type="number"
-                      className="border-[#d0d5dd]"
-                      value={formData.targetCriteria.transactionSizeMax || ""}
-                      onChange={(e) =>
-                        handleNestedChange(
-                          "targetCriteria",
-                          "transactionSizeMax",
-                          e.target.value ? Number(e.target.value) : undefined,
-                        )
-                      }
-                    />
+                    <div className="relative flex-1">
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                        {formData.selectedCurrency === "USD"
+                          ? "$"
+                          : formData.selectedCurrency === "EUR"
+                            ? "€"
+                            : formData.selectedCurrency === "GBP"
+                              ? "£"
+                              : formData.selectedCurrency}
+                      </div>
+                      <Input
+                        id="transactionSizeMax"
+                        type="text"
+                        className="border-[#d0d5dd] pl-8"
+                        value={formatNumberWithCommas(formData.targetCriteria.transactionSizeMax)}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/,/g, "")
+                          if (value === "" || /^\d+$/.test(value)) {
+                            handleNestedChange(
+                              "targetCriteria",
+                              "transactionSizeMax",
+                              value ? Number(value) : undefined,
+                            )
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1605,18 +1987,20 @@ export default function AcquireProfilePage() {
           {/* Management Team Preference */}
           <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
             <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Management Future Preferences</h2>
-            <div className="space-y-4">
-              <RadioGroup
-                value={formData.targetCriteria.managementTeamPreference || ""}
-                onValueChange={(value) => handleNestedChange("targetCriteria", "managementTeamPreference", value)}
-              >
-                {MANAGEMENT_PREFERENCES.map((preference) => (
-                  <div key={preference} className="flex items-center space-x-2">
-                    <RadioGroupItem value={preference} id={`preference-${preference}`} />
-                    <Label htmlFor={`preference-${preference}`}>{preference}</Label>
-                  </div>
-                ))}
-              </RadioGroup>
+            <div className="flex flex-wrap gap-6">
+              {MANAGEMENT_PREFERENCES.map((preference) => (
+                <div key={preference} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`preference-${preference}`}
+                    className="border-[#d0d5dd]"
+                    checked={extendedFormState.selectedManagementPreferences.includes(preference)}
+                    onCheckedChange={() => toggleManagementPreference(preference)}
+                  />
+                  <Label htmlFor={`preference-${preference}`} className="text-[#344054]">
+                    {preference}
+                  </Label>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -1629,6 +2013,63 @@ export default function AcquireProfilePage() {
               value={formData.targetCriteria.description || ""}
               onChange={(e) => handleNestedChange("targetCriteria", "description", e.target.value)}
             />
+          </div>
+          {/* General Preferences */}
+          <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+            <h2 className="text-[#2f2b43] text-lg font-medium mb-4">General Preferences</h2>
+            <div className="space-y-4">
+              <div className="flex items-end space-x-2">
+                <Checkbox
+                  id="stopSendingDeals"
+                  className="mt-1 border-[#d0d5dd]"
+                  checked={formData.preferences.stopSendingDeals}
+                  onCheckedChange={(checked) => handleNestedChange("preferences", "stopSendingDeals", checked === true)}
+                />
+                <Label htmlFor="stopSendingDeals" className="text-[#344054]">
+                  Stop sending deals
+                </Label>
+              </div>
+
+              <div className="flex items-end space-x-2">
+                <Checkbox
+                  id="dontShowMyDeals"
+                  className="mt-1 border-[#d0d5dd]"
+                  checked={formData.preferences.dontShowMyDeals}
+                  onCheckedChange={(checked) => handleNestedChange("preferences", "dontShowMyDeals", checked === true)}
+                />
+                <Label htmlFor="dontShowMyDeals" className="text-[#344054]">
+                  Don't show sellers your company details until you engage. You will show as "Anonymous Buyer"
+                </Label>
+              </div>
+
+              <div className="flex items-end space-x-2">
+                <Checkbox
+                  id="dontSendDealsToMyCompetitors"
+                  className="mt-1 border-[#d0d5dd]"
+                  checked={formData.preferences.dontSendDealsToMyCompetitors}
+                  onCheckedChange={(checked) =>
+                    handleNestedChange("preferences", "dontSendDealsToMyCompetitors", checked === true)
+                  }
+                />
+                <Label htmlFor="dontSendDealsToMyCompetitors" className="text-[#344054]">
+                  Do not send deals that are currently marketed on other deal marketplaces
+                </Label>
+              </div>
+
+              <div className="flex items-end space-x-2">
+                <Checkbox
+                  id="allowBuyerLikeDeals"
+                  className="mt-1 border-[#d0d5dd]"
+                  checked={formData.preferences.allowBuyerLikeDeals}
+                  onCheckedChange={(checked) =>
+                    handleNestedChange("preferences", "allowBuyerLikeDeals", checked === true)
+                  }
+                />
+                <Label htmlFor="allowBuyerLikeDeals" className="text-[#344054]">
+                  Allow buy side fee deals (charged by seller above CIM Amplify Fees)
+                </Label>
+              </div>
+            </div>
           </div>
 
           {/* Terms and Agreements */}
@@ -1676,16 +2117,14 @@ export default function AcquireProfilePage() {
                   I have read and agree to the fee agreement
                 </Label>
               </div>
-           
             </div>
           </div>
-    {/* Submit Button */}
+          {/* Submit Button */}
           <div className="flex justify-end">
             <Button type="submit" className="bg-[#3aafa9] hover:bg-[#2a9d8f] text-white" disabled={isSubmitting}>
               {isSubmitting ? "Submitting..." : "Submit Profile"}
             </Button>
           </div>
-         
         </form>
 
         {/* Debug Information (only visible in development) */}
