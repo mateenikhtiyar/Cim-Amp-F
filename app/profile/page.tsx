@@ -483,6 +483,9 @@ export default function ProfilePage() {
                     {/* Bio is not in the schema, so using a placeholder */}
                     Experienced buyer looking for opportunities
                   </p>
+
+
+
                   <div className="mt-2 flex items-center text-sm text-gray-600">
                     <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path
