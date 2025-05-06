@@ -478,7 +478,7 @@ export default function ProfilePage() {
                   <h2 className="mb-1 text-2xl font-bold">{buyerProfile?.fullName || "User"}</h2>
                   <p className="mb-4 text-sm text-gray-500">{buyerProfile?.role || "Buyer"}</p>
 
-                  <h3 className="mb-2 font-medium">Bio</h3>
+                  {/* <h3 className="mb-2 font-medium">Bio</h3> */}
                   <p className="mb-4 text-sm text-gray-600">
                     {/* Bio is not in the schema, so using a placeholder */}
                     Experienced buyer looking for opportunities
@@ -499,7 +499,7 @@ export default function ProfilePage() {
                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                       />
                     </svg>
-                    <span>Location not specified</span>
+                    {/* <span>Location not specified</span> */}
                   </div>
 
                   <div className="mt-2 flex items-center text-sm text-gray-600">
