@@ -5,7 +5,6 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Search, Eye, LogOut, Settings, Briefcase, ChevronDown, Bell, Upload, X, FileText } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -239,9 +238,12 @@ export default function DealsPage() {
     // Set initial title based on activeTab
     setActiveTitle(`${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Deals`)
 
-    // Check if coming from profile submission
-    if (searchParams?.get("profileSubmitted") === "true") {
+    // Check if coming from profile submission and if notification has been shown before
+    if (searchParams?.get("profileSubmitted") === "true" && !localStorage.getItem("profileSubmissionNotified")) {
       setProfileSubmitted(true)
+      // Set flag in localStorage to prevent showing the message again
+      localStorage.setItem("profileSubmissionNotified", "true")
+
       toast({
         title: "Profile Submitted",
         description: "Your company profile has been successfully submitted.",
@@ -387,8 +389,14 @@ export default function DealsPage() {
 
   // Add this function to handle opening the deal details modal
   const handleViewDealDetails = (deal: Deal) => {
-    setSelectedDeal(deal)
-    setDealDetailsOpen(true)
+    // Only show details popup for active deals
+    if (deal.status === "active") {
+      setSelectedDeal(deal)
+      setDealDetailsOpen(true)
+    } else {
+      // For pending and passed deals, go directly to CIM
+      handleGoToCIM(deal.id)
+    }
   }
 
   // Add a new function to handle the View CIM button click
@@ -591,6 +599,11 @@ export default function DealsPage() {
     }
   }
 
+  // Helper function to count deals by status
+  const countDealsByStatus = (status: string) => {
+    return deals.filter((deal) => deal.status === status).length
+  }
+
   // Add this to the useEffect after checkProfileSubmission()
   useEffect(() => {
     // Check if profile has been submitted
@@ -739,39 +752,30 @@ export default function DealsPage() {
 
           {/* Update the Tabs component to use the handleTabChange function */}
           <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-6 gap-2">
-            <TabsList className="bg-white">
+            <TabsList className="bg-white space-x-4">
               <TabsTrigger
                 value="active"
                 className={`relative ${
-                  activeTab === "active" ? "bg-[#3AAFA9] text-white" : "bg-gray-100 text-gray-700"
-                } hover:bg-[#3AAFA9] hover:text-white px-4 py-2 rounded-md`}
+                  activeTab === "active" ? "bg-[#3AAFA9] text-white" : "bg-gray-200 text-gray-700"
+                } hover:bg-[#3AAFA9] hover:text-white px-6 py-2 rounded-md`}
               >
-                Active
-                <Badge className="ml-1 bg-[#3AAFA9] text-white text-md font-bold rounded px-2">
-                  {deals.filter((d) => d.status === "active").length}
-                </Badge>
+                Active ({countDealsByStatus("active")})
               </TabsTrigger>
               <TabsTrigger
                 value="pending"
                 className={`relative ${
-                  activeTab === "pending" ? "bg-[#3AAFA9] text-white" : "bg-gray-100 text-gray-700"
-                } hover:bg-[#3AAFA9] hover:text-white px-4 py-2 rounded-md`}
+                  activeTab === "pending" ? "bg-[#3AAFA9] text-white" : "bg-gray-200 text-gray-700"
+                } hover:bg-[#3AAFA9] hover:text-white px-6 py-2 rounded-md`}
               >
-                Pending
-                <Badge className="ml-1 bg-[#3AAFA9] text-white text-md font-bold rounded px-2">
-                  {deals.filter((d) => d.status === "pending").length}
-                </Badge>
+                Pending ({countDealsByStatus("pending")})
               </TabsTrigger>
               <TabsTrigger
                 value="passed"
                 className={`relative ${
-                  activeTab === "passed" ? "bg-[#3AAFA9] text-white" : "bg-gray-100 text-gray-700"
-                } hover:bg-[#3AAFA9] hover:text-white px-4 py-2 rounded-md`}
+                  activeTab === "passed" ? "bg-[#3AAFA9] text-white" : "bg-gray-200 text-gray-700"
+                } hover:bg-[#3AAFA9] hover:text-white px-6 py-2 rounded-md`}
               >
-                Passed
-                <Badge className="ml-1 bg-[#3AAFA9] text-white text-md font-bold rounded px-2">
-                  {deals.filter((d) => d.status === "passed").length}
-                </Badge>
+                Passed ({countDealsByStatus("passed")})
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -786,26 +790,7 @@ export default function DealsPage() {
               >
                 <div className="flex items-center justify-between border-b border-gray-200 p-4">
                   <h3 className="text-lg font-medium text-teal-500">{deal.title}</h3>
-                  <div className="flex items-center">
-                    {deal.status === "active" && (
-                      <div className="flex items-center border border-green-500 rounded-full px-2 py-1 text-sm text-green-500">
-                        <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
-                        <span className="text-sm text-gray-600">Active</span>
-                      </div>
-                    )}
-                    {deal.status === "pending" && (
-                      <div className="flex items-center rounded-full px-2 py-1 text-sm  border-2 border-orange-500">
-                        <div className="h-2 w-2 rounded-full bg-orange-500 mr-2 "></div>
-                        <span className="text-sm text-gray-600">Pending</span>
-                      </div>
-                    )}
-                    {deal.status === "passed" && (
-                      <div className="flex items-center border-2 border-blue-500 rounded-full px-2 py-1 text-sm text-blue-500">
-                        <div className="h-2 w-2 rounded-full bg-blue-500 mr-2"></div>
-                        <span className="text-sm text-gray-600">Complete</span>
-                      </div>
-                    )}
-                  </div>
+                  {/* Status badges removed as requested */}
                 </div>
 
                 <div className="p-4">
@@ -863,7 +848,7 @@ export default function DealsPage() {
           </DialogHeader>
           <div className="py-4">
             <p className="mb-4 text-sm text-gray-600">
-              By clicking Approve, you agree to the Global NDA and CIM Amplify Fee Agreement that you accepted.
+            By clicking "Approve" you reaffirm your previous acceptance of the STRAIGHT TO CIM MASTER NON-DISCLOSURE AGREEMENT and the CIM AMPLIFY MASTER FEE AGREEMENT.
             </p>
             <p className="text-sm text-gray-600">
               Once you approve, the seller will be notified and can contact you directly.
