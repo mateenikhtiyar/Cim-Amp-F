@@ -61,6 +61,53 @@ api.interceptors.response.use(
   },
 )
 
+// Add a new function to fetch the user's profile
+export const getUserProfile = async () => {
+  try {
+    const token = localStorage.getItem("token")
+    if (!token) {
+      throw new Error("No authentication token found")
+    }
+
+    // Get API URL from localStorage or use default
+    const apiUrl = localStorage.getItem("apiUrl") || API_URL
+
+    const response = await fetch(`${apiUrl}/company-profiles/my-profile`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        // No profile exists yet, that's okay
+        return null
+      }
+
+      // Handle other errors
+      const errorData = await response.json().catch(() => ({}))
+
+      // If unauthorized, redirect to login
+      if (response.status === 401) {
+        localStorage.removeItem("token")
+        localStorage.removeItem("userId")
+        window.location.href = "/login?session=expired"
+        throw new Error("Authentication expired. Please log in again.")
+      }
+
+      throw new Error(`API Error: ${response.status} - ${JSON.stringify(errorData)}`)
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error("Error fetching user profile:", error)
+    throw error
+  }
+}
+
+// Update the submitCompanyProfile function to handle both create and update
 export const submitCompanyProfile = async (profileData: any) => {
   try {
     // Get the token directly before making the request
@@ -76,7 +123,7 @@ export const submitCompanyProfile = async (profileData: any) => {
 
     // Use direct fetch instead of axios for more control
     const response = await fetch(`${apiUrl}/company-profiles`, {
-      method: "POST",
+      method: "POST", // Always use POST as the API will handle create/update logic
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,

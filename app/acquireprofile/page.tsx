@@ -42,6 +42,9 @@ const COMPANY_TYPES = [
   "Single Acquisition Search",
   "Strategic Operating Company",
   "Buy Side Mandate",
+  "Single Acquisition Search",
+  "Strategic Operating Company",
+  "Buy Side Mandate",
 ]
 
 const CAPITAL_ENTITIES = ["Fund", "Holding Company", "SPV", "Direct Investment"]
@@ -205,6 +208,11 @@ export default function AcquireProfilePage() {
         // Fetch industry data
         const industry = await getIndustryData()
         setIndustryData(industry)
+
+        // After loading the reference data, fetch the user's profile
+        if (authToken) {
+          await fetchUserProfile()
+        }
       } catch (error) {
         console.error("Error fetching data:", error)
         toast({
@@ -216,7 +224,147 @@ export default function AcquireProfilePage() {
     }
 
     fetchData()
-  }, [])
+  }, [authToken])
+
+  // Fetch user's existing profile data
+  const fetchUserProfile = async () => {
+    if (!authToken) return
+
+    try {
+      setIsSubmitting(true)
+
+      const response = await fetch(`${apiUrl}/company-profiles/my-profile`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+      })
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          // No profile exists yet, that's okay
+          console.log("No existing profile found, showing empty form")
+          return
+        }
+
+        // Handle other errors
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(`API Error: ${response.status} - ${JSON.stringify(errorData)}`)
+      }
+
+      const profileData = await response.json()
+      console.log("Existing profile loaded:", profileData)
+
+      // Update form data with the fetched profile
+      if (profileData) {
+        // Ensure all required fields exist in the profile data
+        const updatedProfile = {
+          ...formData,
+          ...profileData,
+          // Ensure nested objects are properly merged
+          preferences: {
+            ...formData.preferences,
+            ...(profileData.preferences || {}),
+          },
+          targetCriteria: {
+            ...formData.targetCriteria,
+            ...(profileData.targetCriteria || {}),
+          },
+          agreements: {
+            ...formData.agreements,
+            ...(profileData.agreements || {}),
+          },
+          // Ensure selectedCurrency is set
+          selectedCurrency: profileData.selectedCurrency || "USD",
+        }
+
+        setFormData(updatedProfile)
+
+        // Update geography selections
+        if (profileData.targetCriteria?.countries?.length > 0 && geoData) {
+          const newGeoSelection = { ...geoSelection }
+
+          // Mark selected countries in the hierarchical selection
+          geoData.continents.forEach((continent) => {
+            if (profileData.targetCriteria.countries.includes(continent.name)) {
+              newGeoSelection.continents[continent.id] = true
+            }
+
+            continent.regions.forEach((region) => {
+              if (profileData.targetCriteria.countries.includes(region.name)) {
+                newGeoSelection.regions[region.id] = true
+              }
+
+              if (region.subRegions) {
+                region.subRegions.forEach((subRegion) => {
+                  if (profileData.targetCriteria.countries.includes(subRegion.name)) {
+                    newGeoSelection.subRegions[subRegion.id] = true
+                  }
+                })
+              }
+            })
+          })
+
+          setGeoSelection(newGeoSelection)
+        }
+
+        // Update industry selections
+        if (profileData.targetCriteria?.industrySectors?.length > 0 && industryData) {
+          const newIndustrySelection = { ...industrySelection }
+
+          // Mark selected industries in the hierarchical selection
+          industryData.sectors.forEach((sector) => {
+            if (profileData.targetCriteria.industrySectors.includes(sector.name)) {
+              newIndustrySelection.sectors[sector.id] = true
+            }
+
+            sector.industryGroups.forEach((group) => {
+              if (profileData.targetCriteria.industrySectors.includes(group.name)) {
+                newIndustrySelection.industryGroups[group.id] = true
+              }
+
+              group.industries.forEach((industry) => {
+                if (profileData.targetCriteria.industrySectors.includes(industry.name)) {
+                  newIndustrySelection.industries[industry.id] = true
+                }
+
+                industry.subIndustries.forEach((subIndustry) => {
+                  if (profileData.targetCriteria.industrySectors.includes(subIndustry.name)) {
+                    newIndustrySelection.subIndustries[subIndustry.id] = true
+                  }
+                })
+              })
+            })
+          })
+
+          setIndustrySelection(newIndustrySelection)
+        }
+
+        // Update management preferences
+        if (profileData.targetCriteria?.managementTeamPreference?.length > 0) {
+          setExtendedFormState({
+            ...extendedFormState,
+            selectedManagementPreferences: [...profileData.targetCriteria.managementTeamPreference],
+          })
+        }
+
+        toast({
+          title: "Profile Loaded",
+          description: "Your existing profile has been loaded.",
+        })
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error)
+      toast({
+        title: "Error Loading Profile",
+        description: "Failed to load your existing profile. Starting with a new form.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   // Let's add a more robust type definition for the CompanyProfile type
   // Replace the existing form state initialization with this updated version that includes proper type handling
@@ -1054,9 +1202,12 @@ export default function AcquireProfilePage() {
         console.log("Acquire Profile - Buyer ID:", buyerId)
       }
 
-      // Submit the data
-      const response = await fetch(`${apiUrl}/company-profiles`, {
-        method: "POST",
+      // Submit the data - use POST for new profiles, PUT for updates
+      const endpoint = `${apiUrl}/company-profiles`
+      const method = "POST" // Always use POST as the API will handle create/update logic
+
+      const response = await fetch(endpoint, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${authToken}`,
