@@ -411,7 +411,7 @@ export default function ProfilePage() {
               className="mb-2 flex items-center rounded-md px-4 py-3 text-gray-700 hover:bg-gray-100"
             >
               <Settings className="mr-3 h-5 w-5" />
-              <span>Edit Profile</span>
+              <span>Edit Company Profile</span>
             </Link>
 
             <button
