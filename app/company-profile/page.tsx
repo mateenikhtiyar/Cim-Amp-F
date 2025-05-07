@@ -4,34 +4,21 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
 import type { CompanyProfile } from "@/types/company-profile"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  PlusCircle,
-  Trash2,
-  Search,
-  AlertCircle,
-  CheckCircle2,
-  ChevronDown,
-  ChevronRight,
-  LogOut,
-  Settings,
-  Briefcase,
-  Eye,
-  Bell,
-} from "lucide-react"
+import { PlusCircle, Trash2, AlertCircle, CheckCircle2, ChevronDown, ChevronRight } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { toast } from "@/components/ui/use-toast"
-import { Toaster } from "@/components/ui/toaster"
 
 import { getGeoData, type GeoData, type Continent, type Region, type SubRegion } from "@/lib/geography-data"
 import { getIndustryData, type IndustryData, type Sector, type IndustryGroup, type Industry } from "@/lib/industry-data"
+
+// Add a direct import for the API service at the top of the file
+import { submitCompanyProfile } from "@/services/api"
 
 const COMPANY_TYPES = [
   "Private Equity",
@@ -40,6 +27,8 @@ const COMPANY_TYPES = [
   "Independent Sponsor",
   "Entrepreneurship through Acquisition",
   "Single Acquisition Search",
+  "Strategic Operating Company",
+  "Buy Side Mandate",
   "Strategic Operating Company",
   "Buy Side Mandate",
 ]
@@ -72,16 +61,6 @@ interface ExtendedFormState {
   selectedManagementPreferences: string[]
 }
 
-// Add BuyerProfile interface
-interface BuyerProfile {
-  _id: string
-  fullName: string
-  email: string
-  companyName: string
-  role: string
-  profilePicture: string | null
-}
-
 export default function CompanyProfilePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -94,13 +73,10 @@ export default function CompanyProfilePage() {
 
   // Authentication state
   const [authToken, setAuthToken] = useState("")
-  const [buyerId, setBuyerId] = useState("")
+  const [companyId, setCompanyId] = useState("")
 
   const [geoData, setGeoData] = useState<GeoData | null>(null)
   const [industryData, setIndustryData] = useState<IndustryData | null>(null)
-
-  // Add buyerProfile state
-  const [buyerProfile, setBuyerProfile] = useState<BuyerProfile | null>(null)
 
   // Hierarchical selection state
   const [geoSelection, setGeoSelection] = useState<HierarchicalSelection>({
@@ -120,7 +96,6 @@ export default function CompanyProfilePage() {
   const [expandedRegions, setExpandedRegions] = useState<Record<string, boolean>>({})
   const [expandedSectors, setExpandedSectors] = useState<Record<string, boolean>>({})
   const [expandedIndustryGroups, setExpandedIndustryGroups] = useState<Record<string, boolean>>({})
-  const [expandedIndustries, setExpandedIndustries] = useState<Record<string, boolean>>({})
 
   // Search terms
   const [countrySearchTerm, setCountrySearchTerm] = useState("")
@@ -144,7 +119,7 @@ export default function CompanyProfilePage() {
   useEffect(() => {
     // Get token and userId from URL parameters
     const urlToken = searchParams?.get("token")
-    const urlUserId = searchParams?.get("userId")
+    const urlCompanyId = searchParams?.get("companyId")
 
     // Set token from URL or localStorage
     if (urlToken) {
@@ -171,18 +146,18 @@ export default function CompanyProfilePage() {
       }
     }
 
-    // Set userId from URL or localStorage
-    if (urlUserId) {
-      const cleanUserId = urlUserId.trim()
-      localStorage.setItem("userId", cleanUserId)
-      setBuyerId(cleanUserId)
-      console.log("Company Profile - Buyer ID set from URL:", cleanUserId)
+    // Set companyId from URL or localStorage
+    if (urlCompanyId) {
+      const cleanCompanyId = urlCompanyId.trim()
+      localStorage.setItem("companyId", cleanCompanyId)
+      setCompanyId(cleanCompanyId)
+      console.log("Company Profile - Company ID set from URL:", cleanCompanyId)
     } else {
-      const storedUserId = localStorage.getItem("userId")
-      if (storedUserId) {
-        const cleanUserId = storedUserId.trim()
-        setBuyerId(cleanUserId)
-        console.log("Company Profile - Buyer ID set from localStorage:", cleanUserId)
+      const storedCompanyId = localStorage.getItem("companyId")
+      if (storedCompanyId) {
+        const cleanCompanyId = storedCompanyId.trim()
+        setCompanyId(cleanCompanyId)
+        console.log("Company Profile - Company ID set from localStorage:", cleanCompanyId)
       }
     }
 
@@ -217,10 +192,9 @@ export default function CompanyProfilePage() {
         const industry = await getIndustryData()
         setIndustryData(industry)
 
-        // After loading the reference data, fetch the user's profile
+        // After loading the reference data, fetch the company's profile
         if (authToken) {
-          await fetchUserProfile()
-          await fetchBuyerProfile()
+          await fetchCompanyProfile()
         }
       } catch (error) {
         console.error("Error fetching data:", error)
@@ -235,14 +209,14 @@ export default function CompanyProfilePage() {
     fetchData()
   }, [authToken])
 
-  // Fetch user's existing profile data
-  const fetchUserProfile = async () => {
+  // Fetch company's existing profile data
+  const fetchCompanyProfile = async () => {
     if (!authToken) return
 
     try {
       setIsSubmitting(true)
 
-      const response = await fetch(`${apiUrl}/company-profiles/my-profile`, {
+      const response = await fetch(`${apiUrl}/company-profiles/detail/${companyId || "my-profile"}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -286,8 +260,8 @@ export default function CompanyProfilePage() {
           },
           // Ensure selectedCurrency is set
           selectedCurrency: profileData.selectedCurrency || "USD",
-          // Ensure capitalAvailability is set
-          capitalAvailability: profileData.capitalAvailability || "need_to_raise",
+          // Ensure capitalEntity is set
+          capitalEntity: profileData.capitalEntity || "Need to raise",
         }
 
         setFormData(updatedProfile)
@@ -376,50 +350,13 @@ export default function CompanyProfilePage() {
     }
   }
 
-  // Fetch buyer profile
-  const fetchBuyerProfile = async () => {
-    try {
-      const token = localStorage.getItem("token")
-      if (!token) {
-        console.warn("Company Profile - Missing token for profile fetch")
-        return
-      }
-
-      // Get API URL from localStorage or use default
-      const apiUrl = localStorage.getItem("apiUrl") || "https://cim-amp.onrender.com"
-
-      // Fetch buyer profile
-      const response = await fetch(`${apiUrl}/buyers/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem("token")
-          localStorage.removeItem("userId")
-          router.push("/login?session=expired")
-          return
-        }
-        throw new Error(`Failed to fetch buyer profile: ${response.status}`)
-      }
-
-      const data = await response.json()
-      setBuyerProfile(data)
-      console.log("Company Profile - Buyer profile fetched:", data)
-    } catch (error) {
-      console.error("Error fetching buyer profile:", error)
-    }
-  }
-
   // Form state
-  const [formData, setFormData] = useState<CompanyProfile & { selectedCurrency: string; capitalAvailability: string }>({
+  const [formData, setFormData] = useState<CompanyProfile & { selectedCurrency: string }>({
     companyName: "",
     website: "",
     contacts: [{ name: "", email: "", phone: "" }],
     companyType: "",
-    capitalEntity: "",
+    capitalEntity: "Need to raise", // Default value
     dealsCompletedLast5Years: undefined,
     averageDealSize: undefined,
     preferences: {
@@ -451,7 +388,6 @@ export default function CompanyProfilePage() {
       feeAgreementAccepted: false,
     },
     selectedCurrency: "USD",
-    capitalAvailability: "need_to_raise", // Default to "need_to_raise"
   })
 
   // Handle form field changes
@@ -864,7 +800,6 @@ export default function CompanyProfilePage() {
 
     handleNestedChange("targetCriteria", "industrySectors", selectedIndustries)
   }
-
   const removeIndustry = (industryToRemove: string) => {
     if (!industryData) return
 
@@ -969,13 +904,6 @@ export default function CompanyProfilePage() {
     }))
   }
 
-  const toggleIndustryExpansion = (industryId: string) => {
-    setExpandedIndustries((prev) => ({
-      ...prev,
-      [industryId]: !prev[industryId],
-    }))
-  }
-
   // Filter geography data based on search term
   const filterGeographyData = () => {
     if (!geoData || !countrySearchTerm) return geoData
@@ -1041,7 +969,7 @@ export default function CompanyProfilePage() {
     if (!formData.companyName?.trim()) return "Company name is required"
     if (!formData.website?.trim()) return "Website is required"
     if (!formData.companyType) return "Company type is required"
-    if (!formData.capitalEntity) return "Capital entity is required"
+    // No longer requiring capitalEntity as it's determined by capitalAvailability
 
     // Website validation
     try {
@@ -1154,58 +1082,11 @@ export default function CompanyProfilePage() {
       // Prepare profile data
       const profileData = {
         ...formData,
-        buyer: buyerId || undefined, // Only include if available
+        company: companyId || undefined, // Only include if available
       }
 
-      console.log("Company Profile - Submitting to API:", apiUrl)
-      console.log("Company Profile - Using token:", authToken.substring(0, 10) + "...")
-      console.log("Company Profile - Authorization header:", `Bearer ${authToken}`)
-      console.log("Company Profile - Submitting data:", JSON.stringify(profileData))
-      if (buyerId) {
-        console.log("Company Profile - Buyer ID:", buyerId)
-      }
-
-      // Submit the data - use POST for new profiles, PUT for updates
-      const endpoint = `${apiUrl}/company-profiles`
-      const method = "POST" // Always use POST as the API will handle create/update logic
-
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify(profileData),
-      })
-
-      console.log("Company Profile - Response status:", response.status)
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        console.error("API Error Response:", errorData)
-
-        // Handle authentication errors
-        if (response.status === 401) {
-          localStorage.removeItem("token")
-          localStorage.removeItem("userId")
-          toast({
-            title: "Authentication Error",
-            description: "Your session has expired. Please log in again.",
-            variant: "destructive",
-          })
-
-          setTimeout(() => {
-            router.push("/login?session=expired")
-          }, 2000)
-
-          throw new Error("Authentication expired. Please log in again.")
-        }
-
-        throw new Error(`API Error: ${response.status} - ${JSON.stringify(errorData)}`)
-      }
-
-      const result = await response.json()
-      console.log("Company Profile - Submission successful:", result)
+      // Use the API service to submit the profile
+      await submitCompanyProfile(profileData)
 
       setSubmitStatus("success")
       toast({
@@ -1216,8 +1097,8 @@ export default function CompanyProfilePage() {
 
       // Redirect after successful submission
       setTimeout(() => {
-        router.push("/deals?profileSubmitted=true")
-      }, 2000)
+        router.push("/dashboard?profileSubmitted=true")
+      }, 1000) // Reduced timeout for faster redirect
     } catch (error: any) {
       console.error("Submission error:", error)
       setSubmitStatus("error")
@@ -1421,309 +1302,235 @@ export default function CompanyProfilePage() {
     )
   }
 
-  // Function to get the complete profile picture URL
-  const getProfilePictureUrl = (path: string | null) => {
-    if (!path) return null
-
-    const apiUrl = localStorage.getItem("apiUrl") || "https://cim-amp.onrender.com"
-
-    // If the path already has http/https, return it as is
-    if (path.startsWith("http://") || path.startsWith("https://")) {
-      return path
-    }
-
-    // Replace backslashes with forward slashes for URL compatibility
-    const formattedPath = path.replace(/\\/g, "/")
-
-    // Check if path already starts with a slash
-    return `${apiUrl}/${formattedPath.startsWith("/") ? formattedPath.substring(1) : formattedPath}`
-  }
-
-  // Handle logout
-  const handleLogout = () => {
-    console.log("Company Profile - Logging out")
-    localStorage.removeItem("token")
-    localStorage.removeItem("userId")
-    router.push("/login")
-  }
-
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-200 bg-white">
-        <div className="flex items-center justify-between px-6 py-3">
-          <div className="flex items-center space-x-10 pt-3 pb-1">
-            <Link href="/deals">
-              <div className="flex items-center">
-                <img src="/logo.svg" alt="CIM Amplify" className="h-10" />
-              </div>
-            </Link>
-            <h1 className="text-2xl font-semibold text-gray-800">Company Profile</h1>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Bell className="h-5 w-5 text-gray-500" />
-              <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-                2
-              </div>
-            </div>
-
-            <div className="flex items-center">
-              <div className="mr-2 text-right">
-                <div className="text-sm font-medium">{buyerProfile?.fullName || "User"}</div>
-                <div className="text-xs text-gray-500">{buyerProfile?.companyName || "Company"}</div>
-              </div>
-              <div className="relative">
-                {buyerProfile?.profilePicture ? (
-                  <img
-                    src={getProfilePictureUrl(buyerProfile.profilePicture) || "/placeholder.svg"}
-                    alt={buyerProfile.fullName}
-                    className="h-8 w-8 rounded-full object-cover"
-                    onError={(e) => {
-                      // Fallback to placeholder on error
-                      ;(e.target as HTMLImageElement).src = "/placeholder.svg"
-                    }}
-                  />
-                ) : (
-                  <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-600 text-sm">{buyerProfile?.fullName?.charAt(0) || "U"}</span>
-                  </div>
-                )}
-              </div>
-             
-            </div>
-          </div>
+    <div className="min-h-screen bg-[#f0f4f8] py-8 px-4 font-poppins">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-semibold text-[#2f2b43] font-poppins">Company Profile Form</h1>
         </div>
-      </header>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-56 border-r border-gray-200 bg-white">
-          <nav className="flex flex-col p-4">
-            <Link href="/deals" className="mb-2 flex items-center rounded-md px-4 py-3 text-gray-700 hover:bg-gray-100">
-              <Briefcase className="mr-3 h-5 w-5" />
-              <span>All Deals</span>
-            </Link>
+        {submitStatus === "success" && (
+          <Alert className="bg-green-50 border-green-200">
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <AlertTitle className="text-green-800">Success!</AlertTitle>
+            <AlertDescription className="text-green-700">
+              Your company profile has been successfully submitted.
+            </AlertDescription>
+          </Alert>
+        )}
 
-            <Link
-              href="/profile"
-              className="mb-2 flex items-center rounded-md px-4 py-3 text-gray-700 hover:bg-gray-100"
-            >
-              <Eye className="mr-3 h-5 w-5" />
-              <span>View Profile</span>
-            </Link>
+        {submitStatus === "error" && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
 
-            <Link
-              href="/company-profile"
-              className="mb-2 flex items-center rounded-md bg-teal-500 px-4 py-3 text-white hover:bg-teal-600"
-            >
-              <Settings className="mr-3 h-5 w-5" />
-              <span>Company Profile</span>
-            </Link>
+        <form onSubmit={handleSubmit}>
+          {/* Company Information */}
+          <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+            <h2 className="text-[#2f2b43] text-lg font-poppins font-seminold mb-4">About Your Company</h2>
 
-            <button
-              onClick={handleLogout}
-              className="flex items-center rounded-md px-4 py-3 text-gray-700 hover:bg-gray-100 text-left w-full"
-            >
-              <LogOut className="mr-3 h-5 w-5" />
-              <span>Sign Out</span>
-            </button>
-          </nav>
-        </aside>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <Label htmlFor="companyName" className="text-[#667085] text-sm mb-1.5 block">
+                  Company Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="companyName"
+                  placeholder="Company Name"
+                  className="border-[#d0d5dd]"
+                  value={formData.companyName}
+                  onChange={(e) => handleChange("companyName", e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="website" className="text-[#667085] text-sm mb-1.5 block">
+                  Company Website <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="website"
+                  placeholder="https://example.com"
+                  className="border-[#d0d5dd]"
+                  value={formData.website}
+                  onChange={(e) => handleChange("website", e.target.value)}
+                  required
+                />
+              </div>
+            </div>
 
-        {/* Main content */}
-        <main className="flex-1 bg-gray-50 p-6">
-          <div className="max-w-4xl mx-auto space-y-6">
-            {submitStatus === "success" && (
-              <Alert className="bg-green-50 border-green-200">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <AlertTitle className="text-green-800">Success!</AlertTitle>
-                <AlertDescription className="text-green-700">
-                  Your company profile has been successfully submitted.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {submitStatus === "error" && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{errorMessage}</AlertDescription>
-              </Alert>
-            )}
-
-            <form onSubmit={handleSubmit}>
-              {/* Company Information */}
-              <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-                <h2 className="text-[#2f2b43] text-lg font-poppins font-seminold mb-4">About Your Company</h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <Label htmlFor="companyName" className="text-[#667085] text-sm mb-1.5 block">
-                      Company Name <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="companyName"
-                      placeholder="Company Name"
-                      className="border-[#d0d5dd]"
-                      value={formData.companyName}
-                      onChange={(e) => handleChange("companyName", e.target.value)}
-                      required
+            <div className="grid grid-cols-1 gap-6 mb-6">
+              <div>
+                <Label htmlFor="companyType" className="text-[#667085] text-sm mb-1.5 block">
+                  Company Type <span className="text-red-500">*</span>
+                </Label>
+                <Select value={formData.companyType} onValueChange={(value) => handleChange("companyType", value)}>
+                  <SelectTrigger className="border-[#d0d5dd]">
+                    <SelectValue placeholder="Select Company Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COMPANY_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-[#667085] text-sm mb-1.5 block">
+                  Capital Availability <span className="text-red-500">*</span>
+                </Label>
+                <div className="flex flex-col space-y-2 mt-1">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="capital_ready"
+                      name="capitalEntity"
+                      value="Ready to deploy immediately"
+                      checked={formData.capitalEntity === "Ready to deploy immediately"}
+                      onChange={(e) => handleChange("capitalEntity", e.target.value)}
+                      className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
                     />
+                    <Label htmlFor="capital_ready" className="text-[#344054] cursor-pointer">
+                      Ready to deploy immediately
+                    </Label>
                   </div>
-                  <div>
-                    <Label htmlFor="website" className="text-[#667085] text-sm mb-1.5 block">
-                      Company Website <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="website"
-                      placeholder="https://example.com"
-                      className="border-[#d0d5dd]"
-                      value={formData.website}
-                      onChange={(e) => handleChange("website", e.target.value)}
-                      required
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="capital_need"
+                      name="capitalEntity"
+                      value="Need to raise"
+                      checked={formData.capitalEntity === "Need to raise"}
+                      onChange={(e) => handleChange("capitalEntity", e.target.value)}
+                      className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
                     />
+                    <Label htmlFor="capital_need" className="text-[#344054] cursor-pointer">
+                      Need to raise
+                    </Label>
                   </div>
                 </div>
+              </div>
+            </div>
 
-                <div className="grid grid-cols-1 gap-6 mb-6">
-                  <div>
-                    <Label htmlFor="companyType" className="text-[#667085] text-sm mb-1.5 block">
-                      Company Type <span className="text-red-500">*</span>
-                    </Label>
-                    <Select value={formData.companyType} onValueChange={(value) => handleChange("companyType", value)}>
-                      <SelectTrigger className="border-[#d0d5dd]">
-                        <SelectValue placeholder="Select Company Type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {COMPANY_TYPES.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-[#667085] text-sm mb-1.5 block">
-                      Capital Availability <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="flex flex-col space-y-2 mt-1">
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          id="capital_ready"
-                          name="capitalAvailability"
-                          value="ready_to_deploy"
-                          checked={formData.capitalEntity === "ready_to_deploy"}
-                          onChange={(e) => handleChange("capitalAvailability", e.target.value)}
-                          className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
-                        />
-                        <Label htmlFor="capital_ready" className="text-[#344054] cursor-pointer">
-                          Ready to deploy immediately
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="dealsCompletedLast5Years" className="text-[#667085] text-sm mb-1.5 block">
+                  Number of deals completed in last 5 years
+                </Label>
+                <Input
+                  id="dealsCompletedLast5Years"
+                  type="number"
+                  className="border-[#d0d5dd]"
+                  value={formData.dealsCompletedLast5Years || ""}
+                  onChange={(e) =>
+                    handleChange("dealsCompletedLast5Years", e.target.value ? Number(e.target.value) : undefined)
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="averageDealSize" className="text-[#667085] text-sm mb-1.5 block">
+                  Average deal size ($)
+                </Label>
+                <Input
+                  id="averageDealSize"
+                  type="text"
+                  className="border-[#d0d5dd]"
+                  value={formatNumberWithCommas(formData.averageDealSize)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/,/g, "")
+                    if (value === "" || /^\d+$/.test(value)) {
+                      handleChange("averageDealSize", value ? Number(value) : undefined)
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <div className="mb-4 mt-4">
+              <Label className="text-[#667085] text-sm mb-1.5 block">
+                Contact Information (up to 3 contacts) <span className="text-red-500">*</span>
+              </Label>
+              <div className="border border-[#d0d5dd] rounded-md p-4">
+                {formData.contacts.map((contact, index) => (
+                  <div key={index} className="mb-4">
+                    {index > 0 && <div className="h-px bg-gray-200 my-4"></div>}
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-sm font-medium">Contact {index + 1}</h3>
+                      {index > 0 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeContact(index)}
+                          className="text-red-500 hover:text-red-700 p-0 h-auto"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor={`contact-name-${index}`} className="text-[#667085] text-sm mb-1.5 block">
+                          Name <span className="text-red-500">*</span>
                         </Label>
+                        <Input
+                          id={`contact-name-${index}`}
+                          className="border-[#d0d5dd]"
+                          value={contact.name}
+                          onChange={(e) => handleContactChange(index, "name", e.target.value)}
+                          required
+                        />
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          id="capital_need"
-                          name="capitalAvailability"
-                          value="need_to_raise"
-                          checked={formData.capitalEntity === "need_to_raise"}
-                          onChange={(e) => handleChange("capitalAvailability", e.target.value)}
-                          className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
-                        />
-                        <Label htmlFor="capital_need" className="text-[#344054] cursor-pointer">
-                          Need to raise
+                      <div>
+                        <Label htmlFor={`contact-email-${index}`} className="text-[#667085] text-sm mb-1.5 block">
+                          Email <span className="text-red-500">*</span>
                         </Label>
+                        <Input
+                          id={`contact-email-${index}`}
+                          type="email"
+                          className="border-[#d0d5dd]"
+                          value={contact.email}
+                          onChange={(e) => handleContactChange(index, "email", e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`contact-phone-${index}`} className="text-[#667085] text-sm mb-1.5 block">
+                          Phone <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id={`contact-phone-${index}`}
+                          className="border-[#d0d5dd]"
+                          value={contact.phone}
+                          onChange={(e) => handleContactChange(index, "phone", e.target.value)}
+                          required
+                        />
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className="mb-4 mt-4">
-                  <Label className="text-[#667085] text-sm mb-1.5 block">
-                    Contact Information (up to 3 contacts) <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="border border-[#d0d5dd] rounded-md p-4">
-                    {formData.contacts.map((contact, index) => (
-                      <div key={index} className="mb-4">
-                        {index > 0 && <div className="h-px bg-gray-200 my-4"></div>}
-                        <div className="flex justify-between items-center mb-2">
-                          <h3 className="text-sm font-medium">Contact {index + 1}</h3>
-                          {index > 0 && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeContact(index)}
-                              className="text-red-500 hover:text-red-700 p-0 h-auto"
-                            >
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Remove
-                            </Button>
-                          )}
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <Label htmlFor={`contact-name-${index}`} className="text-[#667085] text-sm mb-1.5 block">
-                              Name <span className="text-red-500">*</span>
-                            </Label>
-                            <Input
-                              id={`contact-name-${index}`}
-                              className="border-[#d0d5dd]"
-                              value={contact.name}
-                              onChange={(e) => handleContactChange(index, "name", e.target.value)}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor={`contact-email-${index}`} className="text-[#667085] text-sm mb-1.5 block">
-                              Email <span className="text-red-500">*</span>
-                            </Label>
-                            <Input
-                              id={`contact-email-${index}`}
-                              type="email"
-                              className="border-[#d0d5dd]"
-                              value={contact.email}
-                              onChange={(e) => handleContactChange(index, "email", e.target.value)}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor={`contact-phone-${index}`} className="text-[#667085] text-sm mb-1.5 block">
-                              Phone <span className="text-red-500">*</span>
-                            </Label>
-                            <Input
-                              id={`contact-phone-${index}`}
-                              className="border-[#d0d5dd]"
-                              value={contact.phone}
-                              onChange={(e) => handleContactChange(index, "phone", e.target.value)}
-                              required
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    {formData.contacts.length < 3 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={addContact}
-                        className="text-[#3aafa9] hover:text-[#3aafa9] hover:bg-[#f0f4f8] p-0 h-auto"
-                      >
-                        <PlusCircle className="h-4 w-4 mr-2" />
-                        Add More Contacts
-                      </Button>
-                    )}
-                  </div>
-                </div>
+                ))}
+                {formData.contacts.length < 3 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={addContact}
+                    className="text-[#3aafa9] hover:text-[#3aafa9] hover:bg-[#f0f4f8] p-0 h-auto"
+                  >
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Add More Contacts
+                  </Button>
+                )}
               </div>
+            </div>
+          </div>
 
-              {/* Target Criteria */}
-              <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-                <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Target Criteria</h2>
-
+          {/* Target Criteria */}
+          <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+            <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Target Criteria</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <Label className="text-[#667085] text-sm mb-1.5 block">Countries</Label>
