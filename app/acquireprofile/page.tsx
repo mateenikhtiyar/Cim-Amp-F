@@ -1152,6 +1152,11 @@ export default function AcquireProfilePage() {
     if (!formData.companyName?.trim()) return "Company name is required"
     if (!formData.website?.trim()) return "Website is required"
     if (!formData.companyType) return "Company type is required"
+
+    // Make sure we check capitalAvailability rather than capitalEntity
+    if (!formData.capitalAvailability) return "Capital availability is required"
+
+    // Make sure capitalEntity is considered valid if it has a value
     if (!formData.capitalEntity) return "Capital entity is required"
 
     // Website validation
