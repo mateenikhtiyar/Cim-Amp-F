@@ -277,8 +277,6 @@ export default function AcquireProfilePage() {
           },
           // Ensure selectedCurrency is set
           selectedCurrency: profileData.selectedCurrency || "USD",
-          // Ensure capitalAvailability is set
-          capitalAvailability: profileData.capitalAvailability || "need_to_raise",
         }
 
         setFormData(updatedProfile)
@@ -344,11 +342,10 @@ export default function AcquireProfilePage() {
         }
 
         // Update management preferences
-        if (profileData.targetCriteria?.managementTeamPreference) {
-          // Convert from string to array for the UI state
+        if (profileData.targetCriteria?.managementTeamPreference?.length > 0) {
           setExtendedFormState({
             ...extendedFormState,
-            selectedManagementPreferences: [profileData.targetCriteria.managementTeamPreference],
+            selectedManagementPreferences: [...profileData.targetCriteria.managementTeamPreference],
           })
         }
 
@@ -373,7 +370,7 @@ export default function AcquireProfilePage() {
   // Replace the existing form state initialization with this updated version that includes proper type handling
 
   // Form state
-  const [formData, setFormData] = useState<CompanyProfile & { selectedCurrency: string; capitalAvailability: string }>({
+  const [formData, setFormData] = useState<CompanyProfile & { selectedCurrency: string }>({
     companyName: "",
     website: "",
     contacts: [{ name: "", email: "", phone: "" }],
@@ -399,7 +396,7 @@ export default function AcquireProfilePage() {
       minStakePercent: undefined,
       minYearsInBusiness: undefined,
       preferredBusinessModels: [],
-      managementTeamPreference: "", // Changed from empty array to empty string
+      managementTeamPreference: [], // Changed to empty array
       description: "",
     },
     agreements: {
@@ -407,8 +404,7 @@ export default function AcquireProfilePage() {
       ndaAccepted: false,
       feeAgreementAccepted: false,
     },
-    selectedCurrency: "USD",
-    capitalAvailability: "need_to_raise", // Add this field with default value
+    selectedCurrency: "USD", // Add this field
   })
 
   // Handle form field changes
@@ -491,12 +487,11 @@ export default function AcquireProfilePage() {
       selectedManagementPreferences: currentPreferences,
     })
 
-    // Update the managementTeamPreference in the form data
-    // Change from array to string - use the first selected preference or empty string
+    // Update the managementTeamPreference array in the form data
     handleNestedChange(
       "targetCriteria",
       "managementTeamPreference",
-      currentPreferences.length > 0 ? currentPreferences[0] : "",
+      [...currentPreferences], // Use the full array of preferences
     )
   }
 
@@ -1630,41 +1625,6 @@ export default function AcquireProfilePage() {
                     ))}
                   </SelectContent>
                 </Select>
-
-                {/* Add Capital Availability Radio Buttons */}
-                <div className="mt-4">
-                  <Label className="text-[#667085] text-sm mb-2 block">Capital Availability</Label>
-                  <div className="flex flex-wrap gap-6">
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        id="ready_to_deploy"
-                        name="capitalAvailability"
-                        value="ready_to_deploy"
-                        checked={formData.capitalAvailability === "ready_to_deploy"}
-                        onChange={(e) => handleChange("capitalAvailability", e.target.value)}
-                        className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
-                      />
-                      <Label htmlFor="ready_to_deploy" className="text-[#344054] cursor-pointer">
-                        Ready to deploy immediately
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        id="need_to_raise"
-                        name="capitalAvailability"
-                        value="need_to_raise"
-                        checked={formData.capitalAvailability === "need_to_raise"}
-                        onChange={(e) => handleChange("capitalAvailability", e.target.value)}
-                        className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
-                      />
-                      <Label htmlFor="need_to_raise" className="text-[#344054] cursor-pointer">
-                        Need to raise
-                      </Label>
-                    </div>
-                  </div>
-                </div>
               </div>
               <div>
                 <Label htmlFor="capitalEntity" className="text-[#667085] text-sm mb-1.5 block">
