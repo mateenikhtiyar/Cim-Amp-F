@@ -360,7 +360,7 @@ export default function AcquireProfilePage() {
     website: "",
     contacts: [{ name: "", email: "", phone: "" }],
     companyType: "",
-    capitalEntity: "Fund", // Set a default value
+    capitalEntity: "Direct Investment", // Default based on need_to_raise
     dealsCompletedLast5Years: undefined,
     averageDealSize: undefined,
     preferences: {
@@ -397,10 +397,19 @@ export default function AcquireProfilePage() {
 
   // Handle form field changes
   const handleChange = (field: string, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }))
+    if (field === "capitalAvailability") {
+      // When capitalAvailability changes, set capitalEntity based on the selection
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+        capitalEntity: value === "ready_to_deploy" ? "Fund" : "Direct Investment",
+      }))
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }))
+    }
   }
 
   // Handle nested field changes
@@ -1381,23 +1390,6 @@ export default function AcquireProfilePage() {
                     {COMPANY_TYPES.map((type) => (
                       <SelectItem key={type} value={type}>
                         {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="capitalEntity" className="text-[#667085] text-sm mb-1.5 block">
-                  Capital Entity <span className="text-red-500">*</span>
-                </Label>
-                <Select value={formData.capitalEntity} onValueChange={(value) => handleChange("capitalEntity", value)}>
-                  <SelectTrigger className="border-[#d0d5dd]">
-                    <SelectValue placeholder="Select Capital Entity" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CAPITAL_ENTITIES.map((entity) => (
-                      <SelectItem key={entity} value={entity}>
-                        {entity}
                       </SelectItem>
                     ))}
                   </SelectContent>
