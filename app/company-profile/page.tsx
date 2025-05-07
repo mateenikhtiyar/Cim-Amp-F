@@ -72,8 +72,8 @@ interface HierarchicalSelection {
 interface IndustrySelection {
   sectors: Record<string, boolean>
   industryGroups: Record<string, boolean>
-  industries: Record<string, boolean>\
-  subIndustries: Record[string, boolean]
+  industries: Record<string, boolean>
+  subIndustries: Record<string, boolean>
 }
 
 // Store selected management preferences separately from the form data
