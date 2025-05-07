@@ -23,7 +23,7 @@ export interface TargetCriteria {
   minStakePercent?: number
   minYearsInBusiness?: number
   preferredBusinessModels: string[]
-  managementTeamPreference?: string
+  managementTeamPreference: string[] // Changed from string/undefined to string[]
   description?: string
 }
 
@@ -45,4 +45,5 @@ export interface CompanyProfile {
   targetCriteria: TargetCriteria
   agreements: Agreements
   buyer?: string
+  capitalAvailability?: string // Add this field to match what we're submitting
 }

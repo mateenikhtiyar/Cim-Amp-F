@@ -396,7 +396,7 @@ export default function AcquireProfilePage() {
       minStakePercent: undefined,
       minYearsInBusiness: undefined,
       preferredBusinessModels: [],
-      managementTeamPreference: "",
+      managementTeamPreference: [],
       description: "",
     },
     agreements: {
@@ -493,7 +493,7 @@ export default function AcquireProfilePage() {
     handleNestedChange(
       "targetCriteria",
       "managementTeamPreference",
-      currentPreferences.length > 0 ? currentPreferences[0] : "",
+      currentPreferences.length > 0 ? currentPreferences : [],
     )
   }
 
@@ -1251,6 +1251,8 @@ export default function AcquireProfilePage() {
       const profileData = {
         ...formData,
         buyer: buyerId || undefined, // Only include if available
+        // Ensure capitalAvailability is included at the root level
+        capitalAvailability: formData.capitalAvailability || "need_to_raise",
       }
 
       console.log("Acquire Profile - Submitting to API:", apiUrl)

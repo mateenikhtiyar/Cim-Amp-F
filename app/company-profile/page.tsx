@@ -453,7 +453,7 @@ export default function CompanyProfilePage() {
       minStakePercent: undefined,
       minYearsInBusiness: undefined,
       preferredBusinessModels: [],
-      managementTeamPreference: "", // Changed from array to empty string
+      managementTeamPreference: [], // Changed from string to array
       description: "",
     },
     agreements: {
@@ -547,11 +547,10 @@ export default function CompanyProfilePage() {
     })
 
     // Update the managementTeamPreference in the form data
-    // Use the first selected preference or empty string
     handleNestedChange(
       "targetCriteria",
       "managementTeamPreference",
-      currentPreferences.length > 0 ? currentPreferences[0] : "",
+      currentPreferences.length > 0 ? currentPreferences : [],
     )
   }
 
@@ -1309,6 +1308,8 @@ export default function CompanyProfilePage() {
       const profileData = {
         ...formData,
         buyer: buyerId || undefined, // Only include if available
+        // Ensure capitalAvailability is included at the root level
+        capitalAvailability: formData.capitalAvailability || "need_to_raise",
       }
 
       console.log("Company Profile - Submitting to API:", apiUrl)
