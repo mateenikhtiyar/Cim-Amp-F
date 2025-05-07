@@ -1396,8 +1396,8 @@ export default function AcquireProfilePage() {
                       type="radio"
                       id="capital_fund"
                       name="capitalEntity"
-                      value="Ready to deploy immediately"
-                      checked={formData.capitalEntity === "Ready to deploy immediately"}
+                      value="ready_to_deploy"
+                      checked={formData.capitalEntity === "ready_to_deploy"}
                       onChange={(e) => handleChange("capitalEntity", e.target.value)}
                       className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
                     />
@@ -1410,8 +1410,8 @@ export default function AcquireProfilePage() {
                       type="radio"
                       id="capital_holding"
                       name="capitalEntity"
-                      value="Need to raise"
-                      checked={formData.capitalEntity === "Need to raise"}
+                      value="need_to_raise"
+                      checked={formData.capitalEntity === "need_to_raise"}
                       onChange={(e) => handleChange("capitalEntity", e.target.value)}
                       className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
                     />
