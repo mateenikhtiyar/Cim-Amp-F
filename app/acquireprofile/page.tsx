@@ -724,7 +724,7 @@ export default function AcquireProfilePage() {
     )
 
     const allIndustriesDeselected = group.industries.every((i) =>
-      i.id === industry.id ? !isSelected : !newIndustrySelection.industries[i.id],
+      i.id === industry.id ? !isSelected : newIndustrySelection.industries[i.id],
     )
 
     // Update group selection based on industries
@@ -1452,6 +1452,33 @@ export default function AcquireProfilePage() {
                       Need to raise
                     </Label>
                   </div>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-[#667085] text-sm mb-1.5 block">
+                  Capital Entity <span className="text-red-500">*</span>
+                </Label>
+                <div className="flex flex-col space-y-2 mt-1">
+                  {CAPITAL_ENTITIES.map((entity) => (
+                    <div key={entity} className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id={`capital_entity_${entity.replace(/\s+/g, "_").toLowerCase()}`}
+                        name="capitalEntity"
+                        value={entity}
+                        checked={formData.capitalEntity === entity}
+                        onChange={(e) => handleChange("capitalEntity", e.target.value)}
+                        className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
+                      />
+                      <Label
+                        htmlFor={`capital_entity_${entity.replace(/\s+/g, "_").toLowerCase()}`}
+                        className="text-[#344054] cursor-pointer"
+                      >
+                        {entity}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
