@@ -12,7 +12,20 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { PlusCircle, Trash2, Search, AlertCircle, CheckCircle2, ChevronDown, ChevronRight, LogOut, Settings, Briefcase, Eye, Bell } from 'lucide-react'
+import {
+  PlusCircle,
+  Trash2,
+  Search,
+  AlertCircle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  LogOut,
+  Settings,
+  Briefcase,
+  Eye,
+  Bell,
+} from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { toast } from "@/components/ui/use-toast"
 import { Toaster } from "@/components/ui/toaster"
@@ -335,10 +348,14 @@ export default function CompanyProfilePage() {
 
         // Update management preferences
         if (profileData.targetCriteria?.managementTeamPreference) {
-          // Convert from string to array for the UI state
+          // Convert from array to array for the UI state (if it's a string, convert to array)
+          const preferences = Array.isArray(profileData.targetCriteria.managementTeamPreference)
+            ? profileData.targetCriteria.managementTeamPreference
+            : [profileData.targetCriteria.managementTeamPreference]
+
           setExtendedFormState({
             ...extendedFormState,
-            selectedManagementPreferences: [profileData.targetCriteria.managementTeamPreference],
+            selectedManagementPreferences: preferences,
           })
         }
 
@@ -425,7 +442,7 @@ export default function CompanyProfilePage() {
       minStakePercent: undefined,
       minYearsInBusiness: undefined,
       preferredBusinessModels: [],
-      managementTeamPreference: "", // Changed from array to empty string
+      managementTeamPreference: [], // Changed from string to empty array
       description: "",
     },
     agreements: {
@@ -518,12 +535,8 @@ export default function CompanyProfilePage() {
     })
 
     // Update the managementTeamPreference in the form data
-    // Use the first selected preference or empty string
-    handleNestedChange(
-      "targetCriteria",
-      "managementTeamPreference",
-      currentPreferences.length > 0 ? currentPreferences[0] : "",
-    )
+    // Use the array of selected preferences
+    handleNestedChange("targetCriteria", "managementTeamPreference", currentPreferences)
   }
 
   // Geography selection handlers
@@ -1131,6 +1144,13 @@ export default function CompanyProfilePage() {
     setErrorMessage("")
 
     try {
+      // Ensure managementTeamPreference is an array
+      if (!Array.isArray(formData.targetCriteria.managementTeamPreference)) {
+        formData.targetCriteria.managementTeamPreference = formData.targetCriteria.managementTeamPreference
+          ? [formData.targetCriteria.managementTeamPreference]
+          : []
+      }
+
       // Prepare profile data
       const profileData = {
         ...formData,
@@ -1140,6 +1160,7 @@ export default function CompanyProfilePage() {
       console.log("Company Profile - Submitting to API:", apiUrl)
       console.log("Company Profile - Using token:", authToken.substring(0, 10) + "...")
       console.log("Company Profile - Authorization header:", `Bearer ${authToken}`)
+      console.log("Company Profile - Submitting data:", JSON.stringify(profileData))
       if (buyerId) {
         console.log("Company Profile - Buyer ID:", buyerId)
       }
@@ -1627,25 +1648,62 @@ export default function CompanyProfilePage() {
                       Capital Entity <span className="text-red-500">*</span>
                     </Label>
                     <div className="flex flex-col space-y-2 mt-1">
-                      {CAPITAL_ENTITIES.map((entity) => (
-                        <div key={entity} className="flex items-center space-x-2">
-                          <input
-                            type="radio"
-                            id={`capital_entity_${entity.replace(/\s+/g, '_').toLowerCase()}`}
-                            name="capitalEntity"
-                            value={entity}
-                            checked={formData.capitalEntity === entity}
-                            onChange={(e) => handleChange("capitalEntity", e.target.value)}
-                            className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
-                          />
-                          <Label 
-                            htmlFor={`capital_entity_${entity.replace(/\s+/g, '_').toLowerCase()}`} 
-                            className="text-[#344054] cursor-pointer"
-                          >
-                            {entity}
-                          </Label>
-                        </div>
-                      ))}
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          id="capital_fund"
+                          name="capitalEntity"
+                          value="Fund"
+                          checked={formData.capitalEntity === "Fund"}
+                          onChange={(e) => handleChange("capitalEntity", e.target.value)}
+                          className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
+                        />
+                        <Label htmlFor="capital_fund" className="text-[#344054] cursor-pointer">
+                          Fund
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          id="capital_holding"
+                          name="capitalEntity"
+                          value="Holding Company"
+                          checked={formData.capitalEntity === "Holding Company"}
+                          onChange={(e) => handleChange("capitalEntity", e.target.value)}
+                          className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
+                        />
+                        <Label htmlFor="capital_holding" className="text-[#344054] cursor-pointer">
+                          Holding Company
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          id="capital_spv"
+                          name="capitalEntity"
+                          value="SPV"
+                          checked={formData.capitalEntity === "SPV"}
+                          onChange={(e) => handleChange("capitalEntity", e.target.value)}
+                          className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
+                        />
+                        <Label htmlFor="capital_spv" className="text-[#344054] cursor-pointer">
+                          SPV
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          id="capital_direct"
+                          name="capitalEntity"
+                          value="Direct Investment"
+                          checked={formData.capitalEntity === "Direct Investment"}
+                          onChange={(e) => handleChange("capitalEntity", e.target.value)}
+                          className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
+                        />
+                        <Label htmlFor="capital_direct" className="text-[#344054] cursor-pointer">
+                          Direct Investment
+                        </Label>
+                      </div>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 gap-6">
@@ -2160,12 +2218,12 @@ export default function CompanyProfilePage() {
                   {BUSINESS_MODELS.map((model) => (
                     <div key={model} className="flex items-center space-x-2">
                       <Checkbox
-                        id="model-${model}"
+                        id={`model-${model}`}
                         className="border-[#d0d5dd]"
                         checked={formData.targetCriteria.preferredBusinessModels.includes(model)}
                         onCheckedChange={() => toggleBusinessModel(model)}
                       />
-                      <Label htmlFor="model-${model}" className="text-[#344054]">
+                      <Label htmlFor={`model-${model}`} className="text-[#344054]">
                         {model}
                       </Label>
                     </div>
@@ -2180,12 +2238,12 @@ export default function CompanyProfilePage() {
                   {MANAGEMENT_PREFERENCES.map((preference) => (
                     <div key={preference} className="flex items-center space-x-2">
                       <Checkbox
-                        id="preference-${preference}"
+                        id={`preference-${preference}`}
                         className="border-[#d0d5dd]"
                         checked={extendedFormState.selectedManagementPreferences.includes(preference)}
                         onCheckedChange={() => toggleManagementPreference(preference)}
                       />
-                      <Label htmlFor="preference-${preference}" className="text-[#344054]">
+                      <Label htmlFor={`preference-${preference}`} className="text-[#344054]">
                         {preference}
                       </Label>
                     </div>

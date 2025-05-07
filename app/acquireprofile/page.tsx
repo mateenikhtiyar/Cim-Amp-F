@@ -29,6 +29,8 @@ const COMPANY_TYPES = [
   "Single Acquisition Search",
   "Strategic Operating Company",
   "Buy Side Mandate",
+  "Strategic Operating Company",
+  "Buy Side Mandate",
 ]
 
 const CAPITAL_ENTITIES = ["Fund", "Holding Company", "SPV", "Direct Investment"]
@@ -321,10 +323,14 @@ export default function AcquireProfilePage() {
 
         // Update management preferences
         if (profileData.targetCriteria?.managementTeamPreference) {
-          // Convert from string to array for the UI state
+          // Convert from array to array for the UI state (if it's a string, convert to array)
+          const preferences = Array.isArray(profileData.targetCriteria.managementTeamPreference)
+            ? profileData.targetCriteria.managementTeamPreference
+            : [profileData.targetCriteria.managementTeamPreference]
+
           setExtendedFormState({
             ...extendedFormState,
-            selectedManagementPreferences: [profileData.targetCriteria.managementTeamPreference],
+            selectedManagementPreferences: preferences,
           })
         }
 
@@ -374,7 +380,7 @@ export default function AcquireProfilePage() {
       minStakePercent: undefined,
       minYearsInBusiness: undefined,
       preferredBusinessModels: [],
-      managementTeamPreference: "", // Changed from array to empty string
+      managementTeamPreference: [], // Changed from string to empty array
       description: "",
     },
     agreements: {
@@ -467,12 +473,8 @@ export default function AcquireProfilePage() {
     })
 
     // Update the managementTeamPreference in the form data
-    // Use the first selected preference or empty string
-    handleNestedChange(
-      "targetCriteria",
-      "managementTeamPreference",
-      currentPreferences.length > 0 ? currentPreferences[0] : "",
-    )
+    // Use the array of selected preferences
+    handleNestedChange("targetCriteria", "managementTeamPreference", currentPreferences)
   }
 
   // Geography selection handlers
@@ -1073,6 +1075,13 @@ export default function AcquireProfilePage() {
     setErrorMessage("")
 
     try {
+      // Ensure managementTeamPreference is an array
+      if (!Array.isArray(formData.targetCriteria.managementTeamPreference)) {
+        formData.targetCriteria.managementTeamPreference = formData.targetCriteria.managementTeamPreference
+          ? [formData.targetCriteria.managementTeamPreference]
+          : []
+      }
+
       // Prepare profile data
       const profileData = {
         ...formData,
@@ -1082,6 +1091,7 @@ export default function AcquireProfilePage() {
       console.log("Acquire Profile - Submitting to API:", apiUrl)
       console.log("Acquire Profile - Using token:", authToken.substring(0, 10) + "...")
       console.log("Acquire Profile - Authorization header:", `Bearer ${authToken}`)
+      console.log("Acquire Profile - Submitting data:", JSON.stringify(profileData))
       if (buyerId) {
         console.log("Acquire Profile - Buyer ID:", buyerId)
       }
@@ -1452,33 +1462,6 @@ export default function AcquireProfilePage() {
                       Need to raise
                     </Label>
                   </div>
-                </div>
-              </div>
-
-              <div>
-                <Label className="text-[#667085] text-sm mb-1.5 block">
-                  Capital Entity <span className="text-red-500">*</span>
-                </Label>
-                <div className="flex flex-col space-y-2 mt-1">
-                  {CAPITAL_ENTITIES.map((entity) => (
-                    <div key={entity} className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        id={`capital_entity_${entity.replace(/\s+/g, "_").toLowerCase()}`}
-                        name="capitalEntity"
-                        value={entity}
-                        checked={formData.capitalEntity === entity}
-                        onChange={(e) => handleChange("capitalEntity", e.target.value)}
-                        className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
-                      />
-                      <Label
-                        htmlFor={`capital_entity_${entity.replace(/\s+/g, "_").toLowerCase()}`}
-                        className="text-[#344054] cursor-pointer"
-                      >
-                        {entity}
-                      </Label>
-                    </div>
-                  ))}
                 </div>
               </div>
             </div>
