@@ -396,7 +396,7 @@ export default function AcquireProfilePage() {
       minStakePercent: undefined,
       minYearsInBusiness: undefined,
       preferredBusinessModels: [],
-      managementTeamPreference: [], // Changed to empty array
+      managementTeamPreference: "", // Changed to empty string
       description: "",
     },
     agreements: {
@@ -487,11 +487,12 @@ export default function AcquireProfilePage() {
       selectedManagementPreferences: currentPreferences,
     })
 
-    // Update the managementTeamPreference array in the form data
+    // Update the managementTeamPreference in the form data
+    // Use the first selected preference or empty string
     handleNestedChange(
       "targetCriteria",
       "managementTeamPreference",
-      [...currentPreferences], // Use the full array of preferences
+      currentPreferences.length > 0 ? currentPreferences[0] : "",
     )
   }
 
@@ -592,29 +593,50 @@ export default function AcquireProfilePage() {
     if (!geoData) return
 
     const selectedCountries: string[] = []
+    const selectedContinentIds = new Set()
+    const selectedRegionIds = new Set()
 
-    // Add all selected continents, regions, and subregions
+    // First, collect all selected continent and region IDs
+    geoData.continents.forEach((continent) => {
+      if (selection.continents[continent.id]) {
+        selectedContinentIds.add(continent.id)
+      }
+
+      continent.regions.forEach((region) => {
+        if (selection.regions[region.id]) {
+          selectedRegionIds.add(region.id)
+        }
+      })
+    })
+
+    // Then add only the highest level selections
     geoData.continents.forEach((continent) => {
       // Add continent if selected
       if (selection.continents[continent.id]) {
         selectedCountries.push(continent.name)
-      }
-
-      continent.regions.forEach((region) => {
-        // Add region if selected
-        if (selection.regions[region.id]) {
-          selectedCountries.push(region.name)
-        }
-
-        // Add subregions if selected
-        if (region.subRegions) {
-          region.subRegions.forEach((subRegion) => {
-            if (selection.subRegions[subRegion.id]) {
-              selectedCountries.push(subRegion.name)
+      } else {
+        // If continent is not selected, check its regions
+        continent.regions.forEach((region) => {
+          // Add region if selected and its parent continent is not selected
+          if (selection.regions[region.id] && !selectedContinentIds.has(continent.id)) {
+            selectedCountries.push(region.name)
+          } else if (!selection.regions[region.id] && !selectedContinentIds.has(continent.id)) {
+            // If region is not selected, check its subregions
+            if (region.subRegions) {
+              region.subRegions.forEach((subRegion) => {
+                // Add subregion if selected and neither its parent region nor continent is selected
+                if (
+                  selection.subRegions[subRegion.id] &&
+                  !selectedRegionIds.has(region.id) &&
+                  !selectedContinentIds.has(continent.id)
+                ) {
+                  selectedCountries.push(subRegion.name)
+                }
+              })
             }
-          })
-        }
-      })
+          }
+        })
+      }
     })
 
     handleNestedChange("targetCriteria", "countries", selectedCountries)
@@ -781,7 +803,7 @@ export default function AcquireProfilePage() {
     )
 
     const allSubIndustriesDeselected = industry.subIndustries.every((si) =>
-      si.id === subIndustry.id ? !isSelected : !newIndustrySelection.subIndustries[si.id],
+      si.id === subIndustry.id ? !isSelected : newIndustrySelection.subIndustries[si.id],
     )
 
     // Update industry selection based on subindustries
@@ -832,30 +854,65 @@ export default function AcquireProfilePage() {
     if (!industryData) return
 
     const selectedIndustries: string[] = []
+    const selectedSectorIds = new Set()
+    const selectedGroupIds = new Set()
+    const selectedIndustryIds = new Set()
 
-    // Add all selected sectors, groups, industries, and subindustries
+    // First, collect all selected sector, group, and industry IDs
     industryData.sectors.forEach((sector) => {
       if (selection.sectors[sector.id]) {
-        selectedIndustries.push(sector.name)
+        selectedSectorIds.add(sector.id)
       }
 
       sector.industryGroups.forEach((group) => {
         if (selection.industryGroups[group.id]) {
-          selectedIndustries.push(group.name)
+          selectedGroupIds.add(group.id)
         }
 
         group.industries.forEach((industry) => {
           if (selection.industries[industry.id]) {
-            selectedIndustries.push(industry.name)
+            selectedIndustryIds.add(industry.id)
           }
-
-          industry.subIndustries.forEach((subIndustry) => {
-            if (selection.subIndustries[subIndustry.id]) {
-              selectedIndustries.push(subIndustry.name)
-            }
-          })
         })
       })
+    })
+
+    // Then add only the highest level selections
+    industryData.sectors.forEach((sector) => {
+      if (selection.sectors[sector.id]) {
+        selectedIndustries.push(sector.name)
+      } else {
+        sector.industryGroups.forEach((group) => {
+          if (selection.industryGroups[group.id] && !selectedSectorIds.has(sector.id)) {
+            selectedIndustries.push(group.name)
+          } else if (!selection.industryGroups[group.id] && !selectedSectorIds.has(sector.id)) {
+            group.industries.forEach((industry) => {
+              if (
+                selection.industries[industry.id] &&
+                !selectedGroupIds.has(group.id) &&
+                !selectedSectorIds.has(sector.id)
+              ) {
+                selectedIndustries.push(industry.name)
+              } else if (
+                !selection.industries[industry.id] &&
+                !selectedGroupIds.has(group.id) &&
+                !selectedSectorIds.has(sector.id)
+              ) {
+                industry.subIndustries.forEach((subIndustry) => {
+                  if (
+                    selection.subIndustries[subIndustry.id] &&
+                    !selectedIndustryIds.has(industry.id) &&
+                    !selectedGroupIds.has(group.id) &&
+                    !selectedSectorIds.has(sector.id)
+                  ) {
+                    selectedIndustries.push(subIndustry.name)
+                  }
+                })
+              }
+            })
+          }
+        })
+      }
     })
 
     handleNestedChange("targetCriteria", "industrySectors", selectedIndustries)
@@ -1627,21 +1684,67 @@ export default function AcquireProfilePage() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="capitalEntity" className="text-[#667085] text-sm mb-1.5 block">
+                <Label className="text-[#667085] text-sm mb-1.5 block">
                   Capital Availability <span className="text-red-500">*</span>
                 </Label>
-                <Select value={formData.capitalEntity} onValueChange={(value) => handleChange("capitalEntity", value)}>
-                  <SelectTrigger className="border-[#d0d5dd]">
-                    <SelectValue placeholder="Select Capital Entity" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CAPITAL_ENTITIES.map((entity) => (
-                      <SelectItem key={entity} value={entity}>
-                        {entity}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-col space-y-2 mt-1">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="capital_fund"
+                      name="capitalEntity"
+                      value="Fund"
+                      checked={formData.capitalEntity === "Fund"}
+                      onChange={(e) => handleChange("capitalEntity", e.target.value)}
+                      className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
+                    />
+                    <Label htmlFor="capital_fund" className="text-[#344054] cursor-pointer">
+                      Fund
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="capital_holding"
+                      name="capitalEntity"
+                      value="Holding Company"
+                      checked={formData.capitalEntity === "Holding Company"}
+                      onChange={(e) => handleChange("capitalEntity", e.target.value)}
+                      className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
+                    />
+                    <Label htmlFor="capital_holding" className="text-[#344054] cursor-pointer">
+                      Holding Company
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="capital_spv"
+                      name="capitalEntity"
+                      value="SPV"
+                      checked={formData.capitalEntity === "SPV"}
+                      onChange={(e) => handleChange("capitalEntity", e.target.value)}
+                      className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
+                    />
+                    <Label htmlFor="capital_spv" className="text-[#344054] cursor-pointer">
+                      SPV
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="capital_direct"
+                      name="capitalEntity"
+                      value="Direct Investment"
+                      checked={formData.capitalEntity === "Direct Investment"}
+                      onChange={(e) => handleChange("capitalEntity", e.target.value)}
+                      className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
+                    />
+                    <Label htmlFor="capital_direct" className="text-[#344054] cursor-pointer">
+                      Direct Investment
+                    </Label>
+                  </div>
+                </div>
               </div>
             </div>
 
