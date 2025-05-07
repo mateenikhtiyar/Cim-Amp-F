@@ -61,6 +61,7 @@ api.interceptors.response.use(
   },
 )
 
+// Update the submitCompanyProfile function to ensure proper API endpoint usage
 export const submitCompanyProfile = async (profileData: any) => {
   try {
     // Get the token directly before making the request
@@ -70,6 +71,7 @@ export const submitCompanyProfile = async (profileData: any) => {
     }
 
     console.log("API - Submitting company profile with token:", token.substring(0, 10) + "...")
+    console.log("API - Submitting data:", JSON.stringify(profileData))
 
     // Get API URL from localStorage or use default
     const apiUrl = localStorage.getItem("apiUrl") || API_URL
@@ -84,8 +86,11 @@ export const submitCompanyProfile = async (profileData: any) => {
       body: JSON.stringify(profileData),
     })
 
+    console.log("API - Response status:", response.status)
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
+      console.error("API Error Response:", errorData)
 
       // If unauthorized, redirect to login
       if (response.status === 401) {
@@ -98,7 +103,9 @@ export const submitCompanyProfile = async (profileData: any) => {
       throw new Error(`API Error: ${response.status} - ${JSON.stringify(errorData)}`)
     }
 
-    return await response.json()
+    const result = await response.json()
+    console.log("API - Submission successful:", result)
+    return result
   } catch (error) {
     console.error("Error submitting company profile:", error)
     throw error

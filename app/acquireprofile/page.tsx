@@ -20,6 +20,9 @@ import { toast } from "@/components/ui/use-toast"
 import { getGeoData, type GeoData, type Continent, type Region, type SubRegion } from "@/lib/geography-data"
 import { getIndustryData, type IndustryData, type Sector, type IndustryGroup, type Industry } from "@/lib/industry-data"
 
+// Add a direct import for the API service at the top of the file
+import { submitCompanyProfile } from "@/services/api"
+
 const COMPANY_TYPES = [
   "Private Equity",
   "Holding Company",
@@ -1046,6 +1049,7 @@ export default function AcquireProfilePage() {
   }
 
   // Handle form submission
+  // Update the handleSubmit function to use the API service
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -1088,55 +1092,8 @@ export default function AcquireProfilePage() {
         buyer: buyerId || undefined, // Only include if available
       }
 
-      console.log("Acquire Profile - Submitting to API:", apiUrl)
-      console.log("Acquire Profile - Using token:", authToken.substring(0, 10) + "...")
-      console.log("Acquire Profile - Authorization header:", `Bearer ${authToken}`)
-      console.log("Acquire Profile - Submitting data:", JSON.stringify(profileData))
-      if (buyerId) {
-        console.log("Acquire Profile - Buyer ID:", buyerId)
-      }
-
-      // Submit the data - use POST for new profiles, PUT for updates
-      const endpoint = `${apiUrl}/company-profiles`
-      const method = "POST" // Always use POST as the API will handle create/update logic
-
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify(profileData),
-      })
-
-      console.log("Acquire Profile - Response status:", response.status)
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        console.error("API Error Response:", errorData)
-
-        // Handle authentication errors
-        if (response.status === 401) {
-          localStorage.removeItem("token")
-          localStorage.removeItem("userId")
-          toast({
-            title: "Authentication Error",
-            description: "Your session has expired. Please log in again.",
-            variant: "destructive",
-          })
-
-          setTimeout(() => {
-            router.push("/login?session=expired")
-          }, 2000)
-
-          throw new Error("Authentication expired. Please log in again.")
-        }
-
-        throw new Error(`API Error: ${response.status} - ${JSON.stringify(errorData)}`)
-      }
-
-      const result = await response.json()
-      console.log("Acquire Profile - Submission successful:", result)
+      // Use the API service to submit the profile
+      await submitCompanyProfile(profileData)
 
       setSubmitStatus("success")
       toast({
@@ -1148,7 +1105,7 @@ export default function AcquireProfilePage() {
       // Redirect after successful submission
       setTimeout(() => {
         router.push("/deals?profileSubmitted=true")
-      }, 2000)
+      }, 1000) // Reduced timeout for faster redirect
     } catch (error: any) {
       console.error("Submission error:", error)
       setSubmitStatus("error")
@@ -2114,8 +2071,23 @@ export default function AcquireProfilePage() {
           </div>
           {/* Submit Button */}
           <div className="flex justify-end">
-            <Button type="submit" className="bg-[#3aafa9] hover:bg-[#2a9d8f] text-white" disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : "Submit Profile"}
+            <Button
+              type="submit"
+              className="bg-[#3aafa9] hover:bg-[#2a9d8f] text-white px-8 py-2 text-base font-medium"
+              disabled={isSubmitting}
+              onClick={(e) => {
+                console.log("Submit button clicked")
+                handleSubmit(e)
+              }}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <span>Submitting...</span>
+                </div>
+              ) : (
+                "Submit Profile"
+              )}
             </Button>
           </div>
         </form>
