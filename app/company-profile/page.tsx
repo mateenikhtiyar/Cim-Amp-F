@@ -1491,7 +1491,7 @@ export default function CompanyProfilePage() {
                   </div>
                 )}
               </div>
-              <ChevronDown className="ml-1 h-4 w-4 text-gray-500" />
+             
             </div>
           </div>
         </div>
