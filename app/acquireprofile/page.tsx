@@ -40,7 +40,7 @@ const CAPITAL_ENTITIES = ["Fund", "Holding Company", "SPV", "Direct Investment"]
 
 const BUSINESS_MODELS = ["Recurring Revenue", "Project-Based", "Asset Light", "Asset Heavy"]
 
-const MANAGEMENT_PREFERENCES = ["Owner(s) Departing", "Owner(s) Staying", "Management Team Staying", "No Preference"]
+const MANAGEMENT_PREFERENCES = ["Owner(s) Departing", "Owner(s) Staying", "Management Team Staying"]
 
 // Default API URL
 const DEFAULT_API_URL = "https://cim-amp.onrender.com"
@@ -1440,7 +1440,7 @@ export default function AcquireProfilePage() {
               </div>
               <div>
                 <Label htmlFor="averageDealSize" className="text-[#667085] text-sm mb-1.5 block">
-                  Average deal size ($)
+                  Average deal size 
                 </Label>
                 <Input
                   id="averageDealSize"
@@ -1915,8 +1915,7 @@ export default function AcquireProfilePage() {
                 />
               </div>
             </div>
-          </div>
-          {/* Preferred Business Models */}
+                  {/* Preferred Business Models */}
           <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
             <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Preferred Business Models</h2>
             <div className="flex flex-wrap gap-6">
@@ -1963,6 +1962,7 @@ export default function AcquireProfilePage() {
               value={formData.targetCriteria.description || ""}
               onChange={(e) => handleNestedChange("targetCriteria", "description", e.target.value)}
             />
+          </div>
           </div>
           {/* General Preferences */}
           <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
