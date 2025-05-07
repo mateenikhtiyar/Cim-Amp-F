@@ -453,7 +453,7 @@ export default function CompanyProfilePage() {
       minStakePercent: undefined,
       minYearsInBusiness: undefined,
       preferredBusinessModels: [],
-      managementTeamPreference: [], // Changed from string to array
+      managementTeamPreference: "", // Changed from array to empty string
       description: "",
     },
     agreements: {
@@ -547,10 +547,11 @@ export default function CompanyProfilePage() {
     })
 
     // Update the managementTeamPreference in the form data
+    // Use the first selected preference or empty string
     handleNestedChange(
       "targetCriteria",
       "managementTeamPreference",
-      currentPreferences.length > 0 ? currentPreferences : [],
+      currentPreferences.length > 0 ? currentPreferences[0] : "",
     )
   }
 
@@ -1209,11 +1210,6 @@ export default function CompanyProfilePage() {
     if (!formData.companyName?.trim()) return "Company name is required"
     if (!formData.website?.trim()) return "Website is required"
     if (!formData.companyType) return "Company type is required"
-
-    // Make sure we check capitalAvailability rather than capitalEntity
-    if (!formData.capitalAvailability) return "Capital availability is required"
-
-    // Make sure capitalEntity is considered valid if it has a value
     if (!formData.capitalEntity) return "Capital entity is required"
 
     // Website validation
@@ -1313,8 +1309,6 @@ export default function CompanyProfilePage() {
       const profileData = {
         ...formData,
         buyer: buyerId || undefined, // Only include if available
-        // Ensure capitalAvailability is included at the root level
-        capitalAvailability: formData.capitalAvailability || "need_to_raise",
       }
 
       console.log("Company Profile - Submitting to API:", apiUrl)
