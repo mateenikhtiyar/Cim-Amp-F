@@ -1,5 +1,7 @@
 "use client"
 
+import { Toaster } from "@/components/ui/sonner"
+
 import type React from "react"
 
 import { useState, useEffect } from "react"
@@ -14,24 +16,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PlusCircle, Trash2, Search, AlertCircle, CheckCircle2, ChevronDown, ChevronRight } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { toast } from "@/components/ui/use-toast"
-import { Toaster } from "@/components/ui/toaster"
 
 import { getGeoData, type GeoData, type Continent, type Region, type SubRegion } from "@/lib/geography-data"
-import {
-  getIndustryData,
-  type IndustryData,
-  type Sector,
-  type IndustryGroup,
-  type Industry,
-  type SubIndustry,
-} from "@/lib/industry-data"
-
-// Extend the CompanyProfile type to include selectedCurrency
-// declare module "@/types/company-profile" {
-//   interface CompanyProfile {
-//     selectedCurrency: string;
-//   }
-// }
+import { getIndustryData, type IndustryData, type Sector, type IndustryGroup, type Industry } from "@/lib/industry-data"
 
 const COMPANY_TYPES = [
   "Private Equity",
@@ -39,9 +26,6 @@ const COMPANY_TYPES = [
   "Family Office",
   "Independent Sponsor",
   "Entrepreneurship through Acquisition",
-  "Single Acquisition Search",
-  "Strategic Operating Company",
-  "Buy Side Mandate",
   "Single Acquisition Search",
   "Strategic Operating Company",
   "Buy Side Mandate",
@@ -67,7 +51,6 @@ interface IndustrySelection {
   sectors: Record<string, boolean>
   industryGroups: Record<string, boolean>
   industries: Record<string, boolean>
-  subIndustries: Record<string, boolean>
 }
 
 // Store selected management preferences separately from the form data
@@ -104,25 +87,24 @@ export default function AcquireProfilePage() {
     sectors: {},
     industryGroups: {},
     industries: {},
-    subIndustries: {},
   })
 
   // UI state for expanded sections
-  const [expandedContinents, setExpandedContinents = useState<Record<string, boolean>>({})\
-  const [expandedRegions, setExpandedRegions = useState<Record<string, boolean>>({})
-  const [expandedSectors, setExpandedSectors = useState<Record<string, boolean>>({})
-  const [expandedIndustryGroups, setExpandedIndustryGroups = useState<Record<string, boolean>>({})
-  const [expandedIndustries, setExpandedIndustries = useState<Record<string, boolean>>({})
+  const [expandedContinents, setExpandedContinents] = useState<Record<string, boolean>>({})
+  const [expandedRegions, setExpandedRegions] = useState<Record<string, boolean>>({})
+  const [expandedSectors, setExpandedSectors] = useState<Record<string, boolean>>({})
+  const [expandedIndustryGroups, setExpandedIndustryGroups] = useState<Record<string, boolean>>({})
+  const [expandedIndustries, setExpandedIndustries] = useState<Record<string, boolean>>({})
 
   // Search terms
-  const [countrySearchTerm, setCountrySearchTerm = useState("")
-  const [industrySearchTerm, setIndustrySearchTerm = useState("")
+  const [countrySearchTerm, setCountrySearchTerm] = useState("")
+  const [industrySearchTerm, setIndustrySearchTerm] = useState("")
 
   // Available currencies
   const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD"]
 
   // Extended form state for fields not in the CompanyProfile type
-  const [extendedFormState, setExtendedFormState = useState<ExtendedFormState>({
+  const [extendedFormState, setExtendedFormState] = useState<ExtendedFormState>({
     selectedManagementPreferences: [],
   })
 
@@ -277,6 +259,8 @@ export default function AcquireProfilePage() {
           },
           // Ensure selectedCurrency is set
           selectedCurrency: profileData.selectedCurrency || "USD",
+          // Ensure capitalAvailability is set
+          capitalAvailability: profileData.capitalAvailability || "need_to_raise",
         }
 
         setFormData(updatedProfile)
@@ -328,12 +312,6 @@ export default function AcquireProfilePage() {
                 if (profileData.targetCriteria.industrySectors.includes(industry.name)) {
                   newIndustrySelection.industries[industry.id] = true
                 }
-
-                industry.subIndustries.forEach((subIndustry) => {
-                  if (profileData.targetCriteria.industrySectors.includes(subIndustry.name)) {
-                    newIndustrySelection.subIndustries[subIndustry.id] = true
-                  }
-                })
               })
             })
           })
@@ -342,10 +320,11 @@ export default function AcquireProfilePage() {
         }
 
         // Update management preferences
-        if (profileData.targetCriteria?.managementTeamPreference?.length > 0) {
+        if (profileData.targetCriteria?.managementTeamPreference) {
+          // Convert from string to array for the UI state
           setExtendedFormState({
             ...extendedFormState,
-            selectedManagementPreferences: [...profileData.targetCriteria.managementTeamPreference],
+            selectedManagementPreferences: [profileData.targetCriteria.managementTeamPreference],
           })
         }
 
@@ -366,11 +345,8 @@ export default function AcquireProfilePage() {
     }
   }
 
-  // Let's add a more robust type definition for the CompanyProfile type
-  // Replace the existing form state initialization with this updated version that includes proper type handling
-
   // Form state
-  const [formData, setFormData = useState<CompanyProfile & { selectedCurrency: string; capitalAvailability: string }>({
+  const [formData, setFormData] = useState<CompanyProfile & { selectedCurrency: string; capitalAvailability: string }>({
     companyName: "",
     website: "",
     contacts: [{ name: "", email: "", phone: "" }],
@@ -393,10 +369,12 @@ export default function AcquireProfilePage() {
       ebitdaMax: undefined,
       transactionSizeMin: undefined,
       transactionSizeMax: undefined,
+      revenueGrowthMin: undefined,
+      revenueGrowthMax: undefined,
       minStakePercent: undefined,
       minYearsInBusiness: undefined,
       preferredBusinessModels: [],
-      managementTeamPreference: "",
+      managementTeamPreference: "", // Changed from array to empty string
       description: "",
     },
     agreements: {
@@ -692,11 +670,6 @@ export default function AcquireProfilePage() {
       // Update all industries in this group
       group.industries.forEach((industry) => {
         newIndustrySelection.industries[industry.id] = isSelected
-
-        // Update all subindustries in this industry
-        industry.subIndustries.forEach((subIndustry) => {
-          newIndustrySelection.subIndustries[subIndustry.id] = isSelected
-        })
       })
     })
 
@@ -715,11 +688,6 @@ export default function AcquireProfilePage() {
     // Update all industries in this group
     group.industries.forEach((industry) => {
       newIndustrySelection.industries[industry.id] = isSelected
-
-      // Update all subindustries in this industry
-      industry.subIndustries.forEach((subIndustry) => {
-        newIndustrySelection.subIndustries[subIndustry.id] = isSelected
-      })
     })
 
     // Check if all groups in the sector are selected/deselected
@@ -750,77 +718,13 @@ export default function AcquireProfilePage() {
     // Update industry selection
     newIndustrySelection.industries[industry.id] = isSelected
 
-    // Update all subindustries in this industry
-    industry.subIndustries.forEach((subIndustry) => {
-      newIndustrySelection.subIndustries[subIndustry.id] = isSelected
-    })
-
     // Check if all industries in the group are selected/deselected
     const allIndustriesSelected = group.industries.every((i) =>
       i.id === industry.id ? isSelected : newIndustrySelection.industries[i.id],
     )
 
     const allIndustriesDeselected = group.industries.every((i) =>
-      i.id === industry.id ? !isSelected : newIndustrySelection.industries[i.id],
-    )
-
-    // Update group selection based on industries
-    if (allIndustriesSelected) {
-      newIndustrySelection.industryGroups[group.id] = true
-    } else if (allIndustriesDeselected) {
-      newIndustrySelection.industryGroups[group.id] = false
-    }
-
-    // Check if all groups in the sector are selected/deselected
-    const allGroupsSelected = sector.industryGroups.every((g) =>
-      g.id === group.id ? newIndustrySelection.industryGroups[g.id] : newIndustrySelection.industryGroups[g.id],
-    )
-
-    const allGroupsDeselected = sector.industryGroups.every((g) =>
-      g.id === group.id ? !newIndustrySelection.industryGroups[g.id] : !newIndustrySelection.industryGroups[g.id],
-    )
-
-    // Update sector selection based on groups
-    if (allGroupsSelected) {
-      newIndustrySelection.sectors[sector.id] = true
-    } else if (allGroupsDeselected) {
-      newIndustrySelection.sectors[sector.id] = false
-    }
-
-    setIndustrySelection(newIndustrySelection)
-    updateIndustriesInFormData(newIndustrySelection)
-  }
-
-  const toggleSubIndustry = (subIndustry: SubIndustry, industry: Industry, group: IndustryGroup, sector: Sector) => {
-    const newIndustrySelection = { ...industrySelection }
-    const isSelected = !industrySelection.subIndustries[subIndustry.id]
-
-    // Update subindustry selection
-    newIndustrySelection.subIndustries[subIndustry.id] = isSelected
-
-    // Check if all subindustries in the industry are selected/deselected
-    const allSubIndustriesSelected = industry.subIndustries.every((si) =>
-      si.id === subIndustry.id ? isSelected : newIndustrySelection.subIndustries[si.id],
-    )
-
-    const allSubIndustriesDeselected = industry.subIndustries.every((si) =>
-      si.id === subIndustry.id ? !isSelected : newIndustrySelection.subIndustries[si.id],
-    )
-
-    // Update industry selection based on subindustries
-    if (allSubIndustriesSelected) {
-      newIndustrySelection.industries[industry.id] = true
-    } else if (allSubIndustriesDeselected) {
-      newIndustrySelection.industries[industry.id] = false
-    }
-
-    // Check if all industries in the group are selected/deselected
-    const allIndustriesSelected = group.industries.every((i) =>
-      i.id === industry.id ? newIndustrySelection.industries[i.id] : newIndustrySelection.industries[i.id],
-    )
-
-    const allIndustriesDeselected = group.industries.every((i) =>
-      i.id === industry.id ? !newIndustrySelection.industries[i.id] : !newIndustrySelection.industries[i.id],
+      i.id === industry.id ? !isSelected : !newIndustrySelection.industries[i.id],
     )
 
     // Update group selection based on industries
@@ -857,9 +761,8 @@ export default function AcquireProfilePage() {
     const selectedIndustries: string[] = []
     const selectedSectorIds = new Set()
     const selectedGroupIds = new Set()
-    const selectedIndustryIds = new Set()
 
-    // First, collect all selected sector, group, and industry IDs
+    // First, collect all selected sector and group IDs
     industryData.sectors.forEach((sector) => {
       if (selection.sectors[sector.id]) {
         selectedSectorIds.add(sector.id)
@@ -869,12 +772,6 @@ export default function AcquireProfilePage() {
         if (selection.industryGroups[group.id]) {
           selectedGroupIds.add(group.id)
         }
-
-        group.industries.forEach((industry) => {
-          if (selection.industries[industry.id]) {
-            selectedIndustryIds.add(industry.id)
-          }
-        })
       })
     })
 
@@ -894,21 +791,6 @@ export default function AcquireProfilePage() {
                 !selectedSectorIds.has(sector.id)
               ) {
                 selectedIndustries.push(industry.name)
-              } else if (
-                !selection.industries[industry.id] &&
-                !selectedGroupIds.has(group.id) &&
-                !selectedSectorIds.has(sector.id)
-              ) {
-                industry.subIndustries.forEach((subIndustry) => {
-                  if (
-                    selection.subIndustries[subIndustry.id] &&
-                    !selectedIndustryIds.has(industry.id) &&
-                    !selectedGroupIds.has(group.id) &&
-                    !selectedSectorIds.has(sector.id)
-                  ) {
-                    selectedIndustries.push(subIndustry.name)
-                  }
-                })
               }
             })
           }
@@ -937,10 +819,6 @@ export default function AcquireProfilePage() {
 
           group.industries.forEach((industry) => {
             newIndustrySelection.industries[industry.id] = false
-
-            industry.subIndustries.forEach((subIndustry) => {
-              newIndustrySelection.subIndustries[subIndustry.id] = false
-            })
           })
         })
       }
@@ -954,10 +832,6 @@ export default function AcquireProfilePage() {
             // Unselect all children
             group.industries.forEach((industry) => {
               newIndustrySelection.industries[industry.id] = false
-
-              industry.subIndustries.forEach((subIndustry) => {
-                newIndustrySelection.subIndustries[subIndustry.id] = false
-              })
             })
 
             // Check if all groups in the sector are now deselected
@@ -974,11 +848,6 @@ export default function AcquireProfilePage() {
                 newIndustrySelection.industries[industry.id] = false
                 found = true
 
-                // Unselect all children
-                industry.subIndustries.forEach((subIndustry) => {
-                  newIndustrySelection.subIndustries[subIndustry.id] = false
-                })
-
                 // Check parent selections
                 const allIndustriesDeselected = group.industries.every((i) => !newIndustrySelection.industries[i.id])
 
@@ -993,40 +862,6 @@ export default function AcquireProfilePage() {
                     newIndustrySelection.sectors[sector.id] = false
                   }
                 }
-              }
-
-              if (!found) {
-                industry.subIndustries.forEach((subIndustry) => {
-                  if (subIndustry.name === industryToRemove) {
-                    newIndustrySelection.subIndustries[subIndustry.id] = false
-                    found = true
-
-                    // Check parent selections
-                    const allSubIndustriesDeselected = industry.subIndustries.every(
-                      (si) => !newIndustrySelection.subIndustries[si.id],
-                    )
-
-                    if (allSubIndustriesDeselected) {
-                      newIndustrySelection.industries[industry.id] = false
-
-                      const allIndustriesDeselected = group.industries.every(
-                        (i) => !newIndustrySelection.industries[i.id],
-                      )
-
-                      if (allIndustriesDeselected) {
-                        newIndustrySelection.industryGroups[group.id] = false
-
-                        const allGroupsDeselected = sector.industryGroups.every(
-                          (g) => !newIndustrySelection.industryGroups[g.id],
-                        )
-
-                        if (allGroupsDeselected) {
-                          newIndustrySelection.sectors[sector.id] = false
-                        }
-                      }
-                    }
-                  }
-                })
               }
             })
           }
@@ -1070,13 +905,6 @@ export default function AcquireProfilePage() {
     }))
   }
 
-  const toggleIndustryExpansion = (industryId: string) => {
-    setExpandedIndustries((prev) => ({
-      ...prev,
-      [industryId]: !prev[industryId],
-    }))
-  }
-
   // Filter geography data based on search term
   const filterGeographyData = () => {
     if (!geoData || !countrySearchTerm) return geoData
@@ -1112,18 +940,8 @@ export default function AcquireProfilePage() {
         const filteredIndustries: Industry[] = []
 
         group.industries.forEach((industry) => {
-          const filteredSubIndustries = industry.subIndustries.filter((subIndustry) =>
-            subIndustry.name.toLowerCase().includes(industrySearchTerm.toLowerCase()),
-          )
-
-          if (
-            filteredSubIndustries.length > 0 ||
-            industry.name.toLowerCase().includes(industrySearchTerm.toLowerCase())
-          ) {
-            filteredIndustries.push({
-              ...industry,
-              subIndustries: filteredSubIndustries.length > 0 ? filteredSubIndustries : industry.subIndustries,
-            })
+          if (industry.name.toLowerCase().includes(industrySearchTerm.toLowerCase())) {
+            filteredIndustries.push(industry)
           }
         })
 
@@ -1212,6 +1030,14 @@ export default function AcquireProfilePage() {
       formData.targetCriteria.transactionSizeMin > formData.targetCriteria.transactionSizeMax
     ) {
       return "Minimum transaction size cannot be greater than maximum transaction size"
+    }
+
+    if (
+      formData.targetCriteria.revenueGrowthMin !== undefined &&
+      formData.targetCriteria.revenueGrowthMax !== undefined &&
+      formData.targetCriteria.revenueGrowthMin > formData.targetCriteria.revenueGrowthMax
+    ) {
+      return "Minimum revenue growth cannot be greater than maximum revenue growth"
     }
 
     return null
@@ -1498,43 +1324,10 @@ export default function AcquireProfilePage() {
                                 }}
                                 className="mr-2 border-[#d0d5dd]"
                               />
-                              <div
-                                className="flex items-center cursor-pointer flex-1"
-                                onClick={() => toggleIndustryExpansion(industry.id)}
-                              >
-                                {expandedIndustries[industry.id] ? (
-                                  <ChevronDown className="h-3 w-3 mr-1 text-gray-400" />
-                                ) : (
-                                  <ChevronRight className="h-3 w-3 mr-1 text-gray-400" />
-                                )}
-                                <Label htmlFor={`industry-${industry.id}`} className="text-[#344054] cursor-pointer">
-                                  {industry.name}
-                                </Label>
-                              </div>
+                              <Label htmlFor={`industry-${industry.id}`} className="text-[#344054] cursor-pointer">
+                                {industry.name}
+                              </Label>
                             </div>
-
-                            {expandedIndustries[industry.id] && (
-                              <div className="ml-6 mt-1 space-y-1">
-                                {industry.subIndustries.map((subIndustry) => (
-                                  <div key={subIndustry.id} className="flex items-center">
-                                    <Checkbox
-                                      id={`subindustry-${subIndustry.id}`}
-                                      checked={!!industrySelection.subIndustries[subIndustry.id]}
-                                      onCheckedChange={(checked) => {
-                                        toggleSubIndustry(subIndustry, industry, group, sector)
-                                      }}
-                                      className="mr-2 border-[#d0d5dd]"
-                                    />
-                                    <Label
-                                      htmlFor={`subindustry-${subIndustry.id}`}
-                                      className="text-[#344054] cursor-pointer text-sm"
-                                    >
-                                      {subIndustry.name}
-                                    </Label>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
                           </div>
                         ))}
                       </div>
@@ -1553,7 +1346,7 @@ export default function AcquireProfilePage() {
     <div className="min-h-screen bg-[#f0f4f8] py-8 px-4 font-poppins">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-semibold text-[#2f2b43]  font-poppins">Buyer Profile Form</h1>
+          <h1 className="text-3xl font-semibold text-[#2f2b43] font-poppins">Buyer Profile Form</h1>
         </div>
 
         {submitStatus === "success" && (
@@ -1575,64 +1368,6 @@ export default function AcquireProfilePage() {
         )}
 
         <form onSubmit={handleSubmit}>
-          {/* General Preferences
-          <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-            <h2 className="text-[#2f2b43] text-lg font-medium mb-4">General Preferences</h2>
-            <div className="space-y-4">
-              <div className="flex items-end space-x-2">
-                <Checkbox
-                  id="stopSendingDeals"
-                  className="mt-1 border-[#d0d5dd]"
-                  checked={formData.preferences.stopSendingDeals}
-                  onCheckedChange={(checked) => handleNestedChange("preferences", "stopSendingDeals", checked === true)}
-                />
-                <Label htmlFor="stopSendingDeals" className="text-[#344054]">
-                  Stop sending deals
-                </Label>
-              </div>
-
-              <div className="flex items-end space-x-2">
-                <Checkbox
-                  id="dontShowMyDeals"
-                  className="mt-1 border-[#d0d5dd]"
-                  checked={formData.preferences.dontShowMyDeals}
-                  onCheckedChange={(checked) => handleNestedChange("preferences", "dontShowMyDeals", checked === true)}
-                />
-                <Label htmlFor="dontShowMyDeals" className="text-[#344054]">
-                  Don't show sellers your company details until you engage. You will show as "Anonymous Buyer"
-                </Label>
-              </div>
-
-              <div className="flex items-end space-x-2">
-                <Checkbox
-                  id="dontSendDealsToMyCompetitors"
-                  className="mt-1 border-[#d0d5dd]"
-                  checked={formData.preferences.dontSendDealsToMyCompetitors}
-                  onCheckedChange={(checked) =>
-                    handleNestedChange("preferences", "dontSendDealsToMyCompetitors", checked === true)
-                  }
-                />
-                <Label htmlFor="dontSendDealsToMyCompetitors" className="text-[#344054]">
-                  Do not send deals that are currently marketed on other deal marketplaces
-                </Label>
-              </div>
-
-              <div className="flex items-end space-x-2">
-                <Checkbox
-                  id="allowBuyerLikeDeals"
-                  className="mt-1 border-[#d0d5dd]"
-                  checked={formData.preferences.allowBuyerLikeDeals}
-                  onCheckedChange={(checked) =>
-                    handleNestedChange("preferences", "allowBuyerLikeDeals", checked === true)
-                  }
-                />
-                <Label htmlFor="allowBuyerLikeDeals" className="text-[#344054]">
-                  Allow buy side fee deals (charged by seller above CIM Amplify Fees)
-                </Label>
-              </div>
-            </div>
-          </div> */}
-
           {/* Company Information */}
           <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
             <h2 className="text-[#2f2b43] text-lg font-poppins font-seminold mb-4">About Your Company</h2>
@@ -1666,7 +1401,7 @@ export default function AcquireProfilePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="grid grid-cols-1 gap-6 mb-6">
               <div>
                 <Label htmlFor="companyType" className="text-[#667085] text-sm mb-1.5 block">
                   Company Type <span className="text-red-500">*</span>
@@ -1742,10 +1477,15 @@ export default function AcquireProfilePage() {
                 </Label>
                 <Input
                   id="averageDealSize"
-                  type="number"
+                  type="text"
                   className="border-[#d0d5dd]"
-                  value={formData.averageDealSize || ""}
-                  onChange={(e) => handleChange("averageDealSize", e.target.value ? Number(e.target.value) : undefined)}
+                  value={formatNumberWithCommas(formData.averageDealSize)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/,/g, "")
+                    if (value === "" || /^\d+$/.test(value)) {
+                      handleChange("averageDealSize", value ? Number(value) : undefined)
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -2149,24 +1889,43 @@ export default function AcquireProfilePage() {
               </div>
 
               <div>
-                <Label htmlFor="minStakePercent" className="text-[#667085] text-sm mb-1.5 block">
-                  Minimum Stake Percentage (%)
-                </Label>
-                <Input
-                  id="minStakePercent"
-                  type="number"
-                  min="0"
-                  max="100"
-                  className="border-[#d0d5dd]"
-                  value={formData.targetCriteria.minStakePercent || ""}
-                  onChange={(e) =>
-                    handleNestedChange(
-                      "targetCriteria",
-                      "minStakePercent",
-                      e.target.value ? Number(e.target.value) : undefined,
-                    )
-                  }
-                />
+                <Label className="text-[#667085] text-sm mb-1.5 block">3 Year Average Revenue Growth Range (%)</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center">
+                    <Label htmlFor="revenueGrowthMin" className="text-[#667085] text-sm w-10">
+                      Min
+                    </Label>
+                    <Input
+                      id="revenueGrowthMin"
+                      type="text"
+                      className="border-[#d0d5dd]"
+                      value={formatNumberWithCommas(formData.targetCriteria.revenueGrowthMin)}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/,/g, "")
+                        if (value === "" || /^\d+$/.test(value)) {
+                          handleNestedChange("targetCriteria", "revenueGrowthMin", value ? Number(value) : undefined)
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center">
+                    <Label htmlFor="revenueGrowthMax" className="text-[#667085] text-sm w-10">
+                      Max
+                    </Label>
+                    <Input
+                      id="revenueGrowthMax"
+                      type="text"
+                      className="border-[#d0d5dd]"
+                      value={formatNumberWithCommas(formData.targetCriteria.revenueGrowthMax)}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/,/g, "")
+                        if (value === "" || /^\d+$/.test(value)) {
+                          handleNestedChange("targetCriteria", "revenueGrowthMax", value ? Number(value) : undefined)
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -2190,7 +1949,6 @@ export default function AcquireProfilePage() {
               </div>
             </div>
           </div>
-
           {/* Preferred Business Models */}
           <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
             <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Preferred Business Models</h2>
@@ -2210,8 +1968,7 @@ export default function AcquireProfilePage() {
               ))}
             </div>
           </div>
-
-          {/* Management Team Preference */}
+          {/* Management Future Preferences */}
           <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
             <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Management Future Preferences</h2>
             <div className="flex flex-wrap gap-6">
@@ -2230,7 +1987,6 @@ export default function AcquireProfilePage() {
               ))}
             </div>
           </div>
-
           {/* Description of Ideal Target(s) */}
           <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
             <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Description of Ideal Target(s)</h2>
@@ -2298,9 +2054,9 @@ export default function AcquireProfilePage() {
               </div>
             </div>
           </div>
-
-          {/* Terms and Agreements */}
+          {/* Agreements */}
           <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+            <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Agreements</h2>
             <div className="space-y-4">
               <div className="flex items-end space-x-2">
                 <Checkbox
@@ -2353,44 +2109,6 @@ export default function AcquireProfilePage() {
             </Button>
           </div>
         </form>
-
-        {/* Debug Information (only visible in development) */}
-        {process.env.NODE_ENV === "development" && (
-          <div className="mt-8 p-4 bg-gray-100 hidden rounded-lg border border-gray-300">
-            <h3 className="text-lg font-medium mb-2">Debug Information</h3>
-            <div className="space-y-2 text-sm">
-              <div>
-                <strong>API URL:</strong> {apiUrl}
-              </div>
-              <div>
-                <strong>Token Status:</strong> {authToken ? "Set" : "Not Set"}
-                {authToken && (
-                  <span className="ml-2 text-gray-500">(First 10 chars: {authToken.substring(0, 10)}...)</span>
-                )}
-              </div>
-              <div>
-                <strong>Buyer ID:</strong> {buyerId || "Not Set"}
-              </div>
-              <div className="pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    console.log("Current token:", authToken)
-                    console.log("Current buyer ID:", buyerId)
-                    toast({
-                      title: "Auth Debug",
-                      description: `Token: ${authToken ? "Set" : "Not Set"}, Buyer ID: ${buyerId || "Not Set"}`,
-                    })
-                  }}
-                >
-                  Test Auth
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
       <Toaster />
     </div>
