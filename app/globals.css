@@ -13,7 +13,11 @@ body {
     text-wrap: balance;
   }
 }
-
+/* Radio button styling */
+input[type="radio"] {
+  /* Simple color change using accent-color */
+  accent-color: #3aafa9;
+}
 @layer base {
   :root {
     --background: 0 0% 100%;

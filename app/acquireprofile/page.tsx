@@ -1198,7 +1198,7 @@ export default function AcquireProfilePage() {
                               onCheckedChange={(checked) => {
                                 toggleSubRegion(subRegion, region, continent)
                               }}
-                              className="mr-2 border-[#d0d5dd]"
+                              className="mr-2 border-[#0bd4db54d]"
                             />
                             <Label
                               htmlFor={`subregion-${subRegion.id}`}
@@ -1399,7 +1399,8 @@ export default function AcquireProfilePage() {
                       value="ready_to_deploy"
                       checked={formData.capitalEntity === "ready_to_deploy"}
                       onChange={(e) => handleChange("capitalEntity", e.target.value)}
-                      className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
+                      className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4 "
+                      
                     />
                     <Label htmlFor="capital_fund" className="text-[#344054] cursor-pointer">
                       Ready to deploy immediately
@@ -2036,7 +2037,7 @@ export default function AcquireProfilePage() {
                   required
                 />
                 <Label htmlFor="termsAndConditions" className="text-[#344054]">
-                  I have read and agree to the website <span className="text-[#3aafa9]">terms and conditions</span>
+                  I have read and agree to the website <span className="text-[#38A4F1] cursor-pointer">terms and conditions</span>
                 </Label>
               </div>
 
@@ -2049,7 +2050,7 @@ export default function AcquireProfilePage() {
                   required
                 />
                 <Label htmlFor="nda" className="text-[#344054]">
-                  I have read and agree to the universal NDA so that I can go straight to CIM
+                  I have read and agree to the <span className="text-[#38A4F1] cursor-pointer">universal NDA</span> so that I can go straight to CIM
                 </Label>
               </div>
 
@@ -2064,7 +2065,7 @@ export default function AcquireProfilePage() {
                   required
                 />
                 <Label htmlFor="feeAgreement" className="text-[#344054]">
-                  I have read and agree to the fee agreement
+                  I have read and agree to the <span className="text-[#38A4F1] cursor-pointer">fee agreement</span>
                 </Label>
               </div>
             </div>
