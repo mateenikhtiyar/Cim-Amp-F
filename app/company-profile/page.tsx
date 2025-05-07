@@ -31,7 +31,14 @@ import { toast } from "@/components/ui/use-toast"
 import { Toaster } from "@/components/ui/toaster"
 
 import { getGeoData, type GeoData, type Continent, type Region, type SubRegion } from "@/lib/geography-data"
-import { getIndustryData, type IndustryData, type Sector, type IndustryGroup, type Industry } from "@/lib/industry-data"
+import {
+  getIndustryData,
+  type IndustryData,
+  type Sector,
+  type IndustryGroup,
+  type Industry,
+  type SubIndustry,
+} from "@/lib/industry-data"
 
 const COMPANY_TYPES = [
   "Private Equity",
@@ -40,6 +47,8 @@ const COMPANY_TYPES = [
   "Independent Sponsor",
   "Entrepreneurship through Acquisition",
   "Single Acquisition Search",
+  "Strategic Operating Company",
+  "Buy Side Mandate",
   "Strategic Operating Company",
   "Buy Side Mandate",
 ]
@@ -64,6 +73,7 @@ interface IndustrySelection {
   sectors: Record<string, boolean>
   industryGroups: Record<string, boolean>
   industries: Record<string, boolean>
+  subIndustries: Record<string, boolean>
 }
 
 // Store selected management preferences separately from the form data
@@ -113,6 +123,7 @@ export default function CompanyProfilePage() {
     sectors: {},
     industryGroups: {},
     industries: {},
+    subIndustries: {},
   })
 
   // UI state for expanded sections
@@ -339,6 +350,12 @@ export default function CompanyProfilePage() {
                 if (profileData.targetCriteria.industrySectors.includes(industry.name)) {
                   newIndustrySelection.industries[industry.id] = true
                 }
+
+                industry.subIndustries.forEach((subIndustry) => {
+                  if (profileData.targetCriteria.industrySectors.includes(subIndustry.name)) {
+                    newIndustrySelection.subIndustries[subIndustry.id] = true
+                  }
+                })
               })
             })
           })
@@ -433,8 +450,6 @@ export default function CompanyProfilePage() {
       ebitdaMax: undefined,
       transactionSizeMin: undefined,
       transactionSizeMax: undefined,
-      revenueGrowthMin: undefined,
-      revenueGrowthMax: undefined,
       minStakePercent: undefined,
       minYearsInBusiness: undefined,
       preferredBusinessModels: [],
@@ -474,6 +489,7 @@ export default function CompanyProfilePage() {
     const updatedContacts = [...formData.contacts]
     updatedContacts[index] = {
       ...updatedContacts[index],
+      [field]: value,
       [field]: value,
     }
     handleChange("contacts", updatedContacts)
@@ -734,6 +750,11 @@ export default function CompanyProfilePage() {
       // Update all industries in this group
       group.industries.forEach((industry) => {
         newIndustrySelection.industries[industry.id] = isSelected
+
+        // Update all subindustries in this industry
+        industry.subIndustries.forEach((subIndustry) => {
+          newIndustrySelection.subIndustries[subIndustry.id] = isSelected
+        })
       })
     })
 
@@ -752,6 +773,11 @@ export default function CompanyProfilePage() {
     // Update all industries in this group
     group.industries.forEach((industry) => {
       newIndustrySelection.industries[industry.id] = isSelected
+
+      // Update all subindustries in this industry
+      industry.subIndustries.forEach((subIndustry) => {
+        newIndustrySelection.subIndustries[subIndustry.id] = isSelected
+      })
     })
 
     // Check if all groups in the sector are selected/deselected
@@ -781,6 +807,11 @@ export default function CompanyProfilePage() {
 
     // Update industry selection
     newIndustrySelection.industries[industry.id] = isSelected
+
+    // Update all subindustries in this industry
+    industry.subIndustries.forEach((subIndustry) => {
+      newIndustrySelection.subIndustries[subIndustry.id] = isSelected
+    })
 
     // Check if all industries in the group are selected/deselected
     const allIndustriesSelected = group.industries.every((i) =>
@@ -818,6 +849,65 @@ export default function CompanyProfilePage() {
     updateIndustriesInFormData(newIndustrySelection)
   }
 
+  const toggleSubIndustry = (subIndustry: SubIndustry, industry: Industry, group: IndustryGroup, sector: Sector) => {
+    const newIndustrySelection = { ...industrySelection }
+    const isSelected = !industrySelection.subIndustries[subIndustry.id]
+
+    // Update subindustry selection
+    newIndustrySelection.subIndustries[subIndustry.id] = isSelected
+
+    // Check if all subindustries in the industry are selected/deselected
+    const allSubIndustriesSelected = industry.subIndustries.every((si) =>
+      si.id === subIndustry.id ? isSelected : newIndustrySelection.subIndustries[si.id],
+    )
+
+    const allSubIndustriesDeselected = industry.subIndustries.every((si) =>
+      si.id === subIndustry.id ? !isSelected : newIndustrySelection.subIndustries[si.id],
+    )
+
+    // Update industry selection based on subindustries
+    if (allSubIndustriesSelected) {
+      newIndustrySelection.industries[industry.id] = true
+    } else if (allSubIndustriesDeselected) {
+      newIndustrySelection.industries[industry.id] = false
+    }
+
+    // Check if all industries in the group are selected/deselected
+    const allIndustriesSelected = group.industries.every((i) =>
+      i.id === industry.id ? newIndustrySelection.industries[i.id] : newIndustrySelection.industries[i.id],
+    )
+
+    const allIndustriesDeselected = group.industries.every((i) =>
+      i.id === industry.id ? !newIndustrySelection.industries[i.id] : !newIndustrySelection.industries[i.id],
+    )
+
+    // Update group selection based on industries
+    if (allIndustriesSelected) {
+      newIndustrySelection.industryGroups[group.id] = true
+    } else if (allIndustriesDeselected) {
+      newIndustrySelection.industryGroups[group.id] = false
+    }
+
+    // Check if all groups in the sector are selected/deselected
+    const allGroupsSelected = sector.industryGroups.every((g) =>
+      g.id === group.id ? newIndustrySelection.industryGroups[g.id] : newIndustrySelection.industryGroups[g.id],
+    )
+
+    const allGroupsDeselected = sector.industryGroups.every((g) =>
+      g.id === group.id ? !newIndustrySelection.industryGroups[g.id] : !newIndustrySelection.industryGroups[g.id],
+    )
+
+    // Update sector selection based on groups
+    if (allGroupsSelected) {
+      newIndustrySelection.sectors[sector.id] = true
+    } else if (allGroupsDeselected) {
+      newIndustrySelection.sectors[sector.id] = false
+    }
+
+    setIndustrySelection(newIndustrySelection)
+    updateIndustriesInFormData(newIndustrySelection)
+  }
+
   // Update the industries array in formData based on the hierarchical selection
   const updateIndustriesInFormData = (selection: IndustrySelection) => {
     if (!industryData) return
@@ -825,8 +915,9 @@ export default function CompanyProfilePage() {
     const selectedIndustries: string[] = []
     const selectedSectorIds = new Set()
     const selectedGroupIds = new Set()
+    const selectedIndustryIds = new Set()
 
-    // First, collect all selected sector and group IDs
+    // First, collect all selected sector, group, and industry IDs
     industryData.sectors.forEach((sector) => {
       if (selection.sectors[sector.id]) {
         selectedSectorIds.add(sector.id)
@@ -836,6 +927,12 @@ export default function CompanyProfilePage() {
         if (selection.industryGroups[group.id]) {
           selectedGroupIds.add(group.id)
         }
+
+        group.industries.forEach((industry) => {
+          if (selection.industries[industry.id]) {
+            selectedIndustryIds.add(industry.id)
+          }
+        })
       })
     })
 
@@ -855,6 +952,21 @@ export default function CompanyProfilePage() {
                 !selectedSectorIds.has(sector.id)
               ) {
                 selectedIndustries.push(industry.name)
+              } else if (
+                !selection.industries[industry.id] &&
+                !selectedGroupIds.has(group.id) &&
+                !selectedSectorIds.has(sector.id)
+              ) {
+                industry.subIndustries.forEach((subIndustry) => {
+                  if (
+                    selection.subIndustries[subIndustry.id] &&
+                    !selectedIndustryIds.has(industry.id) &&
+                    !selectedGroupIds.has(group.id) &&
+                    !selectedSectorIds.has(sector.id)
+                  ) {
+                    selectedIndustries.push(subIndustry.name)
+                  }
+                })
               }
             })
           }
@@ -883,6 +995,10 @@ export default function CompanyProfilePage() {
 
           group.industries.forEach((industry) => {
             newIndustrySelection.industries[industry.id] = false
+
+            industry.subIndustries.forEach((subIndustry) => {
+              newIndustrySelection.subIndustries[subIndustry.id] = false
+            })
           })
         })
       }
@@ -896,6 +1012,10 @@ export default function CompanyProfilePage() {
             // Unselect all children
             group.industries.forEach((industry) => {
               newIndustrySelection.industries[industry.id] = false
+
+              industry.subIndustries.forEach((subIndustry) => {
+                newIndustrySelection.subIndustries[subIndustry.id] = false
+              })
             })
 
             // Check if all groups in the sector are now deselected
@@ -912,6 +1032,11 @@ export default function CompanyProfilePage() {
                 newIndustrySelection.industries[industry.id] = false
                 found = true
 
+                // Unselect all children
+                industry.subIndustries.forEach((subIndustry) => {
+                  newIndustrySelection.subIndustries[subIndustry.id] = false
+                })
+
                 // Check parent selections
                 const allIndustriesDeselected = group.industries.every((i) => !newIndustrySelection.industries[i.id])
 
@@ -926,6 +1051,40 @@ export default function CompanyProfilePage() {
                     newIndustrySelection.sectors[sector.id] = false
                   }
                 }
+              }
+
+              if (!found) {
+                industry.subIndustries.forEach((subIndustry) => {
+                  if (subIndustry.name === industryToRemove) {
+                    newIndustrySelection.subIndustries[subIndustry.id] = false
+                    found = true
+
+                    // Check parent selections
+                    const allSubIndustriesDeselected = industry.subIndustries.every(
+                      (si) => !newIndustrySelection.subIndustries[si.id],
+                    )
+
+                    if (allSubIndustriesDeselected) {
+                      newIndustrySelection.industries[industry.id] = false
+
+                      const allIndustriesDeselected = group.industries.every(
+                        (i) => !newIndustrySelection.industries[i.id],
+                      )
+
+                      if (allIndustriesDeselected) {
+                        newIndustrySelection.industryGroups[group.id] = false
+
+                        const allGroupsDeselected = sector.industryGroups.every(
+                          (g) => !newIndustrySelection.industryGroups[g.id],
+                        )
+
+                        if (allGroupsDeselected) {
+                          newIndustrySelection.sectors[sector.id] = false
+                        }
+                      }
+                    }
+                  }
+                })
               }
             })
           }
@@ -1011,8 +1170,18 @@ export default function CompanyProfilePage() {
         const filteredIndustries: Industry[] = []
 
         group.industries.forEach((industry) => {
-          if (industry.name.toLowerCase().includes(industrySearchTerm.toLowerCase())) {
-            filteredIndustries.push(industry)
+          const filteredSubIndustries = industry.subIndustries.filter((subIndustry) =>
+            subIndustry.name.toLowerCase().includes(industrySearchTerm.toLowerCase()),
+          )
+
+          if (
+            filteredSubIndustries.length > 0 ||
+            industry.name.toLowerCase().includes(industrySearchTerm.toLowerCase())
+          ) {
+            filteredIndustries.push({
+              ...industry,
+              subIndustries: filteredSubIndustries.length > 0 ? filteredSubIndustries : industry.subIndustries,
+            })
           }
         })
 
@@ -1101,14 +1270,6 @@ export default function CompanyProfilePage() {
       formData.targetCriteria.transactionSizeMin > formData.targetCriteria.transactionSizeMax
     ) {
       return "Minimum transaction size cannot be greater than maximum transaction size"
-    }
-
-    if (
-      formData.targetCriteria.revenueGrowthMin !== undefined &&
-      formData.targetCriteria.revenueGrowthMax !== undefined &&
-      formData.targetCriteria.revenueGrowthMin > formData.targetCriteria.revenueGrowthMax
-    ) {
-      return "Minimum revenue growth cannot be greater than maximum revenue growth"
     }
 
     return null
@@ -1395,10 +1556,43 @@ export default function CompanyProfilePage() {
                                 }}
                                 className="mr-2 border-[#d0d5dd]"
                               />
-                              <Label htmlFor={`industry-${industry.id}`} className="text-[#344054] cursor-pointer">
-                                {industry.name}
-                              </Label>
+                              <div
+                                className="flex items-center cursor-pointer flex-1"
+                                onClick={() => toggleIndustryExpansion(industry.id)}
+                              >
+                                {expandedIndustries[industry.id] ? (
+                                  <ChevronDown className="h-3 w-3 mr-1 text-gray-400" />
+                                ) : (
+                                  <ChevronRight className="h-3 w-3 mr-1 text-gray-400" />
+                                )}
+                                <Label htmlFor={`industry-${industry.id}`} className="text-[#344054] cursor-pointer">
+                                  {industry.name}
+                                </Label>
+                              </div>
                             </div>
+
+                            {expandedIndustries[industry.id] && (
+                              <div className="ml-6 mt-1 space-y-1">
+                                {industry.subIndustries.map((subIndustry) => (
+                                  <div key={subIndustry.id} className="flex items-center">
+                                    <Checkbox
+                                      id={`subindustry-${subIndustry.id}`}
+                                      checked={!!industrySelection.subIndustries[subIndustry.id]}
+                                      onCheckedChange={(checked) => {
+                                        toggleSubIndustry(subIndustry, industry, group, sector)
+                                      }}
+                                      className="mr-2 border-[#d0d5dd]"
+                                    />
+                                    <Label
+                                      htmlFor={`subindustry-${subIndustry.id}`}
+                                      className="text-[#344054] cursor-pointer text-sm"
+                                    >
+                                      {subIndustry.name}
+                                    </Label>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -1579,7 +1773,7 @@ export default function CompanyProfilePage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <Label htmlFor="companyType" className="text-[#667085] text-sm mb-1.5 block">
                       Company Type <span className="text-red-500">*</span>
@@ -1719,15 +1913,12 @@ export default function CompanyProfilePage() {
                       </Label>
                       <Input
                         id="averageDealSize"
-                        type="text"
+                        type="number"
                         className="border-[#d0d5dd]"
-                        value={formatNumberWithCommas(formData.averageDealSize)}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/,/g, "")
-                          if (value === "" || /^\d+$/.test(value)) {
-                            handleChange("averageDealSize", value ? Number(value) : undefined)
-                          }
-                        }}
+                        value={formData.averageDealSize || ""}
+                        onChange={(e) =>
+                          handleChange("averageDealSize", e.target.value ? Number(e.target.value) : undefined)
+                        }
                       />
                     </div>
                   </div>
@@ -2132,53 +2323,24 @@ export default function CompanyProfilePage() {
                   </div>
 
                   <div>
-                    <Label className="text-[#667085] text-sm mb-1.5 block">
-                      3 Year Average Revenue Growth Range (%)
+                    <Label htmlFor="minStakePercent" className="text-[#667085] text-sm mb-1.5 block">
+                      Minimum Stake Percentage (%)
                     </Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="flex items-center">
-                        <Label htmlFor="revenueGrowthMin" className="text-[#667085] text-sm w-10">
-                          Min
-                        </Label>
-                        <Input
-                          id="revenueGrowthMin"
-                          type="text"
-                          className="border-[#d0d5dd]"
-                          value={formatNumberWithCommas(formData.targetCriteria.revenueGrowthMin)}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(/,/g, "")
-                            if (value === "" || /^\d+$/.test(value)) {
-                              handleNestedChange(
-                                "targetCriteria",
-                                "revenueGrowthMin",
-                                value ? Number(value) : undefined,
-                              )
-                            }
-                          }}
-                        />
-                      </div>
-                      <div className="flex items-center">
-                        <Label htmlFor="revenueGrowthMax" className="text-[#667085] text-sm w-10">
-                          Max
-                        </Label>
-                        <Input
-                          id="revenueGrowthMax"
-                          type="text"
-                          className="border-[#d0d5dd]"
-                          value={formatNumberWithCommas(formData.targetCriteria.revenueGrowthMax)}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(/,/g, "")
-                            if (value === "" || /^\d+$/.test(value)) {
-                              handleNestedChange(
-                                "targetCriteria",
-                                "revenueGrowthMax",
-                                value ? Number(value) : undefined,
-                              )
-                            }
-                          }}
-                        />
-                      </div>
-                    </div>
+                    <Input
+                      id="minStakePercent"
+                      type="number"
+                      min="0"
+                      max="100"
+                      className="border-[#d0d5dd]"
+                      value={formData.targetCriteria.minStakePercent || ""}
+                      onChange={(e) =>
+                        handleNestedChange(
+                          "targetCriteria",
+                          "minStakePercent",
+                          e.target.value ? Number(e.target.value) : undefined,
+                        )
+                      }
+                    />
                   </div>
 
                   <div>
