@@ -263,8 +263,8 @@ export default function CompanyProfilePage() {
           },
           // Ensure selectedCurrency is set
           selectedCurrency: profileData.selectedCurrency || "USD",
-          // Ensure capitalEntity is set
-          capitalEntity: profileData.capitalEntity || "Need to raise",
+          // Ensure capitalAvailability is set
+          capitalAvailability: profileData.capitalAvailability || "need_to_raise",
         }
 
         setFormData(updatedProfile)
@@ -354,12 +354,12 @@ export default function CompanyProfilePage() {
   }
 
   // Form state
-  const [formData, setFormData] = useState<CompanyProfile & { selectedCurrency: string }>({
+  const [formData, setFormData] = useState<CompanyProfile & { selectedCurrency: string; capitalAvailability: string }>({
     companyName: "",
     website: "",
     contacts: [{ name: "", email: "", phone: "" }],
     companyType: "",
-    capitalEntity: "Need to raise", // Default value
+    capitalEntity: "Direct Investment", // Default based on need_to_raise
     dealsCompletedLast5Years: undefined,
     averageDealSize: undefined,
     preferences: {
@@ -391,14 +391,25 @@ export default function CompanyProfilePage() {
       feeAgreementAccepted: false,
     },
     selectedCurrency: "USD",
+    capitalAvailability: "need_to_raise", // Default to "need_to_raise"
   })
 
   // Handle form field changes
   const handleChange = (field: string, value: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }))
+    if (field === "capitalAvailability") {
+      // When capitalAvailability changes, set capitalEntity based on the selection
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+        capitalEntity: value === "ready_to_deploy" ? "Fund" : "Direct Investment",
+      }))
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+        [field]: value,
+      }))
+    }
   }
 
   // Handle nested field changes
@@ -1390,28 +1401,28 @@ export default function CompanyProfilePage() {
                   <div className="flex items-center space-x-2">
                     <input
                       type="radio"
-                      id="capital_fund"
-                      name="capitalEntity"
-                      value="Ready to deploy immediately"
-                      checked={formData.capitalEntity === "Ready to deploy immediately"}
-                      onChange={(e) => handleChange("capitalEntity", e.target.value)}
+                      id="capital_ready"
+                      name="capitalAvailability"
+                      value="ready_to_deploy"
+                      checked={formData.capitalAvailability === "ready_to_deploy"}
+                      onChange={(e) => handleChange("capitalAvailability", e.target.value)}
                       className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
                     />
-                    <Label htmlFor="capital_fund" className="text-[#344054] cursor-pointer">
+                    <Label htmlFor="capital_ready" className="text-[#344054] cursor-pointer">
                       Ready to deploy immediately
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <input
                       type="radio"
-                      id="capital_holding"
-                      name="capitalEntity"
-                      value="Need to raise"
-                      checked={formData.capitalEntity === "Need to raise"}
-                      onChange={(e) => handleChange("capitalEntity", e.target.value)}
+                      id="capital_need"
+                      name="capitalAvailability"
+                      value="need_to_raise"
+                      checked={formData.capitalAvailability === "need_to_raise"}
+                      onChange={(e) => handleChange("capitalAvailability", e.target.value)}
                       className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
                     />
-                    <Label htmlFor="capital_holding" className="text-[#344054] cursor-pointer">
+                    <Label htmlFor="capital_need" className="text-[#344054] cursor-pointer">
                       Need to raise
                     </Label>
                   </div>
