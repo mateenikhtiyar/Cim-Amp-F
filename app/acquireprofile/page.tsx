@@ -1415,7 +1415,7 @@ export default function AcquireProfilePage() {
                       onChange={(e) => handleChange("capitalEntity", e.target.value)}
                       className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
                     />
-                    <Label htmlFor="capital_holding" className="text-[#3aafa9] cursor-pointer">
+                    <Label htmlFor="capital_holding" className="text-[#344054] cursor-pointer">
                       Need to raise
                     </Label>
                   </div>
@@ -1425,7 +1425,7 @@ export default function AcquireProfilePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="dealsCompletedLast5Years" className="text-[#3aafa9] text-sm mb-1.5 block">
+                <Label htmlFor="dealsCompletedLast5Years" className="text-[#667085] text-sm mb-1.5 block">
                   Number of deals completed in last 5 years
                 </Label>
                 <Input
