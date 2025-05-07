@@ -1665,7 +1665,7 @@ export default function CompanyProfilePage() {
                     className="h-8 w-8 rounded-full object-cover"
                     onError={(e) => {
                       // Fallback to placeholder on error
-                      ; (e.target as HTMLImageElement).src = "/placeholder.svg"
+                      ;(e.target as HTMLImageElement).src = "/placeholder.svg"
                     }}
                   />
                 ) : (
@@ -1909,591 +1909,588 @@ export default function CompanyProfilePage() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div>
                             <Label htmlFor={`contact-name-${index}`} className="text-[#667085] text-sm mb-1.5 block">
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                  <Label htmlFor={`contact-name-${index}`} className="text-[#667085] text-sm mb-1.5 block">
-                                    Name <span className="text-red-500">*</span>
-                                  </Label>
-                                  <Input
-                                    id={`contact-name-${index}`}
-                                    className="border-[#d0d5dd]"
-                                    value={contact.name}
-                                    onChange={(e) => handleContactChange(index, "name", e.target.value)}
-                                    required
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor={`contact-email-${index}`} className="text-[#667085] text-sm mb-1.5 block">
-                                    Email <span className="text-red-500">*</span>
-                                  </Label>
-                                  <Input
-                                    id={`contact-email-${index}`}
-                                    type="email"
-                                    className="border-[#d0d5dd]"
-                                    value={contact.email}
-                                    onChange={(e) => handleContactChange(index, "email", e.target.value)}
-                                    required
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor={`contact-phone-${index}`} className="text-[#667085] text-sm mb-1.5 block">
-                                    Phone <span className="text-red-500">*</span>
-                                  </Label>
-                                  <Input
-                                    id={`contact-phone-${index}`}
-                                    className="border-[#d0d5dd]"
-                                    value={contact.phone}
-                                    onChange={(e) => handleContactChange(index, "phone", e.target.value)}
-                                    required
-                                  />
-                                </div>
-                              </div>
+                              Name <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id={`contact-name-${index}`}
+                              className="border-[#d0d5dd]"
+                              value={contact.name}
+                              onChange={(e) => handleContactChange(index, "name", e.target.value)}
+                              required
+                            />
                           </div>
+                          <div>
+                            <Label htmlFor={`contact-email-${index}`} className="text-[#667085] text-sm mb-1.5 block">
+                              Email <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id={`contact-email-${index}`}
+                              type="email"
+                              className="border-[#d0d5dd]"
+                              value={contact.email}
+                              onChange={(e) => handleContactChange(index, "email", e.target.value)}
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`contact-phone-${index}`} className="text-[#667085] text-sm mb-1.5 block">
+                              Phone <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id={`contact-phone-${index}`}
+                              className="border-[#d0d5dd]"
+                              value={contact.phone}
+                              onChange={(e) => handleContactChange(index, "phone", e.target.value)}
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
                     ))}
-                          {formData.contacts.length < 3 && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              onClick={addContact} Contact}
-                          className="text-[#3aafa9] hover:text-[#3aafa9] hover:bg-[#f0f4f8] p-0 h-auto"
+                    {formData.contacts.length < 3 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={addContact}
+                        className="text-[#3aafa9] hover:text-[#3aafa9] hover:bg-[#f0f4f8] p-0 h-auto"
                       >
-                          <PlusCircle className="h-4 w-4 mr-2" />
-                          Add More Contacts
-                        </Button>
+                        <PlusCircle className="h-4 w-4 mr-2" />
+                        Add More Contacts
+                      </Button>
                     )}
-                      </div>
-                </div>
-                </div>
-
-                {/* Target Criteria */}
-                <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-                  <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Target Criteria</h2>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                      <Label className="text-[#667085] text-sm mb-1.5 block">Countries</Label>
-                      <div className="border border-[#d0d5dd] rounded-md p-4 h-80 flex flex-col">
-                        <div className="relative mb-4">
-                          <Search className="absolute left-2 top-2.5 h-4 w-4 text-[#667085]" />
-                          <Input
-                            placeholder="Search countries..."
-                            className="pl-8 border-[#d0d5dd]"
-                            value={countrySearchTerm}
-                            onChange={(e) => setCountrySearchTerm(e.target.value)}
-                          />
-                        </div>
-
-                        {formData.targetCriteria.countries.length > 0 && (
-                          <div className="mb-4">
-                            <div className="text-sm text-[#667085] mb-1">Selected Countries</div>
-                            <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
-                              {formData.targetCriteria.countries.map((country, index) => (
-                                <span
-                                  key={`selected-country-${index}`}
-                                  className="bg-gray-100 text-[#344054] text-xs rounded-full px-2 py-0.5 flex items-center group"
-                                >
-                                  {country}
-                                  <button
-                                    type="button"
-                                    onClick={() => removeCountry(country)}
-                                    className="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none"
-                                  >
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      className="h-3 w-3"
-                                      viewBox="0 0 20 20"
-                                      fill="currentColor"
-                                    >
-                                      <path
-                                        fillRule="evenodd"
-                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                        clipRule="evenodd"
-                                      />
-                                    </svg>
-                                  </button>
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="flex-1 overflow-y-auto">{renderGeographySelection()}</div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label className="text-[#667085] text-sm mb-1.5 block">Industry Sectors</Label>
-                      <div className="border border-[#d0d5dd] rounded-md p-4 h-80 flex flex-col">
-                        <div className="relative mb-4">
-                          <Search className="absolute left-2 top-2.5 h-4 w-4 text-[#667085]" />
-                          <Input
-                            placeholder="Search industries..."
-                            className="pl-8 border-[#d0d5dd]"
-                            value={industrySearchTerm}
-                            onChange={(e) => setIndustrySearchTerm(e.target.value)}
-                          />
-                        </div>
-
-                        {formData.targetCriteria.industrySectors.length > 0 && (
-                          <div className="mb-4">
-                            <div className="text-sm text-[#667085] mb-1">Selected Industries</div>
-                            <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
-                              {formData.targetCriteria.industrySectors.map((industry, index) => (
-                                <span
-                                  key={`selected-industry-${index}`}
-                                  className="bg-gray-100 text-[#344054] text-xs rounded-full px-2 py-0.5 flex items-center group"
-                                >
-                                  {industry}
-                                  <button
-                                    type="button"
-                                    onClick={() => removeIndustry(industry)}
-                                    className="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none"
-                                  >
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      className="h-3 w-3"
-                                      viewBox="0 0 20 20"
-                                      fill="currentColor"
-                                    >
-                                      <path
-                                        fillRule="evenodd"
-                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                        clipRule="evenodd"
-                                      />
-                                    </svg>
-                                  </button>
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="flex-1 overflow-y-auto">{renderIndustrySelection()}</div>
-                      </div>
-                    </div>
                   </div>
+                </div>
+              </div>
 
-                  <div className="space-y-6">
-                    <div>
-                      <div className="flex justify-between items-center mb-1.5">
-                        <Label className="text-[#667085] text-sm">Revenue Size Range</Label>
-                        <Select
-                          value={formData.selectedCurrency}
-                          onValueChange={(value) => handleChange("selectedCurrency", value)}
-                        >
-                          <SelectTrigger className="w-24 h-8">
-                            <SelectValue placeholder="Currency" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {CURRENCIES.map((currency) => (
-                              <SelectItem key={currency} value={currency}>
-                                {currency}
-                              </SelectItem>
+              {/* Target Criteria */}
+              <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+                <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Target Criteria</h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <Label className="text-[#667085] text-sm mb-1.5 block">Countries</Label>
+                    <div className="border border-[#d0d5dd] rounded-md p-4 h-80 flex flex-col">
+                      <div className="relative mb-4">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-[#667085]" />
+                        <Input
+                          placeholder="Search countries..."
+                          className="pl-8 border-[#d0d5dd]"
+                          value={countrySearchTerm}
+                          onChange={(e) => setCountrySearchTerm(e.target.value)}
+                        />
+                      </div>
+
+                      {formData.targetCriteria.countries.length > 0 && (
+                        <div className="mb-4">
+                          <div className="text-sm text-[#667085] mb-1">Selected Countries</div>
+                          <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                            {formData.targetCriteria.countries.map((country, index) => (
+                              <span
+                                key={`selected-country-${index}`}
+                                className="bg-gray-100 text-[#344054] text-xs rounded-full px-2 py-0.5 flex items-center group"
+                              >
+                                {country}
+                                <button
+                                  type="button"
+                                  onClick={() => removeCountry(country)}
+                                  className="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-3 w-3"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
+                              </span>
                             ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex items-center">
-                          <Label htmlFor="revenueMin" className="text-[#667085] text-sm w-10">
-                            Min
-                          </Label>
-                          <div className="relative flex-1">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
-                              {formData.selectedCurrency === "USD"
-                                ? "$"
-                                : formData.selectedCurrency === "EUR"
-                                  ? "€"
-                                  : formData.selectedCurrency === "GBP"
-                                    ? "£"
-                                    : formData.selectedCurrency}
-                            </div>
-                            <Input
-                              id="revenueMin"
-                              type="text"
-                              className="border-[#d0d5dd] pl-8"
-                              value={formatNumberWithCommas(formData.targetCriteria.revenueMin)}
-                              onChange={(e) => {
-                                const value = e.target.value.replace(/,/g, "")
-                                if (value === "" || /^\d+$/.test(value)) {
-                                  handleNestedChange("targetCriteria", "revenueMin", value ? Number(value) : undefined)
-                                }
-                              }}
-                            />
                           </div>
                         </div>
-                        <div className="flex items-center">
-                          <Label htmlFor="revenueMax" className="text-[#667085] text-sm w-10">
-                            Max
-                          </Label>
-                          <div className="relative flex-1">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
-                              {formData.selectedCurrency === "USD"
-                                ? "$"
-                                : formData.selectedCurrency === "EUR"
-                                  ? "€"
-                                  : formData.selectedCurrency === "GBP"
-                                    ? "£"
-                                    : formData.selectedCurrency}
-                            </div>
-                            <Input
-                              id="revenueMax"
-                              type="text"
-                              className="border-[#d0d5dd] pl-8"
-                              value={formatNumberWithCommas(formData.targetCriteria.revenueMax)}
-                              onChange={(e) => {
-                                const value = e.target.value.replace(/,/g, "")
-                                if (value === "" || /^\d+$/.test(value)) {
-                                  handleNestedChange("targetCriteria", "revenueMax", value ? Number(value) : undefined)
-                                }
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                      )}
 
-                    <div>
-                      <Label className="text-[#667085] text-sm mb-1.5 block">EBITDA Range</Label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex items-center">
-                          <Label htmlFor="ebitdaMin" className="text-[#667085] text-sm w-10">
-                            Min
-                          </Label>
-                          <div className="relative flex-1">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
-                              {formData.selectedCurrency === "USD"
-                                ? "$"
-                                : formData.selectedCurrency === "EUR"
-                                  ? "€"
-                                  : formData.selectedCurrency === "GBP"
-                                    ? "£"
-                                    : formData.selectedCurrency}
-                            </div>
-                            <Input
-                              id="ebitdaMin"
-                              type="text"
-                              className="border-[#d0d5dd] pl-8"
-                              value={formatNumberWithCommas(formData.targetCriteria.ebitdaMin)}
-                              onChange={(e) => {
-                                const value = e.target.value.replace(/,/g, "")
-                                if (value === "" || /^\d+$/.test(value)) {
-                                  handleNestedChange("targetCriteria", "ebitdaMin", value ? Number(value) : undefined)
-                                }
-                              }}
-                            />
-                          </div>
-                        </div>
-                        <div className="flex items-center">
-                          <Label htmlFor="ebitdaMax" className="text-[#667085] text-sm w-10">
-                            Max
-                          </Label>
-                          <div className="relative flex-1">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
-                              {formData.selectedCurrency === "USD"
-                                ? "$"
-                                : formData.selectedCurrency === "EUR"
-                                  ? "€"
-                                  : formData.selectedCurrency === "GBP"
-                                    ? "£"
-                                    : formData.selectedCurrency}
-                            </div>
-                            <Input
-                              id="ebitdaMax"
-                              type="text"
-                              className="border-[#d0d5dd] pl-8"
-                              value={formatNumberWithCommas(formData.targetCriteria.ebitdaMax)}
-                              onChange={(e) => {
-                                const value = e.target.value.replace(/,/g, "")
-                                if (value === "" || /^\d+$/.test(value)) {
-                                  handleNestedChange("targetCriteria", "ebitdaMax", value ? Number(value) : undefined)
-                                }
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label className="text-[#667085] text-sm mb-1.5 block">Transaction Size Range</Label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex items-center">
-                          <Label htmlFor="transactionSizeMin" className="text-[#667085] text-sm w-10">
-                            Min
-                          </Label>
-                          <div className="relative flex-1">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
-                              {formData.selectedCurrency === "USD"
-                                ? "$"
-                                : formData.selectedCurrency === "EUR"
-                                  ? "€"
-                                  : formData.selectedCurrency === "GBP"
-                                    ? "£"
-                                    : formData.selectedCurrency}
-                            </div>
-                            <Input
-                              id="transactionSizeMin"
-                              type="text"
-                              className="border-[#d0d5dd] pl-8"
-                              value={formatNumberWithCommas(formData.targetCriteria.transactionSizeMin)}
-                              onChange={(e) => {
-                                const value = e.target.value.replace(/,/g, "")
-                                if (value === "" || /^\d+$/.test(value)) {
-                                  handleNestedChange(
-                                    "targetCriteria",
-                                    "transactionSizeMin",
-                                    value ? Number(value) : undefined,
-                                  )
-                                }
-                              }}
-                            />
-                          </div>
-                        </div>
-                        <div className="flex items-center">
-                          <Label htmlFor="transactionSizeMax" className="text-[#667085] text-sm w-10">
-                            Max
-                          </Label>
-                          <div className="relative flex-1">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
-                              {formData.selectedCurrency === "USD"
-                                ? "$"
-                                : formData.selectedCurrency === "EUR"
-                                  ? "€"
-                                  : formData.selectedCurrency === "GBP"
-                                    ? "£"
-                                    : formData.selectedCurrency}
-                            </div>
-                            <Input
-                              id="transactionSizeMax"
-                              type="text"
-                              className="border-[#d0d5dd] pl-8"
-                              value={formatNumberWithCommas(formData.targetCriteria.transactionSizeMax)}
-                              onChange={(e) => {
-                                const value = e.target.value.replace(/,/g, "")
-                                if (value === "" || /^\d+$/.test(value)) {
-                                  handleNestedChange(
-                                    "targetCriteria",
-                                    "transactionSizeMax",
-                                    value ? Number(value) : undefined,
-                                  )
-                                }
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="minStakePercent" className="text-[#667085] text-sm mb-1.5 block">
-                        Minimum Stake Percentage (%)
-                      </Label>
-                      <Input
-                        id="minStakePercent"
-                        type="number"
-                        min="0"
-                        max="100"
-                        className="border-[#d0d5dd]"
-                        value={formData.targetCriteria.minStakePercent || ""}
-                        onChange={(e) =>
-                          handleNestedChange(
-                            "targetCriteria",
-                            "minStakePercent",
-                            e.target.value ? Number(e.target.value) : undefined,
-                          )
-                        }
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="minYearsInBusiness" className="text-[#667085] text-sm mb-1.5 block">
-                        Minimum Years in Business
-                      </Label>
-                      <Input
-                        id="minYearsInBusiness"
-                        type="number"
-                        min="0"
-                        className="border-[#d0d5dd]"
-                        value={formData.targetCriteria.minYearsInBusiness || ""}
-                        onChange={(e) =>
-                          handleNestedChange(
-                            "targetCriteria",
-                            "minYearsInBusiness",
-                            e.target.value ? Number(e.target.value) : undefined,
-                          )
-                        }
-                      />
+                      <div className="flex-1 overflow-y-auto">{renderGeographySelection()}</div>
                     </div>
                   </div>
-                </div>
 
-                {/* Preferred Business Models */}
-                <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-                  <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Preferred Business Models</h2>
-                  <div className="flex flex-wrap gap-6">
-                    {BUSINESS_MODELS.map((model) => (
-                      <div key={model} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`model-${model}`}
-                          className="border-[#d0d5dd]"
-                          checked={formData.targetCriteria.preferredBusinessModels.includes(model)}
-                          onCheckedChange={() => toggleBusinessModel(model)}
+                  <div>
+                    <Label className="text-[#667085] text-sm mb-1.5 block">Industry Sectors</Label>
+                    <div className="border border-[#d0d5dd] rounded-md p-4 h-80 flex flex-col">
+                      <div className="relative mb-4">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-[#667085]" />
+                        <Input
+                          placeholder="Search industries..."
+                          className="pl-8 border-[#d0d5dd]"
+                          value={industrySearchTerm}
+                          onChange={(e) => setIndustrySearchTerm(e.target.value)}
                         />
-                        <Label htmlFor={`model-${model}`} className="text-[#344054]">
-                          {model}
-                        </Label>
                       </div>
-                    ))}
+
+                      {formData.targetCriteria.industrySectors.length > 0 && (
+                        <div className="mb-4">
+                          <div className="text-sm text-[#667085] mb-1">Selected Industries</div>
+                          <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                            {formData.targetCriteria.industrySectors.map((industry, index) => (
+                              <span
+                                key={`selected-industry-${index}`}
+                                className="bg-gray-100 text-[#344054] text-xs rounded-full px-2 py-0.5 flex items-center group"
+                              >
+                                {industry}
+                                <button
+                                  type="button"
+                                  onClick={() => removeIndustry(industry)}
+                                  className="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-3 w-3"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex-1 overflow-y-auto">{renderIndustrySelection()}</div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Management Team Preference */}
-                <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-                  <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Management Future Preferences</h2>
-                  <div className="flex flex-wrap gap-6">
-                    {MANAGEMENT_PREFERENCES.map((preference) => (
-                      <div key={preference} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`preference-${preference}`}
-                          className="border-[#d0d5dd]"
-                          checked={extendedFormState.selectedManagementPreferences.includes(preference)}
-                          onCheckedChange={() => toggleManagementPreference(preference)}
-                        />
-                        <Label htmlFor={`preference-${preference}`} className="text-[#344054]">
-                          {preference}
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex justify-between items-center mb-1.5">
+                      <Label className="text-[#667085] text-sm">Revenue Size Range</Label>
+                      <Select
+                        value={formData.selectedCurrency}
+                        onValueChange={(value) => handleChange("selectedCurrency", value)}
+                      >
+                        <SelectTrigger className="w-24 h-8">
+                          <SelectValue placeholder="Currency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CURRENCIES.map((currency) => (
+                            <SelectItem key={currency} value={currency}>
+                              {currency}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-center">
+                        <Label htmlFor="revenueMin" className="text-[#667085] text-sm w-10">
+                          Min
                         </Label>
+                        <div className="relative flex-1">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                            {formData.selectedCurrency === "USD"
+                              ? "$"
+                              : formData.selectedCurrency === "EUR"
+                                ? "€"
+                                : formData.selectedCurrency === "GBP"
+                                  ? "£"
+                                  : formData.selectedCurrency}
+                          </div>
+                          <Input
+                            id="revenueMin"
+                            type="text"
+                            className="border-[#d0d5dd] pl-8"
+                            value={formatNumberWithCommas(formData.targetCriteria.revenueMin)}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/,/g, "")
+                              if (value === "" || /^\d+$/.test(value)) {
+                                handleNestedChange("targetCriteria", "revenueMin", value ? Number(value) : undefined)
+                              }
+                            }}
+                          />
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Description of Ideal Target(s) */}
-                <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-                  <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Description of Ideal Target(s)</h2>
-                  <Textarea
-                    placeholder="Add additional information about company types you are pursuing especially specific industries and activities."
-                    className="min-h-[100px] border-[#d0d5dd]"
-                    value={formData.targetCriteria.description || ""}
-                    onChange={(e) => handleNestedChange("targetCriteria", "description", e.target.value)}
-                  />
-                </div>
-                {/* General Preferences */}
-                <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-                  <h2 className="text-[#2f2b43] text-lg font-medium mb-4">General Preferences</h2>
-                  <div className="space-y-4">
-                    <div className="flex items-end space-x-2">
-                      <Checkbox
-                        id="stopSendingDeals"
-                        className="mt-1 border-[#d0d5dd]"
-                        checked={formData.preferences.stopSendingDeals}
-                        onCheckedChange={(checked) =>
-                          handleNestedChange("preferences", "stopSendingDeals", checked === true)
-                        }
-                      />
-                      <Label htmlFor="stopSendingDeals" className="text-[#344054]">
-                        Stop sending deals
-                      </Label>
-                    </div>
-
-                    <div className="flex items-end space-x-2">
-                      <Checkbox
-                        id="dontShowMyDeals"
-                        className="mt-1 border-[#d0d5dd]"
-                        checked={formData.preferences.dontShowMyDeals}
-                        onCheckedChange={(checked) =>
-                          handleNestedChange("preferences", "dontShowMyDeals", checked === true)
-                        }
-                      />
-                      <Label htmlFor="dontShowMyDeals" className="text-[#344054]">
-                        Don't show sellers your company details until you engage. You will show as "Anonymous Buyer"
-                      </Label>
-                    </div>
-
-                    <div className="flex items-end space-x-2">
-                      <Checkbox
-                        id="dontSendDealsToMyCompetitors"
-                        className="mt-1 border-[#d0d5dd]"
-                        checked={formData.preferences.dontSendDealsToMyCompetitors}
-                        onCheckedChange={(checked) =>
-                          handleNestedChange("preferences", "dontSendDealsToMyCompetitors", checked === true)
-                        }
-                      />
-                      <Label htmlFor="dontSendDealsToMyCompetitors" className="text-[#344054]">
-                        Do not send deals that are currently marketed on other deal marketplaces
-                      </Label>
-                    </div>
-
-                    <div className="flex items-end space-x-2">
-                      <Checkbox
-                        id="allowBuyerLikeDeals"
-                        className="mt-1 border-[#d0d5dd]"
-                        checked={formData.preferences.allowBuyerLikeDeals}
-                        onCheckedChange={(checked) =>
-                          handleNestedChange("preferences", "allowBuyerLikeDeals", checked === true)
-                        }
-                      />
-                      <Label htmlFor="allowBuyerLikeDeals" className="text-[#344054]">
-                        Allow buy side fee deals (charged by seller above CIM Amplify Fees)
-                      </Label>
+                      <div className="flex items-center">
+                        <Label htmlFor="revenueMax" className="text-[#667085] text-sm w-10">
+                          Max
+                        </Label>
+                        <div className="relative flex-1">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                            {formData.selectedCurrency === "USD"
+                              ? "$"
+                              : formData.selectedCurrency === "EUR"
+                                ? "€"
+                                : formData.selectedCurrency === "GBP"
+                                  ? "£"
+                                  : formData.selectedCurrency}
+                          </div>
+                          <Input
+                            id="revenueMax"
+                            type="text"
+                            className="border-[#d0d5dd] pl-8"
+                            value={formatNumberWithCommas(formData.targetCriteria.revenueMax)}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/,/g, "")
+                              if (value === "" || /^\d+$/.test(value)) {
+                                handleNestedChange("targetCriteria", "revenueMax", value ? Number(value) : undefined)
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Terms and Agreements */}
-                <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-                  <div className="space-y-4">
-                    <div className="flex items-end space-x-2">
-                      <Checkbox
-                        id="termsAndConditions"
-                        className="mt-1 border-[#d0d5dd]"
-                        checked={formData.agreements.termsAndConditionsAccepted}
-                        onCheckedChange={(checked) =>
-                          handleNestedChange("agreements", "termsAndConditionsAccepted", checked === true)
-                        }
-                        required
-                      />
-                      <Label htmlFor="termsAndConditions" className="text-[#344054]">
-                        I have read and agree to the website <span className="text-[#3aafa9]">terms and conditions</span>
-                      </Label>
-                    </div>
-
-                    <div className="flex items-end space-x-2">
-                      <Checkbox
-                        id="nda"
-                        className="mt-1 border-[#d0d5dd]"
-                        checked={formData.agreements.ndaAccepted}
-                        onCheckedChange={(checked) => handleNestedChange("agreements", "ndaAccepted", checked === true)}
-                        required
-                      />
-                      <Label htmlFor="nda" className="text-[#344054]">
-                        I have read and agree to the universal NDA so that I can go straight to CIM
-                      </Label>
-                    </div>
-
-                    <div className="flex items-end space-x-2">
-                      <Checkbox
-                        id="feeAgreement"
-                        className="mt-1 border-[#d0d5dd]"
-                        checked={formData.agreements.feeAgreementAccepted}
-                        onCheckedChange={(checked) =>
-                          handleNestedChange("agreements", "feeAgreementAccepted", checked === true)
-                        }
-                        required
-                      />
-                      <Label htmlFor="feeAgreement" className="text-[#344054]">
-                        I have read and agree to the fee agreement
-                      </Label>
+                  <div>
+                    <Label className="text-[#667085] text-sm mb-1.5 block">EBITDA Range</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-center">
+                        <Label htmlFor="ebitdaMin" className="text-[#667085] text-sm w-10">
+                          Min
+                        </Label>
+                        <div className="relative flex-1">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                            {formData.selectedCurrency === "USD"
+                              ? "$"
+                              : formData.selectedCurrency === "EUR"
+                                ? "€"
+                                : formData.selectedCurrency === "GBP"
+                                  ? "£"
+                                  : formData.selectedCurrency}
+                          </div>
+                          <Input
+                            id="ebitdaMin"
+                            type="text"
+                            className="border-[#d0d5dd] pl-8"
+                            value={formatNumberWithCommas(formData.targetCriteria.ebitdaMin)}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/,/g, "")
+                              if (value === "" || /^\d+$/.test(value)) {
+                                handleNestedChange("targetCriteria", "ebitdaMin", value ? Number(value) : undefined)
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <Label htmlFor="ebitdaMax" className="text-[#667085] text-sm w-10">
+                          Max
+                        </Label>
+                        <div className="relative flex-1">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                            {formData.selectedCurrency === "USD"
+                              ? "$"
+                              : formData.selectedCurrency === "EUR"
+                                ? "€"
+                                : formData.selectedCurrency === "GBP"
+                                  ? "£"
+                                  : formData.selectedCurrency}
+                          </div>
+                          <Input
+                            id="ebitdaMax"
+                            type="text"
+                            className="border-[#d0d5dd] pl-8"
+                            value={formatNumberWithCommas(formData.targetCriteria.ebitdaMax)}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/,/g, "")
+                              if (value === "" || /^\d+$/.test(value)) {
+                                handleNestedChange("targetCriteria", "ebitdaMax", value ? Number(value) : undefined)
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Submit Button */}
-                <div className="flex justify-end">
-                  <Button type="submit" className="bg-[#3aafa9] hover:bg-[#2a9d8f] text-white" disabled={isSubmitting}>
-                    {isSubmitting ? "Submitting..." : "Submit Profile"}
-                  </Button>
+                  <div>
+                    <Label className="text-[#667085] text-sm mb-1.5 block">Transaction Size Range</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-center">
+                        <Label htmlFor="transactionSizeMin" className="text-[#667085] text-sm w-10">
+                          Min
+                        </Label>
+                        <div className="relative flex-1">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                            {formData.selectedCurrency === "USD"
+                              ? "$"
+                              : formData.selectedCurrency === "EUR"
+                                ? "€"
+                                : formData.selectedCurrency === "GBP"
+                                  ? "£"
+                                  : formData.selectedCurrency}
+                          </div>
+                          <Input
+                            id="transactionSizeMin"
+                            type="text"
+                            className="border-[#d0d5dd] pl-8"
+                            value={formatNumberWithCommas(formData.targetCriteria.transactionSizeMin)}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/,/g, "")
+                              if (value === "" || /^\d+$/.test(value)) {
+                                handleNestedChange(
+                                  "targetCriteria",
+                                  "transactionSizeMin",
+                                  value ? Number(value) : undefined,
+                                )
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <Label htmlFor="transactionSizeMax" className="text-[#667085] text-sm w-10">
+                          Max
+                        </Label>
+                        <div className="relative flex-1">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                            {formData.selectedCurrency === "USD"
+                              ? "$"
+                              : formData.selectedCurrency === "EUR"
+                                ? "€"
+                                : formData.selectedCurrency === "GBP"
+                                  ? "£"
+                                  : formData.selectedCurrency}
+                          </div>
+                          <Input
+                            id="transactionSizeMax"
+                            type="text"
+                            className="border-[#d0d5dd] pl-8"
+                            value={formatNumberWithCommas(formData.targetCriteria.transactionSizeMax)}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/,/g, "")
+                              if (value === "" || /^\d+$/.test(value)) {
+                                handleNestedChange(
+                                  "targetCriteria",
+                                  "transactionSizeMax",
+                                  value ? Number(value) : undefined,
+                                )
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="minStakePercent" className="text-[#667085] text-sm mb-1.5 block">
+                      Minimum Stake Percentage (%)
+                    </Label>
+                    <Input
+                      id="minStakePercent"
+                      type="number"
+                      min="0"
+                      max="100"
+                      className="border-[#d0d5dd]"
+                      value={formData.targetCriteria.minStakePercent || ""}
+                      onChange={(e) =>
+                        handleNestedChange(
+                          "targetCriteria",
+                          "minStakePercent",
+                          e.target.value ? Number(e.target.value) : undefined,
+                        )
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="minYearsInBusiness" className="text-[#667085] text-sm mb-1.5 block">
+                      Minimum Years in Business
+                    </Label>
+                    <Input
+                      id="minYearsInBusiness"
+                      type="number"
+                      min="0"
+                      className="border-[#d0d5dd]"
+                      value={formData.targetCriteria.minYearsInBusiness || ""}
+                      onChange={(e) =>
+                        handleNestedChange(
+                          "targetCriteria",
+                          "minYearsInBusiness",
+                          e.target.value ? Number(e.target.value) : undefined,
+                        )
+                      }
+                    />
+                  </div>
                 </div>
+              </div>
+
+              {/* Preferred Business Models */}
+              <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+                <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Preferred Business Models</h2>
+                <div className="flex flex-wrap gap-6">
+                  {BUSINESS_MODELS.map((model) => (
+                    <div key={model} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`model-${model}`}
+                        className="border-[#d0d5dd]"
+                        checked={formData.targetCriteria.preferredBusinessModels.includes(model)}
+                        onCheckedChange={() => toggleBusinessModel(model)}
+                      />
+                      <Label htmlFor={`model-${model}`} className="text-[#344054]">
+                        {model}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Management Team Preference */}
+              <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+                <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Management Future Preferences</h2>
+                <div className="flex flex-wrap gap-6">
+                  {MANAGEMENT_PREFERENCES.map((preference) => (
+                    <div key={preference} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`preference-${preference}`}
+                        className="border-[#d0d5dd]"
+                        checked={extendedFormState.selectedManagementPreferences.includes(preference)}
+                        onCheckedChange={() => toggleManagementPreference(preference)}
+                      />
+                      <Label htmlFor={`preference-${preference}`} className="text-[#344054]">
+                        {preference}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Description of Ideal Target(s) */}
+              <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+                <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Description of Ideal Target(s)</h2>
+                <Textarea
+                  placeholder="Add additional information about company types you are pursuing especially specific industries and activities."
+                  className="min-h-[100px] border-[#d0d5dd]"
+                  value={formData.targetCriteria.description || ""}
+                  onChange={(e) => handleNestedChange("targetCriteria", "description", e.target.value)}
+                />
+              </div>
+              {/* General Preferences */}
+              <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+                <h2 className="text-[#2f2b43] text-lg font-medium mb-4">General Preferences</h2>
+                <div className="space-y-4">
+                  <div className="flex items-end space-x-2">
+                    <Checkbox
+                      id="stopSendingDeals"
+                      className="mt-1 border-[#d0d5dd]"
+                      checked={formData.preferences.stopSendingDeals}
+                      onCheckedChange={(checked) =>
+                        handleNestedChange("preferences", "stopSendingDeals", checked === true)
+                      }
+                    />
+                    <Label htmlFor="stopSendingDeals" className="text-[#344054]">
+                      Stop sending deals
+                    </Label>
+                  </div>
+
+                  <div className="flex items-end space-x-2">
+                    <Checkbox
+                      id="dontShowMyDeals"
+                      className="mt-1 border-[#d0d5dd]"
+                      checked={formData.preferences.dontShowMyDeals}
+                      onCheckedChange={(checked) =>
+                        handleNestedChange("preferences", "dontShowMyDeals", checked === true)
+                      }
+                    />
+                    <Label htmlFor="dontShowMyDeals" className="text-[#344054]">
+                      Don't show sellers your company details until you engage. You will show as "Anonymous Buyer"
+                    </Label>
+                  </div>
+
+                  <div className="flex items-end space-x-2">
+                    <Checkbox
+                      id="dontSendDealsToMyCompetitors"
+                      className="mt-1 border-[#d0d5dd]"
+                      checked={formData.preferences.dontSendDealsToMyCompetitors}
+                      onCheckedChange={(checked) =>
+                        handleNestedChange("preferences", "dontSendDealsToMyCompetitors", checked === true)
+                      }
+                    />
+                    <Label htmlFor="dontSendDealsToMyCompetitors" className="text-[#344054]">
+                      Do not send deals that are currently marketed on other deal marketplaces
+                    </Label>
+                  </div>
+
+                  <div className="flex items-end space-x-2">
+                    <Checkbox
+                      id="allowBuyerLikeDeals"
+                      className="mt-1 border-[#d0d5dd]"
+                      checked={formData.preferences.allowBuyerLikeDeals}
+                      onCheckedChange={(checked) =>
+                        handleNestedChange("preferences", "allowBuyerLikeDeals", checked === true)
+                      }
+                    />
+                    <Label htmlFor="allowBuyerLikeDeals" className="text-[#344054]">
+                      Allow buy side fee deals (charged by seller above CIM Amplify Fees)
+                    </Label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Terms and Agreements */}
+              <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+                <div className="space-y-4">
+                  <div className="flex items-end space-x-2">
+                    <Checkbox
+                      id="termsAndConditions"
+                      className="mt-1 border-[#d0d5dd]"
+                      checked={formData.agreements.termsAndConditionsAccepted}
+                      onCheckedChange={(checked) =>
+                        handleNestedChange("agreements", "termsAndConditionsAccepted", checked === true)
+                      }
+                      required
+                    />
+                    <Label htmlFor="termsAndConditions" className="text-[#344054]">
+                      I have read and agree to the website <span className="text-[#3aafa9]">terms and conditions</span>
+                    </Label>
+                  </div>
+
+                  <div className="flex items-end space-x-2">
+                    <Checkbox
+                      id="nda"
+                      className="mt-1 border-[#d0d5dd]"
+                      checked={formData.agreements.ndaAccepted}
+                      onCheckedChange={(checked) => handleNestedChange("agreements", "ndaAccepted", checked === true)}
+                      required
+                    />
+                    <Label htmlFor="nda" className="text-[#344054]">
+                      I have read and agree to the universal NDA so that I can go straight to CIM
+                    </Label>
+                  </div>
+
+                  <div className="flex items-end space-x-2">
+                    <Checkbox
+                      id="feeAgreement"
+                      className="mt-1 border-[#d0d5dd]"
+                      checked={formData.agreements.feeAgreementAccepted}
+                      onCheckedChange={(checked) =>
+                        handleNestedChange("agreements", "feeAgreementAccepted", checked === true)
+                      }
+                      required
+                    />
+                    <Label htmlFor="feeAgreement" className="text-[#344054]">
+                      I have read and agree to the fee agreement
+                    </Label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex justify-end">
+                <Button type="submit" className="bg-[#3aafa9] hover:bg-[#2a9d8f] text-white" disabled={isSubmitting}>
+                  {isSubmitting ? "Submitting..." : "Submit Profile"}
+                </Button>
+              </div>
             </form>
           </div>
         </main>
