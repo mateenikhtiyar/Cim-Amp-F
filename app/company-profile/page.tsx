@@ -1616,7 +1616,7 @@ export default function CompanyProfilePage() {
                           id="capital_ready"
                           name="capitalAvailability"
                           value="ready_to_deploy"
-                          checked={formData.capitalAvailability === "ready_to_deploy"}
+                          checked={formData.capitalEntity === "ready_to_deploy"}
                           onChange={(e) => handleChange("capitalAvailability", e.target.value)}
                           className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
                         />
@@ -1630,7 +1630,7 @@ export default function CompanyProfilePage() {
                           id="capital_need"
                           name="capitalAvailability"
                           value="need_to_raise"
-                          checked={formData.capitalAvailability === "need_to_raise"}
+                          checked={formData.capitalEntity === "need_to_raise"}
                           onChange={(e) => handleChange("capitalAvailability", e.target.value)}
                           className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
                         />
@@ -1638,105 +1638,6 @@ export default function CompanyProfilePage() {
                           Need to raise
                         </Label>
                       </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <Label className="text-[#667085] text-sm mb-1.5 block">
-                      Capital Entity <span className="text-red-500">*</span>
-                    </Label>
-                    <div className="flex flex-col space-y-2 mt-1">
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          id="capital_fund"
-                          name="capitalEntity"
-                          value="Fund"
-                          checked={formData.capitalEntity === "Fund"}
-                          onChange={(e) => handleChange("capitalEntity", e.target.value)}
-                          className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
-                        />
-                        <Label htmlFor="capital_fund" className="text-[#344054] cursor-pointer">
-                          Fund
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          id="capital_holding"
-                          name="capitalEntity"
-                          value="Holding Company"
-                          checked={formData.capitalEntity === "Holding Company"}
-                          onChange={(e) => handleChange("capitalEntity", e.target.value)}
-                          className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
-                        />
-                        <Label htmlFor="capital_holding" className="text-[#344054] cursor-pointer">
-                          Holding Company
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          id="capital_spv"
-                          name="capitalEntity"
-                          value="SPV"
-                          checked={formData.capitalEntity === "SPV"}
-                          onChange={(e) => handleChange("capitalEntity", e.target.value)}
-                          className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
-                        />
-                        <Label htmlFor="capital_spv" className="text-[#344054] cursor-pointer">
-                          SPV
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          id="capital_direct"
-                          name="capitalEntity"
-                          value="Direct Investment"
-                          checked={formData.capitalEntity === "Direct Investment"}
-                          onChange={(e) => handleChange("capitalEntity", e.target.value)}
-                          className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
-                        />
-                        <Label htmlFor="capital_direct" className="text-[#344054] cursor-pointer">
-                          Direct Investment
-                        </Label>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-6">
-                    <div>
-                      <Label htmlFor="dealsCompletedLast5Years" className="text-[#667085] text-sm mb-1.5 block">
-                        Number of deals completed in last 5 years
-                      </Label>
-                      <Input
-                        id="dealsCompletedLast5Years"
-                        type="number"
-                        className="border-[#d0d5dd]"
-                        value={formData.dealsCompletedLast5Years || ""}
-                        onChange={(e) =>
-                          handleChange("dealsCompletedLast5Years", e.target.value ? Number(e.target.value) : undefined)
-                        }
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="averageDealSize" className="text-[#667085] text-sm mb-1.5 block">
-                        Average deal size ($)
-                      </Label>
-                      <Input
-                        id="averageDealSize"
-                        type="text"
-                        className="border-[#d0d5dd]"
-                        value={formatNumberWithCommas(formData.averageDealSize)}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/,/g, "")
-                          if (value === "" || /^\d+$/.test(value)) {
-                            handleChange("averageDealSize", value ? Number(value) : undefined)
-                          }
-                        }}
-                      />
                     </div>
                   </div>
                 </div>
