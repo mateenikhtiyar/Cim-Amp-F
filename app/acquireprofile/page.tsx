@@ -1440,7 +1440,7 @@ export default function AcquireProfilePage() {
               </div>
               <div>
                 <Label htmlFor="averageDealSize" className="text-[#667085] text-sm mb-1.5 block">
-                  Average deal size 
+                  Average deal size
                 </Label>
                 <Input
                   id="averageDealSize"
@@ -1915,54 +1915,54 @@ export default function AcquireProfilePage() {
                 />
               </div>
             </div>
-                  {/* Preferred Business Models */}
-          <div className="rounded-lg p-6 shadow-sm mb-6">
-            <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Preferred Business Models</h2>
-            <div className="flex flex-wrap gap-6">
-              {BUSINESS_MODELS.map((model) => (
-                <div key={model} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`model-${model}`}
-                    className="border-[#d0d5dd]"
-                    checked={formData.targetCriteria.preferredBusinessModels.includes(model)}
-                    onCheckedChange={() => toggleBusinessModel(model)}
-                  />
-                  <Label htmlFor={`model-${model}`} className="text-[#344054]">
-                    {model}
-                  </Label>
-                </div>
-              ))}
+            {/* Preferred Business Models */}
+            <div className="rounded-lg p-6 shadow-sm mb-6">
+              <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Preferred Business Models</h2>
+              <div className="flex flex-wrap gap-6">
+                {BUSINESS_MODELS.map((model) => (
+                  <div key={model} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`model-${model}`}
+                      className="border-[#d0d5dd]"
+                      checked={formData.targetCriteria.preferredBusinessModels.includes(model)}
+                      onCheckedChange={() => toggleBusinessModel(model)}
+                    />
+                    <Label htmlFor={`model-${model}`} className="text-[#344054]">
+                      {model}
+                    </Label>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-          {/* Management Future Preferences */}
-          <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-            <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Management Future Preferences</h2>
-            <div className="flex flex-wrap gap-6">
-              {MANAGEMENT_PREFERENCES.map((preference) => (
-                <div key={preference} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`preference-${preference}`}
-                    className="border-[#d0d5dd]"
-                    checked={extendedFormState.selectedManagementPreferences.includes(preference)}
-                    onCheckedChange={() => toggleManagementPreference(preference)}
-                  />
-                  <Label htmlFor={`preference-${preference}`} className="text-[#344054]">
-                    {preference}
-                  </Label>
-                </div>
-              ))}
+            {/* Management Future Preferences */}
+            <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+              <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Management Future Preferences</h2>
+              <div className="flex flex-wrap gap-6">
+                {MANAGEMENT_PREFERENCES.map((preference) => (
+                  <div key={preference} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`preference-${preference}`}
+                      className="border-[#d0d5dd]"
+                      checked={extendedFormState.selectedManagementPreferences.includes(preference)}
+                      onCheckedChange={() => toggleManagementPreference(preference)}
+                    />
+                    <Label htmlFor={`preference-${preference}`} className="text-[#344054]">
+                      {preference}
+                    </Label>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-          {/* Description of Ideal Target(s) */}
-          <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
-            <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Description of Ideal Target(s)</h2>
-            <Textarea
-              placeholder="Add additional information about company types you are pursuing especially specific industries and activities."
-              className="min-h-[100px] border-[#d0d5dd]"
-              value={formData.targetCriteria.description || ""}
-              onChange={(e) => handleNestedChange("targetCriteria", "description", e.target.value)}
-            />
-          </div>
+            {/* Description of Ideal Target(s) */}
+            <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
+              <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Description of Ideal Target(s)</h2>
+              <Textarea
+                placeholder="Add additional information about company types you are pursuing especially specific industries and activities."
+                className="min-h-[100px] border-[#d0d5dd]"
+                value={formData.targetCriteria.description || ""}
+                onChange={(e) => handleNestedChange("targetCriteria", "description", e.target.value)}
+              />
+            </div>
           </div>
           {/* General Preferences */}
           <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
