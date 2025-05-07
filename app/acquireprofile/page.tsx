@@ -108,21 +108,21 @@ export default function AcquireProfilePage() {
   })
 
   // UI state for expanded sections
-  const [expandedContinents, setExpandedContinents] = useState<Record<string, boolean>>({})
-  const [expandedRegions, setExpandedRegions] = useState<Record<string, boolean>>({})
-  const [expandedSectors, setExpandedSectors] = useState<Record<string, boolean>>({})
-  const [expandedIndustryGroups, setExpandedIndustryGroups] = useState<Record<string, boolean>>({})
-  const [expandedIndustries, setExpandedIndustries] = useState<Record<string, boolean>>({})
+  const [expandedContinents, setExpandedContinents = useState<Record<string, boolean>>({})\
+  const [expandedRegions, setExpandedRegions = useState<Record<string, boolean>>({})
+  const [expandedSectors, setExpandedSectors = useState<Record<string, boolean>>({})
+  const [expandedIndustryGroups, setExpandedIndustryGroups = useState<Record<string, boolean>>({})
+  const [expandedIndustries, setExpandedIndustries = useState<Record<string, boolean>>({})
 
   // Search terms
-  const [countrySearchTerm, setCountrySearchTerm] = useState("")
-  const [industrySearchTerm, setIndustrySearchTerm] = useState("")
+  const [countrySearchTerm, setCountrySearchTerm = useState("")
+  const [industrySearchTerm, setIndustrySearchTerm = useState("")
 
   // Available currencies
   const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD"]
 
   // Extended form state for fields not in the CompanyProfile type
-  const [extendedFormState, setExtendedFormState] = useState<ExtendedFormState>({
+  const [extendedFormState, setExtendedFormState = useState<ExtendedFormState>({
     selectedManagementPreferences: [],
   })
 
@@ -370,7 +370,7 @@ export default function AcquireProfilePage() {
   // Replace the existing form state initialization with this updated version that includes proper type handling
 
   // Form state
-  const [formData, setFormData] = useState<CompanyProfile & { selectedCurrency: string; capitalAvailability: string }>({
+  const [formData, setFormData = useState<CompanyProfile & { selectedCurrency: string; capitalAvailability: string }>({
     companyName: "",
     website: "",
     contacts: [{ name: "", email: "", phone: "" }],
