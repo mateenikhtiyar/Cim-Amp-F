@@ -370,7 +370,7 @@ export default function AcquireProfilePage() {
   // Replace the existing form state initialization with this updated version that includes proper type handling
 
   // Form state
-  const [formData, setFormData] = useState<CompanyProfile & { selectedCurrency: string }>({
+  const [formData, setFormData] = useState<CompanyProfile & { selectedCurrency: string; capitalAvailability: string }>({
     companyName: "",
     website: "",
     contacts: [{ name: "", email: "", phone: "" }],
@@ -396,7 +396,7 @@ export default function AcquireProfilePage() {
       minStakePercent: undefined,
       minYearsInBusiness: undefined,
       preferredBusinessModels: [],
-      managementTeamPreference: "", // Changed to empty string
+      managementTeamPreference: "",
       description: "",
     },
     agreements: {
@@ -404,7 +404,8 @@ export default function AcquireProfilePage() {
       ndaAccepted: false,
       feeAgreementAccepted: false,
     },
-    selectedCurrency: "USD", // Add this field
+    selectedCurrency: "USD",
+    capitalAvailability: "need_to_raise", // Default to "need_to_raise"
   })
 
   // Handle form field changes
@@ -1691,57 +1692,29 @@ export default function AcquireProfilePage() {
                   <div className="flex items-center space-x-2">
                     <input
                       type="radio"
-                      id="capital_fund"
-                      name="capitalEntity"
-                      value="Fund"
-                      checked={formData.capitalEntity === "Fund"}
-                      onChange={(e) => handleChange("capitalEntity", e.target.value)}
+                      id="capital_ready"
+                      name="capitalAvailability"
+                      value="ready_to_deploy"
+                      checked={formData.capitalAvailability === "ready_to_deploy"}
+                      onChange={(e) => handleChange("capitalAvailability", e.target.value)}
                       className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
                     />
-                    <Label htmlFor="capital_fund" className="text-[#344054] cursor-pointer">
-                      Fund
+                    <Label htmlFor="capital_ready" className="text-[#344054] cursor-pointer">
+                      Ready to deploy immediately
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <input
                       type="radio"
-                      id="capital_holding"
-                      name="capitalEntity"
-                      value="Holding Company"
-                      checked={formData.capitalEntity === "Holding Company"}
-                      onChange={(e) => handleChange("capitalEntity", e.target.value)}
+                      id="capital_need"
+                      name="capitalAvailability"
+                      value="need_to_raise"
+                      checked={formData.capitalAvailability === "need_to_raise"}
+                      onChange={(e) => handleChange("capitalAvailability", e.target.value)}
                       className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
                     />
-                    <Label htmlFor="capital_holding" className="text-[#344054] cursor-pointer">
-                      Holding Company
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      id="capital_spv"
-                      name="capitalEntity"
-                      value="SPV"
-                      checked={formData.capitalEntity === "SPV"}
-                      onChange={(e) => handleChange("capitalEntity", e.target.value)}
-                      className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
-                    />
-                    <Label htmlFor="capital_spv" className="text-[#344054] cursor-pointer">
-                      SPV
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      id="capital_direct"
-                      name="capitalEntity"
-                      value="Direct Investment"
-                      checked={formData.capitalEntity === "Direct Investment"}
-                      onChange={(e) => handleChange("capitalEntity", e.target.value)}
-                      className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
-                    />
-                    <Label htmlFor="capital_direct" className="text-[#344054] cursor-pointer">
-                      Direct Investment
+                    <Label htmlFor="capital_need" className="text-[#344054] cursor-pointer">
+                      Need to raise
                     </Label>
                   </div>
                 </div>

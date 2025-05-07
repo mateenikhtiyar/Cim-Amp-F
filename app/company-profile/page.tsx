@@ -12,7 +12,20 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { PlusCircle, Trash2, Search, AlertCircle, CheckCircle2, ChevronDown, ChevronRight, LogOut, Settings, Briefcase, Eye, Bell } from 'lucide-react'
+import {
+  PlusCircle,
+  Trash2,
+  Search,
+  AlertCircle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  LogOut,
+  Settings,
+  Briefcase,
+  Eye,
+  Bell,
+} from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { toast } from "@/components/ui/use-toast"
 import { Toaster } from "@/components/ui/toaster"
@@ -34,6 +47,8 @@ const COMPANY_TYPES = [
   "Independent Sponsor",
   "Entrepreneurship through Acquisition",
   "Single Acquisition Search",
+  "Strategic Operating Company",
+  "Buy Side Mandate",
   "Strategic Operating Company",
   "Buy Side Mandate",
 ]
@@ -474,6 +489,7 @@ export default function CompanyProfilePage() {
     const updatedContacts = [...formData.contacts]
     updatedContacts[index] = {
       ...updatedContacts[index],
+      [field]: value,
       [field]: value,
     }
     handleChange("contacts", updatedContacts)
