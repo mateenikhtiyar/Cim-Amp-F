@@ -61,8 +61,8 @@ api.interceptors.response.use(
   },
 )
 
-// Update the submitCompanyProfile function to ensure proper API endpoint usage
-export const submitCompanyProfile = async (profileData: any) => {
+// Update the submitCompanyProfile function to handle both create and update operations
+export const submitCompanyProfile = async (profileData: any, profileId?: string) => {
   try {
     // Get the token directly before making the request
     const token = localStorage.getItem("token")
@@ -70,15 +70,26 @@ export const submitCompanyProfile = async (profileData: any) => {
       throw new Error("No authentication token found")
     }
 
-    console.log("API - Submitting company profile with token:", token.substring(0, 10) + "...")
+    // Determine if this is a create or update operation
+    const isUpdate = !!profileId
+    console.log(
+      `API - ${isUpdate ? "Updating" : "Creating"} company profile with token:`,
+      token.substring(0, 10) + "...",
+    )
     console.log("API - Submitting data:", JSON.stringify(profileData))
 
     // Get API URL from localStorage or use default
     const apiUrl = localStorage.getItem("apiUrl") || API_URL
 
+    // Use the appropriate endpoint based on whether this is a create or update
+    const endpoint = isUpdate ? `${apiUrl}/company-profiles/${profileId}` : `${apiUrl}/company-profiles`
+    const method = isUpdate ? "PUT" : "POST"
+
+    console.log(`API - Using ${method} request to endpoint:`, endpoint)
+
     // Use direct fetch instead of axios for more control
-    const response = await fetch(`${apiUrl}/company-profiles`, {
-      method: "POST",
+    const response = await fetch(endpoint, {
+      method: method,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -104,10 +115,10 @@ export const submitCompanyProfile = async (profileData: any) => {
     }
 
     const result = await response.json()
-    console.log("API - Submission successful:", result)
+    console.log(`API - ${isUpdate ? "Update" : "Submission"} successful:`, result)
     return result
   } catch (error) {
-    console.error("Error submitting company profile:", error)
+    console.error(`Error ${profileId ? "updating" : "submitting"} company profile:`, error)
     throw error
   }
 }

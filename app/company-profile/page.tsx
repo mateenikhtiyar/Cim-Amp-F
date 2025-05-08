@@ -140,6 +140,9 @@ export default function CompanyProfilePage() {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
   }
 
+  // Add a state variable to store the company profile ID
+  const [profileId, setProfileId] = useState<string | null>(null)
+
   // Check for token on mount and from URL parameters
   useEffect(() => {
     // Get token and userId from URL parameters
@@ -264,6 +267,12 @@ export default function CompanyProfilePage() {
 
       const profileData = await response.json()
       console.log("Existing profile loaded:", profileData)
+
+      // Store the profile ID for updates
+      if (profileData && profileData._id) {
+        setProfileId(profileData._id)
+        console.log("Company Profile ID stored for updates:", profileData._id)
+      }
 
       // Update form data with the fetched profile
       if (profileData) {
@@ -1165,9 +1174,12 @@ export default function CompanyProfilePage() {
         console.log("Company Profile - Buyer ID:", buyerId)
       }
 
-      // Submit the data - use POST for new profiles, PUT for updates
-      const endpoint = `${apiUrl}/company-profiles`
-      const method = "POST" // Always use POST as the API will handle create/update logic
+      // Determine if this is a create or update operation
+      const isUpdate = !!profileId
+      const endpoint = isUpdate ? `${apiUrl}/company-profiles/${profileId}` : `${apiUrl}/company-profiles`
+      const method = isUpdate ? "PUT" : "POST"
+
+      console.log(`Company Profile - ${isUpdate ? "Updating" : "Creating"} profile at endpoint:`, endpoint)
 
       const response = await fetch(endpoint, {
         method,
@@ -1207,10 +1219,18 @@ export default function CompanyProfilePage() {
       const result = await response.json()
       console.log("Company Profile - Submission successful:", result)
 
+      // If this was a create operation, store the new profile ID for future updates
+      if (!isUpdate && result && result._id) {
+        setProfileId(result._id)
+        console.log("Company Profile - New profile ID stored:", result._id)
+      }
+
       setSubmitStatus("success")
       toast({
-        title: "Profile Submitted",
-        description: "Your company profile has been successfully submitted.",
+        title: isUpdate ? "Profile Updated" : "Profile Submitted",
+        description: isUpdate
+          ? "Your company profile has been successfully updated."
+          : "Your company profile has been successfully submitted.",
         variant: "default",
       })
 
@@ -1491,7 +1511,6 @@ export default function CompanyProfilePage() {
                   </div>
                 )}
               </div>
-             
             </div>
           </div>
         </div>
