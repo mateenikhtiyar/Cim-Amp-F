@@ -42,6 +42,8 @@ const COMPANY_TYPES = [
   "Single Acquisition Search",
   "Strategic Operating Company",
   "Buy Side Mandate",
+  "Strategic Operating Company",
+  "Buy Side Mandate",
 ]
 
 const CAPITAL_ENTITIES = ["Fund", "Holding Company", "SPV", "Direct Investment"]
@@ -1177,7 +1179,7 @@ export default function CompanyProfilePage() {
       // Determine if this is a create or update operation
       const isUpdate = !!profileId
       const endpoint = isUpdate ? `${apiUrl}/company-profiles/${profileId}` : `${apiUrl}/company-profiles`
-      const method = isUpdate ? "PUT" : "POST"
+      const method = isUpdate ? "PATCH" : "POST"
 
       console.log(`Company Profile - ${isUpdate ? "Updating" : "Creating"} profile at endpoint:`, endpoint)
 

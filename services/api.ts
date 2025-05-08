@@ -83,7 +83,7 @@ export const submitCompanyProfile = async (profileData: any, profileId?: string)
 
     // Use the appropriate endpoint based on whether this is a create or update
     const endpoint = isUpdate ? `${apiUrl}/company-profiles/${profileId}` : `${apiUrl}/company-profiles`
-    const method = isUpdate ? "PUT" : "POST"
+    const method = isUpdate ? "PATCH" : "POST"
 
     console.log(`API - Using ${method} request to endpoint:`, endpoint)
 
