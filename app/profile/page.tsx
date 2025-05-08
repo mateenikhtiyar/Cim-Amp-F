@@ -501,7 +501,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Company Profile Section */}
-              {companyProfile ? (
+              {/* {companyProfile ? (
                 <div className="mb-8 rounded-md border border-gray-200 bg-white p-6">
                   <h3 className="mb-4 text-lg font-medium">Company Information</h3>
 
@@ -564,10 +564,10 @@ export default function ProfilePage() {
                     </button>
                   </Link>
                 </div>
-              )}
+              )} */}
 
               {/* Contacts Section */}
-              {companyProfile && companyProfile.contacts.length > 0 ? (
+              {/* {companyProfile && companyProfile.contacts.length > 0 ? (
                 <div className="rounded-md border border-gray-200 bg-white p-6">
                   <h3 className="mb-4 text-lg font-medium">Contacts</h3>
 
@@ -603,7 +603,7 @@ export default function ProfilePage() {
                   <h3 className="mb-4 text-lg font-medium">Contacts</h3>
                   <p className="text-gray-500">No contacts added yet.</p>
                 </div>
-              ) : null}
+              ) : null} */}
             </>
           )}
         </main>
