@@ -32,8 +32,6 @@ const COMPANY_TYPES = [
   "Single Acquisition Search",
   "Strategic Operating Company",
   "Buy Side Mandate",
-  "Strategic Operating Company",
-  "Buy Side Mandate",
 ]
 
 const CAPITAL_ENTITIES = ["Fund", "Holding Company", "SPV", "Direct Investment"]
@@ -112,6 +110,9 @@ export default function AcquireProfilePage() {
   const [extendedFormState, setExtendedFormState] = useState<ExtendedFormState>({
     selectedManagementPreferences: [],
   })
+
+  // Add a new state for field-specific errors after the other state declarations (around line 100)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   // Format number with commas
   const formatNumberWithCommas = (value: number | undefined) => {
@@ -394,15 +395,62 @@ export default function AcquireProfilePage() {
     selectedCurrency: "USD",
   })
 
+  // Add a function to validate individual fields (after the validateForm function)
+  const validateField = (field: string, value: any): string | null => {
+    switch (field) {
+      case "companyName":
+        return !value?.trim() ? "Company name is required" : null
+      case "website":
+        try {
+          const websiteUrl = new URL(value.startsWith("http") ? value : `https://${value}`)
+          if (!websiteUrl.hostname.includes(".")) {
+            return "Please enter a valid website URL (e.g., example.com)"
+          }
+        } catch (e) {
+          return "Please enter a valid website URL (e.g., example.com)"
+        }
+        return null
+      case "companyType":
+        return !value ? "Please select a company type" : null
+      case "contact.name":
+        return !value?.trim() ? "Contact name is required" : null
+      case "contact.email":
+        if (!value?.trim()) return "Contact email is required"
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        return !emailRegex.test(value) ? "Please enter a valid email address (e.g., name@example.com)" : null
+      case "contact.phone":
+        if (!value?.trim()) return "Contact phone is required"
+        const phoneRegex = /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/
+        return !phoneRegex.test(value) ? "Please enter a valid phone number (e.g., 123-456-7890)" : null
+      case "agreements.termsAndConditions":
+        return value ? null : "You must accept the terms and conditions"
+      case "agreements.nda":
+        return value ? null : "You must accept the NDA"
+      case "agreements.feeAgreement":
+        return value ? null : "You must accept the fee agreement"
+      default:
+        return null
+    }
+  }
+
   // Handle form field changes
+  // Update the handleChange function to validate fields on change
   const handleChange = (field: string, value: any) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }))
+
+    // Validate the field and update errors
+    const error = validateField(field, value)
+    setFieldErrors((prev) => ({
+      ...prev,
+      [field]: error || "",
+    }))
   }
 
   // Handle nested field changes
+  // Update the handleNestedChange function to validate fields on change
   const handleNestedChange = (parent: string, field: string, value: any) => {
     setFormData((prev) => ({
       ...prev,
@@ -411,9 +459,17 @@ export default function AcquireProfilePage() {
         [field]: value,
       },
     }))
+
+    // Validate the field and update errors
+    const error = validateField(`${parent}.${field}`, value)
+    setFieldErrors((prev) => ({
+      ...prev,
+      [`${parent}.${field}`]: error || "",
+    }))
   }
 
   // Handle contact changes
+  // Update the handleContactChange function to validate fields on change
   const handleContactChange = (index: number, field: string, value: string) => {
     const updatedContacts = [...formData.contacts]
     updatedContacts[index] = {
@@ -421,6 +477,13 @@ export default function AcquireProfilePage() {
       [field]: value,
     }
     handleChange("contacts", updatedContacts)
+
+    // Validate the field and update errors
+    const error = validateField(`contact.${field}`, value)
+    setFieldErrors((prev) => ({
+      ...prev,
+      [`contacts[${index}].${field}`]: error || "",
+    }))
   }
 
   // Add new contact
@@ -969,48 +1032,32 @@ export default function AcquireProfilePage() {
   }
 
   // Form validation
+  // Update the validateForm function to populate all field errors at once
   const validateForm = () => {
-    // Basic validation
-    if (!formData.companyName?.trim()) return "Company name is required"
-    if (!formData.website?.trim()) return "Website is required"
-    if (!formData.companyType) return "Company type is required"
-    // Remove the following line:
-    // if (!formData.capitalEntity) return "Capital entity is required"
+    const errors: Record<string, string> = {}
 
-    // Website validation
-    try {
-      const websiteUrl = new URL(formData.website.startsWith("http") ? formData.website : `https://${formData.website}`)
-      if (!websiteUrl.hostname.includes(".")) {
-        return "Please enter a valid website URL"
-      }
-    } catch (e) {
-      return "Please enter a valid website URL"
-    }
+    // Basic validation
+    errors["companyName"] = validateField("companyName", formData.companyName) || ""
+    errors["website"] = validateField("website", formData.website) || ""
+    errors["companyType"] = validateField("companyType", formData.companyType) || ""
 
     // Contact validation
-    if (formData.contacts.length === 0) return "At least one contact is required"
-    for (const contact of formData.contacts) {
-      if (!contact.name?.trim()) return "Contact name is required"
-      if (!contact.email?.trim()) return "Contact email is required"
-      if (!contact.phone?.trim()) return "Contact phone is required"
-
-      // Email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(contact.email)) {
-        return `Invalid email format for contact: ${contact.name}`
-      }
+    if (formData.contacts.length === 0) {
+      errors["contacts"] = "At least one contact is required"
+    } else {
+      formData.contacts.forEach((contact, index) => {
+        errors[`contacts[${index}].name`] = validateField("contact.name", contact.name) || ""
+        errors[`contacts[${index}].email`] = validateField("contact.email", contact.email) || ""
+        errors[`contacts[${index}].phone`] = validateField("contact.phone", contact.phone) || ""
+      })
     }
 
     // Agreements validation
-    if (!formData.agreements.termsAndConditionsAccepted) {
-      return "You must accept the terms and conditions"
-    }
-    if (!formData.agreements.ndaAccepted) {
-      return "You must accept the NDA"
-    }
-    if (!formData.agreements.feeAgreementAccepted) {
-      return "You must accept the fee agreement"
-    }
+    errors["agreements.termsAndConditionsAccepted"] =
+      validateField("agreements.termsAndConditions", formData.agreements.termsAndConditionsAccepted) || ""
+    errors["agreements.ndaAccepted"] = validateField("agreements.nda", formData.agreements.ndaAccepted) || ""
+    errors["agreements.feeAgreementAccepted"] =
+      validateField("agreements.feeAgreement", formData.agreements.feeAgreementAccepted) || ""
 
     // Number range validations
     if (
@@ -1018,7 +1065,7 @@ export default function AcquireProfilePage() {
       formData.targetCriteria.revenueMax !== undefined &&
       formData.targetCriteria.revenueMin > formData.targetCriteria.revenueMax
     ) {
-      return "Minimum revenue cannot be greater than maximum revenue"
+      errors["targetCriteria.revenueMin"] = "Minimum revenue cannot be greater than maximum revenue"
     }
 
     if (
@@ -1026,7 +1073,7 @@ export default function AcquireProfilePage() {
       formData.targetCriteria.ebitdaMax !== undefined &&
       formData.targetCriteria.ebitdaMin > formData.targetCriteria.ebitdaMax
     ) {
-      return "Minimum EBITDA cannot be greater than maximum EBITDA"
+      errors["targetCriteria.ebitdaMin"] = "Minimum EBITDA cannot be greater than maximum EBITDA"
     }
 
     if (
@@ -1034,7 +1081,8 @@ export default function AcquireProfilePage() {
       formData.targetCriteria.transactionSizeMax !== undefined &&
       formData.targetCriteria.transactionSizeMin > formData.targetCriteria.transactionSizeMax
     ) {
-      return "Minimum transaction size cannot be greater than maximum transaction size"
+      errors["targetCriteria.transactionSizeMin"] =
+        "Minimum transaction size cannot be greater than maximum transaction size"
     }
 
     if (
@@ -1042,14 +1090,19 @@ export default function AcquireProfilePage() {
       formData.targetCriteria.revenueGrowthMax !== undefined &&
       formData.targetCriteria.revenueGrowthMin > formData.targetCriteria.revenueGrowthMax
     ) {
-      return "Minimum revenue growth cannot be greater than maximum revenue growth"
+      errors["targetCriteria.revenueGrowthMin"] = "Minimum revenue growth cannot be greater than maximum revenue growth"
     }
 
-    return null
+    // Update the fieldErrors state
+    setFieldErrors(errors)
+
+    // Check if there are any errors
+    const hasErrors = Object.values(errors).some((error) => error !== "")
+    return hasErrors ? "Please correct the errors in the form" : null
   }
 
   // Handle form submission
-  // Update the handleSubmit function to use the API service
+  // Update the handleSubmit function to scroll to the first error
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -1068,9 +1121,20 @@ export default function AcquireProfilePage() {
     if (validationError) {
       toast({
         title: "Validation Error",
-        description: validationError,
+        description: "Please correct the errors in the form before submitting.",
         variant: "destructive",
       })
+
+      // Find the first field with an error and scroll to it
+      const firstErrorField = Object.keys(fieldErrors).find((key) => fieldErrors[key])
+      if (firstErrorField) {
+        const element = document.getElementById(firstErrorField.replace(/\[|\]|\./g, "-"))
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" })
+          element.focus()
+        }
+      }
+
       return
     }
 
@@ -1340,7 +1404,9 @@ export default function AcquireProfilePage() {
             <h2 className="text-[#2f2b43] text-lg font-poppins font-seminold mb-4">About Your Company</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
+              {/* Update the company name input (find the company name input in the JSX) */}
+              {/* Replace: */}
+              {/* <div>
                 <Label htmlFor="companyName" className="text-[#667085] text-sm mb-1.5 block">
                   Company Name <span className="text-red-500">*</span>
                 </Label>
@@ -1352,8 +1418,28 @@ export default function AcquireProfilePage() {
                   onChange={(e) => handleChange("companyName", e.target.value)}
                   required
                 />
-              </div>
+              </div> */}
+
+              {/* With: */}
               <div>
+                <Label htmlFor="companyName" className="text-[#667085] text-sm mb-1.5 block">
+                  Company Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="companyName"
+                  placeholder="Company Name"
+                  className={`border-[#d0d5dd] ${fieldErrors["companyName"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                  value={formData.companyName}
+                  onChange={(e) => handleChange("companyName", e.target.value)}
+                  required
+                />
+                {fieldErrors["companyName"] && (
+                  <p className="text-red-500 text-sm mt-1">{fieldErrors["companyName"]}</p>
+                )}
+              </div>
+              {/* Update the website input (find the website input in the JSX) */}
+              {/* Replace: */}
+              {/* <div>
                 <Label htmlFor="website" className="text-[#667085] text-sm mb-1.5 block">
                   Company Website <span className="text-red-500">*</span>
                 </Label>
@@ -1365,11 +1451,32 @@ export default function AcquireProfilePage() {
                   onChange={(e) => handleChange("website", e.target.value)}
                   required
                 />
+              </div> */}
+
+              {/* With: */}
+              <div>
+                <Label htmlFor="website" className="text-[#667085] text-sm mb-1.5 block">
+                  Company Website <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="website"
+                  placeholder="https://example.com"
+                  className={`border-[#d0d5dd] ${fieldErrors["website"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                  value={formData.website}
+                  onChange={(e) => handleChange("website", e.target.value)}
+                  required
+                />
+                {fieldErrors["website"] && <p className="text-red-500 text-sm mt-1">{fieldErrors["website"]}</p>}
+                <p className="text-gray-500 text-xs mt-1">
+                  Enter a valid URL (e.g., example.com or https://example.com)
+                </p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-6 mb-6">
-              <div>
+              {/* Update the company type select (find the company type select in the JSX) */}
+              {/* Replace: */}
+              {/* <div>
                 <Label htmlFor="companyType" className="text-[#667085] text-sm mb-1.5 block">
                   Company Type <span className="text-red-500">*</span>
                 </Label>
@@ -1385,6 +1492,31 @@ export default function AcquireProfilePage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div> */}
+
+              {/* With: */}
+              <div>
+                <Label htmlFor="companyType" className="text-[#667085] text-sm mb-1.5 block">
+                  Company Type <span className="text-red-500">*</span>
+                </Label>
+                <Select value={formData.companyType} onValueChange={(value) => handleChange("companyType", value)}>
+                  <SelectTrigger
+                    id="companyType"
+                    className={`border-[#d0d5dd] ${fieldErrors["companyType"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                  >
+                    <SelectValue placeholder="Select Company Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COMPANY_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {fieldErrors["companyType"] && (
+                  <p className="text-red-500 text-sm mt-1">{fieldErrors["companyType"]}</p>
+                )}
               </div>
               <div>
                 <Label className="text-[#667085] text-sm mb-1.5 block">
@@ -1400,7 +1532,6 @@ export default function AcquireProfilePage() {
                       checked={formData.capitalEntity === "ready_to_deploy"}
                       onChange={(e) => handleChange("capitalEntity", e.target.value)}
                       className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4 "
-                      
                     />
                     <Label htmlFor="capital_fund" className="text-[#344054] cursor-pointer">
                       Ready to deploy immediately
@@ -1481,18 +1612,35 @@ export default function AcquireProfilePage() {
                       )}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Update the contact inputs (find the contact inputs in the JSX) */}
+                      {/* For each contact field, update the input to show errors */}
+                      {/* For example, for the contact name input: */}
+                      {/* Replace: */}
+                      {/* <Input
+                        id={`contact-name-${index}`}
+                        className="border-[#d0d5dd]"
+                        value={contact.name}
+                        onChange={(e) => handleContactChange(index, "name", e.target.value)}
+                        required
+                      /> */}
+
+                      {/* With: */}
                       <div>
                         <Label htmlFor={`contact-name-${index}`} className="text-[#667085] text-sm mb-1.5 block">
                           Name <span className="text-red-500">*</span>
                         </Label>
                         <Input
                           id={`contact-name-${index}`}
-                          className="border-[#d0d5dd]"
+                          className={`border-[#d0d5dd] ${fieldErrors[`contacts[${index}].name`] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                           value={contact.name}
                           onChange={(e) => handleContactChange(index, "name", e.target.value)}
                           required
                         />
+                        {fieldErrors[`contacts[${index}].name`] && (
+                          <p className="text-red-500 text-sm mt-1">{fieldErrors[`contacts[${index}].name`]}</p>
+                        )}
                       </div>
+                      {/* Similarly, update the email and phone inputs for contacts */}
                       <div>
                         <Label htmlFor={`contact-email-${index}`} className="text-[#667085] text-sm mb-1.5 block">
                           Email <span className="text-red-500">*</span>
@@ -1500,11 +1648,14 @@ export default function AcquireProfilePage() {
                         <Input
                           id={`contact-email-${index}`}
                           type="email"
-                          className="border-[#d0d5dd]"
+                          className={`border-[#d0d5dd] ${fieldErrors[`contacts[${index}].email`] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                           value={contact.email}
                           onChange={(e) => handleContactChange(index, "email", e.target.value)}
                           required
                         />
+                        {fieldErrors[`contacts[${index}].email`] && (
+                          <p className="text-red-500 text-sm mt-1">{fieldErrors[`contacts[${index}].email`]}</p>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor={`contact-phone-${index}`} className="text-[#667085] text-sm mb-1.5 block">
@@ -1512,11 +1663,14 @@ export default function AcquireProfilePage() {
                         </Label>
                         <Input
                           id={`contact-phone-${index}`}
-                          className="border-[#d0d5dd]"
+                          className={`border-[#d0d5dd] ${fieldErrors[`contacts[${index}].phone`] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                           value={contact.phone}
                           onChange={(e) => handleContactChange(index, "phone", e.target.value)}
                           required
                         />
+                        {fieldErrors[`contacts[${index}].phone`] && (
+                          <p className="text-red-500 text-sm mt-1">{fieldErrors[`contacts[${index}].phone`]}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -2026,7 +2180,11 @@ export default function AcquireProfilePage() {
           <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
             <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Agreements</h2>
             <div className="space-y-4">
-              <div className="flex items-end space-x-2">
+              {/* Update the agreement checkboxes (find the agreement checkboxes in the JSX) */}
+              {/* For each agreement checkbox, update to show errors */}
+              {/* For example, for the terms and conditions checkbox: */}
+              {/* Replace: */}
+              {/* <div className="flex items-end space-x-2">
                 <Checkbox
                   id="termsAndConditions"
                   className="mt-1 border-[#d0d5dd]"
@@ -2037,36 +2195,72 @@ export default function AcquireProfilePage() {
                   required
                 />
                 <Label htmlFor="termsAndConditions" className="text-[#344054]">
-                  I have read and agree to the website <span className="text-[#38A4F1] cursor-pointer">terms and conditions</span>
+                  I have read and agree to the website{" "}
+                  <span className="text-[#38A4F1] cursor-pointer">terms and conditions</span>
                 </Label>
+              </div> */}
+
+              {/* With: */}
+              <div className="flex flex-col">
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="termsAndConditions"
+                    className={`mt-1 ${fieldErrors["agreements.termsAndConditionsAccepted"] ? "border-red-500" : "border-[#d0d5dd]"}`}
+                    checked={formData.agreements.termsAndConditionsAccepted}
+                    onCheckedChange={(checked) =>
+                      handleNestedChange("agreements", "termsAndConditionsAccepted", checked === true)
+                    }
+                    required
+                  />
+                  <Label htmlFor="termsAndConditions" className="text-[#344054]">
+                    I have read and agree to the website{" "}
+                    <span className="text-[#38A4F1] cursor-pointer">terms and conditions</span>
+                  </Label>
+                </div>
+                {fieldErrors["agreements.termsAndConditionsAccepted"] && (
+                  <p className="text-red-500 text-sm mt-1 ml-6">
+                    {fieldErrors["agreements.termsAndConditionsAccepted"]}
+                  </p>
+                )}
+              </div>
+              {/* Similarly, update the other agreement checkboxes */}
+              <div className="flex flex-col">
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="nda"
+                    className={`mt-1 ${fieldErrors["agreements.ndaAccepted"] ? "border-red-500" : "border-[#d0d5dd]"}`}
+                    checked={formData.agreements.ndaAccepted}
+                    onCheckedChange={(checked) => handleNestedChange("agreements", "ndaAccepted", checked === true)}
+                    required
+                  />
+                  <Label htmlFor="nda" className="text-[#344054]">
+                    I have read and agree to the <span className="text-[#38A4F1] cursor-pointer">universal NDA</span> so
+                    that I can go straight to CIM
+                  </Label>
+                </div>
+                {fieldErrors["agreements.ndaAccepted"] && (
+                  <p className="text-red-500 text-sm mt-1 ml-6">{fieldErrors["agreements.ndaAccepted"]}</p>
+                )}
               </div>
 
-              <div className="flex items-end space-x-2">
-                <Checkbox
-                  id="nda"
-                  className="mt-1 border-[#d0d5dd]"
-                  checked={formData.agreements.ndaAccepted}
-                  onCheckedChange={(checked) => handleNestedChange("agreements", "ndaAccepted", checked === true)}
-                  required
-                />
-                <Label htmlFor="nda" className="text-[#344054]">
-                  I have read and agree to the <span className="text-[#38A4F1] cursor-pointer">universal NDA</span> so that I can go straight to CIM
-                </Label>
-              </div>
-
-              <div className="flex items-end space-x-2">
-                <Checkbox
-                  id="feeAgreement"
-                  className="mt-1 border-[#d0d5dd]"
-                  checked={formData.agreements.feeAgreementAccepted}
-                  onCheckedChange={(checked) =>
-                    handleNestedChange("agreements", "feeAgreementAccepted", checked === true)
-                  }
-                  required
-                />
-                <Label htmlFor="feeAgreement" className="text-[#344054]">
-                  I have read and agree to the <span className="text-[#38A4F1] cursor-pointer">fee agreement</span>
-                </Label>
+              <div className="flex flex-col">
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="feeAgreement"
+                    className={`mt-1 ${fieldErrors["agreements.feeAgreementAccepted"] ? "border-red-500" : "border-[#d0d5dd]"}`}
+                    checked={formData.agreements.feeAgreementAccepted}
+                    onCheckedChange={(checked) =>
+                      handleNestedChange("agreements", "feeAgreementAccepted", checked === true)
+                    }
+                    required
+                  />
+                  <Label htmlFor="feeAgreement" className="text-[#344054]">
+                    I have read and agree to the <span className="text-[#38A4F1] cursor-pointer">fee agreement</span>
+                  </Label>
+                </div>
+                {fieldErrors["agreements.feeAgreementAccepted"] && (
+                  <p className="text-red-500 text-sm mt-1 ml-6">{fieldErrors["agreements.feeAgreementAccepted"]}</p>
+                )}
               </div>
             </div>
           </div>
