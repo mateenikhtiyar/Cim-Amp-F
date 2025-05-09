@@ -50,7 +50,7 @@ const CAPITAL_ENTITIES = ["Fund", "Holding Company", "SPV", "Direct Investment"]
 
 const BUSINESS_MODELS = ["Recurring Revenue", "Project-Based", "Asset Light", "Asset Heavy"]
 
-const MANAGEMENT_PREFERENCES = ["Owner(s) Departing", "Owner(s) Staying", "Management Team Staying", "No Preference"]
+const MANAGEMENT_PREFERENCES = ["Owner(s) Departing", "Owner(s) Staying", "Management Team Staying"]
 
 // Default API URL
 const DEFAULT_API_URL = "https://cim-amp.onrender.com"
