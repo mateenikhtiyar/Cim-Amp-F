@@ -689,20 +689,20 @@ export default function DealsPage() {
             </Link>
 
             <Link
-              href="/profile"
+              href="/company-profile"
               className="mb-2 flex items-center rounded-md px-4 py-3 text-gray-700 hover:bg-gray-100"
             >
               <Eye className="mr-3 h-5 w-5" />
-              <span>View Profile</span>
+              <span>Company Profile</span>
             </Link>
 
-            <Link
+            {/* <Link
               href="/deals"
               className="mb-2 flex items-center rounded-md px-4 py-3 text-gray-700 hover:bg-gray-100"
             >
               <Settings className="mr-3 h-5 w-5" />
               <span>Settings</span>
-            </Link>
+            </Link> */}
 
             <button
               onClick={handleLogout}
