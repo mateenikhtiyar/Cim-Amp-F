@@ -42,6 +42,8 @@ const COMPANY_TYPES = [
   "Single Acquisition Search",
   "Strategic Operating Company",
   "Buy Side Mandate",
+  "Strategic Operating Company",
+  "Buy Side Mandate",
 ]
 
 const CAPITAL_ENTITIES = ["Fund", "Holding Company", "SPV", "Direct Investment"]
