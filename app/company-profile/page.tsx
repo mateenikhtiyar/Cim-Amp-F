@@ -300,8 +300,9 @@ export default function CompanyProfilePage() {
           },
           // Ensure selectedCurrency is set
           selectedCurrency: profileData.selectedCurrency || "USD",
-          // Ensure capitalAvailability is set
-          capitalAvailability: profileData.capitalAvailability || "need_to_raise",
+          // Ensure capitalEntity and capitalAvailability are set correctly
+          capitalEntity: profileData.capitalEntity || profileData.capitalAvailability || "need_to_raise",
+          capitalAvailability: profileData.capitalAvailability || profileData.capitalEntity || "need_to_raise",
         }
 
         setFormData(updatedProfile)
@@ -863,7 +864,7 @@ export default function CompanyProfilePage() {
     )
 
     const allIndustriesDeselected = group.industries.every((i) =>
-      i.id === industry.id ? !isSelected : !newIndustrySelection.industries[i.id],
+      i.id === industry.id ? !isSelected : newIndustrySelection.industries[i.id],
     )
 
     // Update group selection based on industries
@@ -1071,6 +1072,48 @@ export default function CompanyProfilePage() {
     })
 
     return { continents: filteredContinents }
+  }
+
+  // Add this new function:
+  const selectSearchedCountry = (countryName: string) => {
+    if (!geoData) return
+
+    let found = false
+
+    // Search through all continents, regions, and subregions
+    geoData.continents.forEach((continent) => {
+      if (continent.name.toLowerCase().includes(countryName.toLowerCase())) {
+        // Toggle the continent if it matches
+        toggleContinent(continent)
+        found = true
+        return
+      }
+
+      continent.regions.forEach((region) => {
+        if (region.name.toLowerCase().includes(countryName.toLowerCase())) {
+          // Toggle the region if it matches
+          toggleRegion(region, continent)
+          found = true
+          return
+        }
+
+        if (region.subRegions) {
+          region.subRegions.forEach((subRegion) => {
+            if (subRegion.name.toLowerCase().includes(countryName.toLowerCase())) {
+              // Toggle the subregion if it matches
+              toggleSubRegion(subRegion, region, continent)
+              found = true
+              return
+            }
+          })
+        }
+      })
+    })
+
+    if (found) {
+      // Clear the search term after selection
+      setCountrySearchTerm("")
+    }
   }
 
   // Filter industry data based on search term
@@ -1488,17 +1531,7 @@ export default function CompanyProfilePage() {
                         {group.industries.map((industry) => (
                           <div key={industry.id} className="pl-2">
                             <div className="flex items-center">
-                              <Checkbox
-                                id={`industry-${industry.id}`}
-                                checked={!!industrySelection.industries[industry.id]}
-                                onCheckedChange={(checked) => {
-                                  toggleIndustry(industry, group, sector)
-                                }}
-                                className="mr-2 border-[#d0d5dd]"
-                              />
-                              <Label htmlFor={`industry-${industry.id}`} className="text-[#344054] cursor-pointer">
-                                {industry.name}
-                              </Label>
+                              <Label className="text-[#344054] cursor-pointer text-sm">{industry.name}</Label>
                             </div>
                           </div>
                         ))}
@@ -1721,8 +1754,14 @@ export default function CompanyProfilePage() {
                           id="capital_ready"
                           name="capitalAvailability"
                           value="ready_to_deploy"
-                          checked={formData.capitalEntity === "ready_to_deploy"}
-                          onChange={(e) => handleChange("capitalAvailability", e.target.value)}
+                          checked={
+                            formData.capitalEntity === "ready_to_deploy" ||
+                            formData.capitalAvailability === "ready_to_deploy"
+                          }
+                          onChange={(e) => {
+                            handleChange("capitalEntity", e.target.value)
+                            handleChange("capitalAvailability", e.target.value)
+                          }}
                           className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
                         />
                         <Label htmlFor="capital_ready" className="text-[#344054] cursor-pointer">
@@ -1735,8 +1774,14 @@ export default function CompanyProfilePage() {
                           id="capital_need"
                           name="capitalAvailability"
                           value="need_to_raise"
-                          checked={formData.capitalEntity === "need_to_raise"}
-                          onChange={(e) => handleChange("capitalAvailability", e.target.value)}
+                          checked={
+                            formData.capitalEntity === "need_to_raise" ||
+                            formData.capitalAvailability === "need_to_raise"
+                          }
+                          onChange={(e) => {
+                            handleChange("capitalEntity", e.target.value)
+                            handleChange("capitalAvailability", e.target.value)
+                          }}
                           className="text-[#3aafa9] focus:ring-[#3aafa9] h-4 w-4"
                         />
                         <Label htmlFor="capital_need" className="text-[#344054] cursor-pointer">
@@ -1847,12 +1892,28 @@ export default function CompanyProfilePage() {
                     <div className="border border-[#d0d5dd] rounded-md p-4 h-80 flex flex-col">
                       <div className="relative mb-4">
                         <Search className="absolute left-2 top-2.5 h-4 w-4 text-[#667085]" />
-                        <Input
-                          placeholder="Search countries..."
-                          className="pl-8 border-[#d0d5dd]"
-                          value={countrySearchTerm}
-                          onChange={(e) => setCountrySearchTerm(e.target.value)}
-                        />
+                        <div className="flex">
+                          <Input
+                            placeholder="Search countries..."
+                            className="pl-8 border-[#d0d5dd] rounded-r-none"
+                            value={countrySearchTerm}
+                            onChange={(e) => setCountrySearchTerm(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && countrySearchTerm) {
+                                e.preventDefault()
+                                selectSearchedCountry(countrySearchTerm)
+                              }
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            className="rounded-l-none"
+                            onClick={() => countrySearchTerm && selectSearchedCountry(countrySearchTerm)}
+                            disabled={!countrySearchTerm}
+                          >
+                            Select
+                          </Button>
+                        </div>
                       </div>
 
                       {formData.targetCriteria.countries.length > 0 && (

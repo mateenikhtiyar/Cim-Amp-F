@@ -996,6 +996,48 @@ export default function AcquireProfilePage() {
     return { continents: filteredContinents }
   }
 
+  // Add this new function:
+  const selectSearchedCountry = (countryName: string) => {
+    if (!geoData) return
+
+    let found = false
+
+    // Search through all continents, regions, and subregions
+    geoData.continents.forEach((continent) => {
+      if (continent.name.toLowerCase().includes(countryName.toLowerCase())) {
+        // Toggle the continent if it matches
+        toggleContinent(continent)
+        found = true
+        return
+      }
+
+      continent.regions.forEach((region) => {
+        if (region.name.toLowerCase().includes(countryName.toLowerCase())) {
+          // Toggle the region if it matches
+          toggleRegion(region, continent)
+          found = true
+          return
+        }
+
+        if (region.subRegions) {
+          region.subRegions.forEach((subRegion) => {
+            if (subRegion.name.toLowerCase().includes(countryName.toLowerCase())) {
+              // Toggle the subregion if it matches
+              toggleSubRegion(subRegion, region, continent)
+              found = true
+              return
+            }
+          })
+        }
+      })
+    })
+
+    if (found) {
+      // Clear the search term after selection
+      setCountrySearchTerm("")
+    }
+  }
+
   // Filter industry data based on search term
   const filterIndustryData = () => {
     if (!industryData || !industrySearchTerm) return industryData
@@ -1354,17 +1396,7 @@ export default function AcquireProfilePage() {
                         {group.industries.map((industry) => (
                           <div key={industry.id} className="pl-2">
                             <div className="flex items-center">
-                              <Checkbox
-                                id={`industry-${industry.id}`}
-                                checked={!!industrySelection.industries[industry.id]}
-                                onCheckedChange={(checked) => {
-                                  toggleIndustry(industry, group, sector)
-                                }}
-                                className="mr-2 border-[#d0d5dd]"
-                              />
-                              <Label htmlFor={`industry-${industry.id}`} className="text-[#344054] cursor-pointer">
-                                {industry.name}
-                              </Label>
+                              <Label className="text-[#344054] cursor-pointer text-sm">{industry.name}</Label>
                             </div>
                           </div>
                         ))}
@@ -1707,12 +1739,28 @@ export default function AcquireProfilePage() {
                 <div className="border border-[#d0d5dd] rounded-md p-4 h-80 flex flex-col">
                   <div className="relative mb-4">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-[#667085]" />
-                    <Input
-                      placeholder="Search countries..."
-                      className="pl-8 border-[#d0d5dd]"
-                      value={countrySearchTerm}
-                      onChange={(e) => setCountrySearchTerm(e.target.value)}
-                    />
+                    <div className="flex">
+                      <Input
+                        placeholder="Search countries..."
+                        className="pl-8 border-[#d0d5dd] rounded-r-none"
+                        value={countrySearchTerm}
+                        onChange={(e) => setCountrySearchTerm(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && countrySearchTerm) {
+                            e.preventDefault()
+                            selectSearchedCountry(countrySearchTerm)
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        className="rounded-l-none"
+                        onClick={() => countrySearchTerm && selectSearchedCountry(countrySearchTerm)}
+                        disabled={!countrySearchTerm}
+                      >
+                        Select
+                      </Button>
+                    </div>
                   </div>
 
                   {formData.targetCriteria.countries.length > 0 && (
