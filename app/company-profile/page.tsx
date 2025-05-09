@@ -134,14 +134,17 @@ export default function CompanyProfilePage() {
     selectedManagementPreferences: [],
   })
 
+  // Add a state variable to store the company profile ID
+  const [profileId, setProfileId] = useState<string | null>(null)
+
+  // Add a new state for field-specific errors
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+
   // Format number with commas
   const formatNumberWithCommas = (value: number | undefined) => {
     if (value === undefined) return ""
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
   }
-
-  // Add a state variable to store the company profile ID
-  const [profileId, setProfileId] = useState<string | null>(null)
 
   // Check for token on mount and from URL parameters
   useEffect(() => {
@@ -463,11 +466,58 @@ export default function CompanyProfilePage() {
     capitalAvailability: "need_to_raise", // Default to "need_to_raise"
   })
 
+  // Add a function to validate individual fields
+  const validateField = (field: string, value: any): string | null => {
+    switch (field) {
+      case "companyName":
+        return !value?.trim() ? "Company name is required" : null
+      case "website":
+        try {
+          const websiteUrl = new URL(value.startsWith("http") ? value : `https://${value}`)
+          if (!websiteUrl.hostname.includes(".")) {
+            return "Please enter a valid website URL (e.g., example.com)"
+          }
+        } catch (e) {
+          return "Please enter a valid website URL (e.g., example.com)"
+        }
+        return null
+      case "companyType":
+        return !value ? "Please select a company type" : null
+      case "capitalEntity":
+        return !value ? "Please select a capital entity" : null
+      case "contact.name":
+        return !value?.trim() ? "Contact name is required" : null
+      case "contact.email":
+        if (!value?.trim()) return "Contact email is required"
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        return !emailRegex.test(value) ? "Please enter a valid email address (e.g., name@example.com)" : null
+      case "contact.phone":
+        if (!value?.trim()) return "Contact phone is required"
+        const phoneRegex = /^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/
+        return !phoneRegex.test(value) ? "Please enter a valid phone number (e.g., 123-456-7890)" : null
+      case "agreements.termsAndConditions":
+        return value ? null : "You must accept the terms and conditions"
+      case "agreements.nda":
+        return value ? null : "You must accept the NDA"
+      case "agreements.feeAgreement":
+        return value ? null : "You must accept the fee agreement"
+      default:
+        return null
+    }
+  }
+
   // Handle form field changes
   const handleChange = (field: string, value: any) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
+    }))
+
+    // Validate the field and update errors
+    const error = validateField(field, value)
+    setFieldErrors((prev) => ({
+      ...prev,
+      [field]: error || "",
     }))
   }
 
@@ -480,6 +530,13 @@ export default function CompanyProfilePage() {
         [field]: value,
       },
     }))
+
+    // Validate the field and update errors
+    const error = validateField(`${parent}.${field}`, value)
+    setFieldErrors((prev) => ({
+      ...prev,
+      [`${parent}.${field}`]: error || "",
+    }))
   }
 
   // Handle contact changes
@@ -490,6 +547,13 @@ export default function CompanyProfilePage() {
       [field]: value,
     }
     handleChange("contacts", updatedContacts)
+
+    // Validate the field and update errors
+    const error = validateField(`contact.${field}`, value)
+    setFieldErrors((prev) => ({
+      ...prev,
+      [`contacts[${index}].${field}`]: error || "",
+    }))
   }
 
   // Add new contact
@@ -797,7 +861,7 @@ export default function CompanyProfilePage() {
     )
 
     const allIndustriesDeselected = group.industries.every((i) =>
-      i.id === industry.id ? !isSelected : newIndustrySelection.industries[i.id],
+      i.id === industry.id ? !isSelected : !newIndustrySelection.industries[i.id],
     )
 
     // Update group selection based on industries
@@ -1046,46 +1110,31 @@ export default function CompanyProfilePage() {
 
   // Form validation
   const validateForm = () => {
-    // Basic validation
-    if (!formData.companyName?.trim()) return "Company name is required"
-    if (!formData.website?.trim()) return "Website is required"
-    if (!formData.companyType) return "Company type is required"
-    if (!formData.capitalEntity) return "Capital entity is required"
+    const errors: Record<string, string> = {}
 
-    // Website validation
-    try {
-      const websiteUrl = new URL(formData.website.startsWith("http") ? formData.website : `https://${formData.website}`)
-      if (!websiteUrl.hostname.includes(".")) {
-        return "Please enter a valid website URL"
-      }
-    } catch (e) {
-      return "Please enter a valid website URL"
-    }
+    // Basic validation
+    errors["companyName"] = validateField("companyName", formData.companyName) || ""
+    errors["website"] = validateField("website", formData.website) || ""
+    errors["companyType"] = validateField("companyType", formData.companyType) || ""
+    errors["capitalEntity"] = validateField("capitalEntity", formData.capitalEntity) || ""
 
     // Contact validation
-    if (formData.contacts.length === 0) return "At least one contact is required"
-    for (const contact of formData.contacts) {
-      if (!contact.name?.trim()) return "Contact name is required"
-      if (!contact.email?.trim()) return "Contact email is required"
-      if (!contact.phone?.trim()) return "Contact phone is required"
-
-      // Email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(contact.email)) {
-        return `Invalid email format for contact: ${contact.name}`
-      }
+    if (formData.contacts.length === 0) {
+      errors["contacts"] = "At least one contact is required"
+    } else {
+      formData.contacts.forEach((contact, index) => {
+        errors[`contacts[${index}].name`] = validateField("contact.name", contact.name) || ""
+        errors[`contacts[${index}].email`] = validateField("contact.email", contact.email) || ""
+        errors[`contacts[${index}].phone`] = validateField("contact.phone", contact.phone) || ""
+      })
     }
 
     // Agreements validation
-    if (!formData.agreements.termsAndConditionsAccepted) {
-      return "You must accept the terms and conditions"
-    }
-    if (!formData.agreements.ndaAccepted) {
-      return "You must accept the NDA"
-    }
-    if (!formData.agreements.feeAgreementAccepted) {
-      return "You must accept the fee agreement"
-    }
+    errors["agreements.termsAndConditionsAccepted"] =
+      validateField("agreements.termsAndConditions", formData.agreements.termsAndConditionsAccepted) || ""
+    errors["agreements.ndaAccepted"] = validateField("agreements.nda", formData.agreements.ndaAccepted) || ""
+    errors["agreements.feeAgreementAccepted"] =
+      validateField("agreements.feeAgreement", formData.agreements.feeAgreementAccepted) || ""
 
     // Number range validations
     if (
@@ -1093,7 +1142,8 @@ export default function CompanyProfilePage() {
       formData.targetCriteria.revenueMax !== undefined &&
       formData.targetCriteria.revenueMin > formData.targetCriteria.revenueMax
     ) {
-      return "Minimum revenue cannot be greater than maximum revenue"
+      errors["targetCriteria.revenueMin"] = "Minimum revenue cannot be greater than maximum revenue"
+      errors["targetCriteria.revenueMax"] = "Maximum revenue cannot be less than minimum revenue"
     }
 
     if (
@@ -1101,7 +1151,8 @@ export default function CompanyProfilePage() {
       formData.targetCriteria.ebitdaMax !== undefined &&
       formData.targetCriteria.ebitdaMin > formData.targetCriteria.ebitdaMax
     ) {
-      return "Minimum EBITDA cannot be greater than maximum EBITDA"
+      errors["targetCriteria.ebitdaMin"] = "Minimum EBITDA cannot be greater than maximum EBITDA"
+      errors["targetCriteria.ebitdaMax"] = "Maximum EBITDA cannot be less than minimum EBITDA"
     }
 
     if (
@@ -1109,7 +1160,10 @@ export default function CompanyProfilePage() {
       formData.targetCriteria.transactionSizeMax !== undefined &&
       formData.targetCriteria.transactionSizeMin > formData.targetCriteria.transactionSizeMax
     ) {
-      return "Minimum transaction size cannot be greater than maximum transaction size"
+      errors["targetCriteria.transactionSizeMin"] =
+        "Minimum transaction size cannot be greater than maximum transaction size"
+      errors["targetCriteria.transactionSizeMax"] =
+        "Maximum transaction size cannot be less than minimum transaction size"
     }
 
     if (
@@ -1117,10 +1171,16 @@ export default function CompanyProfilePage() {
       formData.targetCriteria.revenueGrowthMax !== undefined &&
       formData.targetCriteria.revenueGrowthMin > formData.targetCriteria.revenueGrowthMax
     ) {
-      return "Minimum revenue growth cannot be greater than maximum revenue growth"
+      errors["targetCriteria.revenueGrowthMin"] = "Minimum revenue growth cannot be greater than maximum revenue growth"
+      errors["targetCriteria.revenueGrowthMax"] = "Maximum revenue growth cannot be less than minimum revenue growth"
     }
 
-    return null
+    // Update the fieldErrors state
+    setFieldErrors(errors)
+
+    // Check if there are any errors
+    const hasErrors = Object.values(errors).some((error) => error !== "")
+    return hasErrors ? "Please correct the errors in the form" : null
   }
 
   // Handle form submission
@@ -1142,9 +1202,20 @@ export default function CompanyProfilePage() {
     if (validationError) {
       toast({
         title: "Validation Error",
-        description: validationError,
+        description: "Please correct the errors in the form before submitting.",
         variant: "destructive",
       })
+
+      // Find the first field with an error and scroll to it
+      const firstErrorField = Object.keys(fieldErrors).find((key) => fieldErrors[key])
+      if (firstErrorField) {
+        const element = document.getElementById(firstErrorField.replace(/\[|\]|\./g, "-"))
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" })
+          element.focus()
+        }
+      }
+
       return
     }
 
@@ -1330,7 +1401,7 @@ export default function CompanyProfilePage() {
                               onCheckedChange={(checked) => {
                                 toggleSubRegion(subRegion, region, continent)
                               }}
-                              className="mr-2 border-[#d0d5dd]"
+                              className="mr-2 border-[#0bd4db54d]"
                             />
                             <Label
                               htmlFor={`subregion-${subRegion.id}`}
@@ -1585,11 +1656,14 @@ export default function CompanyProfilePage() {
                     <Input
                       id="companyName"
                       placeholder="Company Name"
-                      className="border-[#d0d5dd]"
+                      className={`border-[#d0d5dd] ${fieldErrors["companyName"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                       value={formData.companyName}
                       onChange={(e) => handleChange("companyName", e.target.value)}
                       required
                     />
+                    {fieldErrors["companyName"] && (
+                      <p className="text-red-500 text-sm mt-1">{fieldErrors["companyName"]}</p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="website" className="text-[#667085] text-sm mb-1.5 block">
@@ -1598,11 +1672,15 @@ export default function CompanyProfilePage() {
                     <Input
                       id="website"
                       placeholder="https://example.com"
-                      className="border-[#d0d5dd]"
+                      className={`border-[#d0d5dd] ${fieldErrors["website"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                       value={formData.website}
                       onChange={(e) => handleChange("website", e.target.value)}
                       required
                     />
+                    {fieldErrors["website"] && <p className="text-red-500 text-sm mt-1">{fieldErrors["website"]}</p>}
+                    <p className="text-gray-500 text-xs mt-1">
+                      Enter a valid URL (e.g., example.com or https://example.com)
+                    </p>
                   </div>
                 </div>
 
@@ -1612,7 +1690,10 @@ export default function CompanyProfilePage() {
                       Company Type <span className="text-red-500">*</span>
                     </Label>
                     <Select value={formData.companyType} onValueChange={(value) => handleChange("companyType", value)}>
-                      <SelectTrigger className="border-[#d0d5dd]">
+                      <SelectTrigger
+                        id="companyType"
+                        className={`border-[#d0d5dd] ${fieldErrors["companyType"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                      >
                         <SelectValue placeholder="Select Company Type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -1623,6 +1704,9 @@ export default function CompanyProfilePage() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {fieldErrors["companyType"] && (
+                      <p className="text-red-500 text-sm mt-1">{fieldErrors["companyType"]}</p>
+                    )}
                   </div>
                   <div>
                     <Label className="text-[#667085] text-sm mb-1.5 block">
@@ -1658,6 +1742,9 @@ export default function CompanyProfilePage() {
                         </Label>
                       </div>
                     </div>
+                    {fieldErrors["capitalEntity"] && (
+                      <p className="text-red-500 text-sm mt-1">{fieldErrors["capitalEntity"]}</p>
+                    )}
                   </div>
                 </div>
                 <div className="mb-4 mt-4">
@@ -1690,11 +1777,14 @@ export default function CompanyProfilePage() {
                             </Label>
                             <Input
                               id={`contact-name-${index}`}
-                              className="border-[#d0d5dd]"
+                              className={`border-[#d0d5dd] ${fieldErrors[`contacts[${index}].name`] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                               value={contact.name}
                               onChange={(e) => handleContactChange(index, "name", e.target.value)}
                               required
                             />
+                            {fieldErrors[`contacts[${index}].name`] && (
+                              <p className="text-red-500 text-sm mt-1">{fieldErrors[`contacts[${index}].name`]}</p>
+                            )}
                           </div>
                           <div>
                             <Label htmlFor={`contact-email-${index}`} className="text-[#667085] text-sm mb-1.5 block">
@@ -1703,11 +1793,14 @@ export default function CompanyProfilePage() {
                             <Input
                               id={`contact-email-${index}`}
                               type="email"
-                              className="border-[#d0d5dd]"
+                              className={`border-[#d0d5dd] ${fieldErrors[`contacts[${index}].email`] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                               value={contact.email}
                               onChange={(e) => handleContactChange(index, "email", e.target.value)}
                               required
                             />
+                            {fieldErrors[`contacts[${index}].email`] && (
+                              <p className="text-red-500 text-sm mt-1">{fieldErrors[`contacts[${index}].email`]}</p>
+                            )}
                           </div>
                           <div>
                             <Label htmlFor={`contact-phone-${index}`} className="text-[#667085] text-sm mb-1.5 block">
@@ -1715,11 +1808,14 @@ export default function CompanyProfilePage() {
                             </Label>
                             <Input
                               id={`contact-phone-${index}`}
-                              className="border-[#d0d5dd]"
+                              className={`border-[#d0d5dd] ${fieldErrors[`contacts[${index}].phone`] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                               value={contact.phone}
                               onChange={(e) => handleContactChange(index, "phone", e.target.value)}
                               required
                             />
+                            {fieldErrors[`contacts[${index}].phone`] && (
+                              <p className="text-red-500 text-sm mt-1">{fieldErrors[`contacts[${index}].phone`]}</p>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1885,7 +1981,7 @@ export default function CompanyProfilePage() {
                           <Input
                             id="revenueMin"
                             type="text"
-                            className="border-[#d0d5dd] pl-8"
+                            className={`border-[#d0d5dd] pl-8 ${fieldErrors["targetCriteria.revenueMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                             value={formatNumberWithCommas(formData.targetCriteria.revenueMin)}
                             onChange={(e) => {
                               const value = e.target.value.replace(/,/g, "")
@@ -1894,6 +1990,9 @@ export default function CompanyProfilePage() {
                               }
                             }}
                           />
+                          {fieldErrors["targetCriteria.revenueMin"] && (
+                            <p className="text-red-500 text-sm mt-1">{fieldErrors["targetCriteria.revenueMin"]}</p>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center">
@@ -1947,7 +2046,7 @@ export default function CompanyProfilePage() {
                           <Input
                             id="ebitdaMin"
                             type="text"
-                            className="border-[#d0d5dd] pl-8"
+                            className={`border-[#d0d5dd] pl-8 ${fieldErrors["targetCriteria.ebitdaMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                             value={formatNumberWithCommas(formData.targetCriteria.ebitdaMin)}
                             onChange={(e) => {
                               const value = e.target.value.replace(/,/g, "")
@@ -1956,6 +2055,9 @@ export default function CompanyProfilePage() {
                               }
                             }}
                           />
+                          {fieldErrors["targetCriteria.ebitdaMin"] && (
+                            <p className="text-red-500 text-sm mt-1">{fieldErrors["targetCriteria.ebitdaMin"]}</p>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center">
@@ -2009,7 +2111,7 @@ export default function CompanyProfilePage() {
                           <Input
                             id="transactionSizeMin"
                             type="text"
-                            className="border-[#d0d5dd] pl-8"
+                            className={`border-[#d0d5dd] pl-8 ${fieldErrors["targetCriteria.transactionSizeMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                             value={formatNumberWithCommas(formData.targetCriteria.transactionSizeMin)}
                             onChange={(e) => {
                               const value = e.target.value.replace(/,/g, "")
@@ -2022,6 +2124,11 @@ export default function CompanyProfilePage() {
                               }
                             }}
                           />
+                          {fieldErrors["targetCriteria.transactionSizeMin"] && (
+                            <p className="text-red-500 text-sm mt-1">
+                              {fieldErrors["targetCriteria.transactionSizeMin"]}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center">
@@ -2071,7 +2178,7 @@ export default function CompanyProfilePage() {
                         <Input
                           id="revenueGrowthMin"
                           type="text"
-                          className="border-[#d0d5dd]"
+                          className={`border-[#d0d5dd] ${fieldErrors["targetCriteria.revenueGrowthMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                           value={formatNumberWithCommas(formData.targetCriteria.revenueGrowthMin)}
                           onChange={(e) => {
                             const value = e.target.value.replace(/,/g, "")
@@ -2084,6 +2191,9 @@ export default function CompanyProfilePage() {
                             }
                           }}
                         />
+                        {fieldErrors["targetCriteria.revenueGrowthMin"] && (
+                          <p className="text-red-500 text-sm mt-1">{fieldErrors["targetCriteria.revenueGrowthMin"]}</p>
+                        )}
                       </div>
                       <div className="flex items-center">
                         <Label htmlFor="revenueGrowthMax" className="text-[#667085] text-sm w-10">
@@ -2246,47 +2356,65 @@ export default function CompanyProfilePage() {
               {/* Terms and Agreements */}
               <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
                 <div className="space-y-4">
-                  <div className="flex items-end space-x-2">
-                    <Checkbox
-                      id="termsAndConditions"
-                      className="mt-1 border-[#d0d5dd]"
-                      checked={formData.agreements.termsAndConditionsAccepted}
-                      onCheckedChange={(checked) =>
-                        handleNestedChange("agreements", "termsAndConditionsAccepted", checked === true)
-                      }
-                      required
-                    />
-                    <Label htmlFor="termsAndConditions" className="text-[#344054]">
-                      I have read and agree to the website <span className="text-[#3aafa9]">terms and conditions</span>
-                    </Label>
+                  <div className="flex flex-col">
+                    <div className="flex items-start space-x-2">
+                      <Checkbox
+                        id="termsAndConditions"
+                        className={`mt-1 ${fieldErrors["agreements.termsAndConditionsAccepted"] ? "border-red-500" : "border-[#d0d5dd]"}`}
+                        checked={formData.agreements.termsAndConditionsAccepted}
+                        onCheckedChange={(checked) =>
+                          handleNestedChange("agreements", "termsAndConditionsAccepted", checked === true)
+                        }
+                        required
+                      />
+                      <Label htmlFor="termsAndConditions" className="text-[#344054]">
+                        I have read and agree to the website{" "}
+                        <span className="text-[#3aafa9]">terms and conditions</span>
+                      </Label>
+                    </div>
+                    {fieldErrors["agreements.termsAndConditionsAccepted"] && (
+                      <p className="text-red-500 text-sm mt-1 ml-6">
+                        {fieldErrors["agreements.termsAndConditionsAccepted"]}
+                      </p>
+                    )}
                   </div>
 
-                  <div className="flex items-end space-x-2">
-                    <Checkbox
-                      id="nda"
-                      className="mt-1 border-[#d0d5dd]"
-                      checked={formData.agreements.ndaAccepted}
-                      onCheckedChange={(checked) => handleNestedChange("agreements", "ndaAccepted", checked === true)}
-                      required
-                    />
-                    <Label htmlFor="nda" className="text-[#344054]">
-                      I have read and agree to the universal NDA so that I can go straight to CIM
-                    </Label>
+                  <div className="flex flex-col">
+                    <div className="flex items-start space-x-2">
+                      <Checkbox
+                        id="nda"
+                        className={`mt-1 ${fieldErrors["agreements.ndaAccepted"] ? "border-red-500" : "border-[#d0d5dd]"}`}
+                        checked={formData.agreements.ndaAccepted}
+                        onCheckedChange={(checked) => handleNestedChange("agreements", "ndaAccepted", checked === true)}
+                        required
+                      />
+                      <Label htmlFor="nda" className="text-[#344054]">
+                        I have read and agree to the universal NDA so that I can go straight to CIM
+                      </Label>
+                    </div>
+                    {fieldErrors["agreements.ndaAccepted"] && (
+                      <p className="text-red-500 text-sm mt-1 ml-6">{fieldErrors["agreements.ndaAccepted"]}</p>
+                    )}
                   </div>
 
-                  <div className="flex items-end space-x-2">
-                    <Checkbox
-                      id="feeAgreement"
-                      className="mt-1 border-[#d0d5dd]"
-                      checked={formData.agreements.feeAgreementAccepted}
-                      onCheckedChange={(checked) =>
-                        handleNestedChange("agreements", "feeAgreementAccepted", checked === true)
-                      }
-                      required
-                    />
-                    <Label htmlFor="feeAgreement" className="text-[#344054]">
-                      I have read and agree to the fee agreement
-                    </Label>
+                  <div className="flex flex-col">
+                    <div className="flex items-start space-x-2">
+                      <Checkbox
+                        id="feeAgreement"
+                        className={`mt-1 ${fieldErrors["agreements.feeAgreementAccepted"] ? "border-red-500" : "border-[#d0d5dd]"}`}
+                        checked={formData.agreements.feeAgreementAccepted}
+                        onCheckedChange={(checked) =>
+                          handleNestedChange("agreements", "feeAgreementAccepted", checked === true)
+                        }
+                        required
+                      />
+                      <Label htmlFor="feeAgreement" className="text-[#344054]">
+                        I have read and agree to the fee agreement
+                      </Label>
+                    </div>
+                    {fieldErrors["agreements.feeAgreementAccepted"] && (
+                      <p className="text-red-500 text-sm mt-1 ml-6">{fieldErrors["agreements.feeAgreementAccepted"]}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2294,7 +2422,14 @@ export default function CompanyProfilePage() {
               {/* Submit Button */}
               <div className="flex justify-end">
                 <Button type="submit" className="bg-[#3aafa9] hover:bg-[#2a9d8f] text-white" disabled={isSubmitting}>
-                  {isSubmitting ? "Submitting..." : "Submit Profile"}
+                  {isSubmitting ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <span>Submitting...</span>
+                    </div>
+                  ) : (
+                    "Submit Profile"
+                  )}
                 </Button>
               </div>
             </form>

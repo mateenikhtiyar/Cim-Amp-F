@@ -32,6 +32,8 @@ const COMPANY_TYPES = [
   "Single Acquisition Search",
   "Strategic Operating Company",
   "Buy Side Mandate",
+  "Strategic Operating Company",
+  "Buy Side Mandate",
 ]
 
 const CAPITAL_ENTITIES = ["Fund", "Holding Company", "SPV", "Direct Investment"]
@@ -1066,6 +1068,7 @@ export default function AcquireProfilePage() {
       formData.targetCriteria.revenueMin > formData.targetCriteria.revenueMax
     ) {
       errors["targetCriteria.revenueMin"] = "Minimum revenue cannot be greater than maximum revenue"
+      errors["targetCriteria.revenueMax"] = "Maximum revenue cannot be less than minimum revenue"
     }
 
     if (
@@ -1074,6 +1077,7 @@ export default function AcquireProfilePage() {
       formData.targetCriteria.ebitdaMin > formData.targetCriteria.ebitdaMax
     ) {
       errors["targetCriteria.ebitdaMin"] = "Minimum EBITDA cannot be greater than maximum EBITDA"
+      errors["targetCriteria.ebitdaMax"] = "Maximum EBITDA cannot be less than minimum EBITDA"
     }
 
     if (
@@ -1083,6 +1087,8 @@ export default function AcquireProfilePage() {
     ) {
       errors["targetCriteria.transactionSizeMin"] =
         "Minimum transaction size cannot be greater than maximum transaction size"
+      errors["targetCriteria.transactionSizeMax"] =
+        "Maximum transaction size cannot be less than minimum transaction size"
     }
 
     if (
@@ -1091,6 +1097,7 @@ export default function AcquireProfilePage() {
       formData.targetCriteria.revenueGrowthMin > formData.targetCriteria.revenueGrowthMax
     ) {
       errors["targetCriteria.revenueGrowthMin"] = "Minimum revenue growth cannot be greater than maximum revenue growth"
+      errors["targetCriteria.revenueGrowthMax"] = "Maximum revenue growth cannot be less than minimum revenue growth"
     }
 
     // Update the fieldErrors state
@@ -1731,7 +1738,8 @@ export default function AcquireProfilePage() {
                               >
                                 <path
                                   fillRule="evenodd"
-                                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.4
+14z"
                                   clipRule="evenodd"
                                 />
                               </svg>
@@ -1836,7 +1844,7 @@ export default function AcquireProfilePage() {
                       <Input
                         id="revenueMin"
                         type="text"
-                        className="border-[#d0d5dd] pl-8"
+                        className={`border-[#d0d5dd] pl-8 ${fieldErrors["targetCriteria.revenueMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.revenueMin)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -1845,6 +1853,9 @@ export default function AcquireProfilePage() {
                           }
                         }}
                       />
+                      {fieldErrors["targetCriteria.revenueMin"] && (
+                        <p className="text-red-500 text-sm mt-1">{fieldErrors["targetCriteria.revenueMin"]}</p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center">
@@ -1864,7 +1875,7 @@ export default function AcquireProfilePage() {
                       <Input
                         id="revenueMax"
                         type="text"
-                        className="border-[#d0d5dd] pl-8"
+                        className={`border-[#d0d5dd] pl-8 ${fieldErrors["targetCriteria.revenueMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.revenueMax)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -1873,9 +1884,17 @@ export default function AcquireProfilePage() {
                           }
                         }}
                       />
+                      {fieldErrors["targetCriteria.revenueMax"] && (
+                        <p className="text-red-500 text-sm mt-1">{fieldErrors["targetCriteria.revenueMax"]}</p>
+                      )}
                     </div>
                   </div>
                 </div>
+                {formData.targetCriteria.revenueMin !== undefined &&
+                  formData.targetCriteria.revenueMax !== undefined &&
+                  formData.targetCriteria.revenueMin > formData.targetCriteria.revenueMax && (
+                    <p className="text-red-500 text-sm mt-1">Minimum revenue cannot be greater than maximum revenue</p>
+                  )}
               </div>
 
               <div>
@@ -1898,7 +1917,7 @@ export default function AcquireProfilePage() {
                       <Input
                         id="ebitdaMin"
                         type="text"
-                        className="border-[#d0d5dd] pl-8"
+                        className={`border-[#d0d5dd] pl-8 ${fieldErrors["targetCriteria.ebitdaMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.ebitdaMin)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -1907,6 +1926,9 @@ export default function AcquireProfilePage() {
                           }
                         }}
                       />
+                      {fieldErrors["targetCriteria.ebitdaMin"] && (
+                        <p className="text-red-500 text-sm mt-1">{fieldErrors["targetCriteria.ebitdaMin"]}</p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center">
@@ -1926,7 +1948,7 @@ export default function AcquireProfilePage() {
                       <Input
                         id="ebitdaMax"
                         type="text"
-                        className="border-[#d0d5dd] pl-8"
+                        className={`border-[#d0d5dd] pl-8 ${fieldErrors["targetCriteria.ebitdaMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.ebitdaMax)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -1935,9 +1957,17 @@ export default function AcquireProfilePage() {
                           }
                         }}
                       />
+                      {fieldErrors["targetCriteria.ebitdaMax"] && (
+                        <p className="text-red-500 text-sm mt-1">{fieldErrors["targetCriteria.ebitdaMax"]}</p>
+                      )}
                     </div>
                   </div>
                 </div>
+                {formData.targetCriteria.ebitdaMin !== undefined &&
+                  formData.targetCriteria.ebitdaMax !== undefined &&
+                  formData.targetCriteria.ebitdaMin > formData.targetCriteria.ebitdaMax && (
+                    <p className="text-red-500 text-sm mt-1">Minimum EBITDA cannot be greater than maximum EBITDA</p>
+                  )}
               </div>
 
               <div>
@@ -1960,7 +1990,7 @@ export default function AcquireProfilePage() {
                       <Input
                         id="transactionSizeMin"
                         type="text"
-                        className="border-[#d0d5dd] pl-8"
+                        className={`border-[#d0d5dd] pl-8 ${fieldErrors["targetCriteria.transactionSizeMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.transactionSizeMin)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -1973,6 +2003,9 @@ export default function AcquireProfilePage() {
                           }
                         }}
                       />
+                      {fieldErrors["targetCriteria.transactionSizeMin"] && (
+                        <p className="text-red-500 text-sm mt-1">{fieldErrors["targetCriteria.transactionSizeMin"]}</p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center">
@@ -1992,7 +2025,7 @@ export default function AcquireProfilePage() {
                       <Input
                         id="transactionSizeMax"
                         type="text"
-                        className="border-[#d0d5dd] pl-8"
+                        className={`border-[#d0d5dd] pl-8 ${fieldErrors["targetCriteria.transactionSizeMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.transactionSizeMax)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -2005,9 +2038,19 @@ export default function AcquireProfilePage() {
                           }
                         }}
                       />
+                      {fieldErrors["targetCriteria.transactionSizeMax"] && (
+                        <p className="text-red-500 text-sm mt-1">{fieldErrors["targetCriteria.transactionSizeMax"]}</p>
+                      )}
                     </div>
                   </div>
                 </div>
+                {formData.targetCriteria.transactionSizeMin !== undefined &&
+                  formData.targetCriteria.transactionSizeMax !== undefined &&
+                  formData.targetCriteria.transactionSizeMin > formData.targetCriteria.transactionSizeMax && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Minimum transaction size cannot be greater than maximum transaction size
+                    </p>
+                  )}
               </div>
 
               <div>
@@ -2020,7 +2063,7 @@ export default function AcquireProfilePage() {
                     <Input
                       id="revenueGrowthMin"
                       type="text"
-                      className="border-[#d0d5dd]"
+                      className={`border-[#d0d5dd] ${fieldErrors["targetCriteria.revenueGrowthMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                       value={formatNumberWithCommas(formData.targetCriteria.revenueGrowthMin)}
                       onChange={(e) => {
                         const value = e.target.value.replace(/,/g, "")
@@ -2029,6 +2072,9 @@ export default function AcquireProfilePage() {
                         }
                       }}
                     />
+                    {fieldErrors["targetCriteria.revenueGrowthMin"] && (
+                      <p className="text-red-500 text-sm mt-1">{fieldErrors["targetCriteria.revenueGrowthMin"]}</p>
+                    )}
                   </div>
                   <div className="flex items-center">
                     <Label htmlFor="revenueGrowthMax" className="text-[#667085] text-sm w-10">
@@ -2037,7 +2083,7 @@ export default function AcquireProfilePage() {
                     <Input
                       id="revenueGrowthMax"
                       type="text"
-                      className="border-[#d0d5dd]"
+                      className={`border-[#d0d5dd] ${fieldErrors["targetCriteria.revenueGrowthMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                       value={formatNumberWithCommas(formData.targetCriteria.revenueGrowthMax)}
                       onChange={(e) => {
                         const value = e.target.value.replace(/,/g, "")
@@ -2046,8 +2092,18 @@ export default function AcquireProfilePage() {
                         }
                       }}
                     />
+                    {fieldErrors["targetCriteria.revenueGrowthMax"] && (
+                      <p className="text-red-500 text-sm mt-1">{fieldErrors["targetCriteria.revenueGrowthMax"]}</p>
+                    )}
                   </div>
                 </div>
+                {formData.targetCriteria.revenueGrowthMin !== undefined &&
+                  formData.targetCriteria.revenueGrowthMax !== undefined &&
+                  formData.targetCriteria.revenueGrowthMin > formData.targetCriteria.revenueGrowthMax && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Minimum revenue growth cannot be greater than maximum revenue growth
+                    </p>
+                  )}
               </div>
 
               <div>
