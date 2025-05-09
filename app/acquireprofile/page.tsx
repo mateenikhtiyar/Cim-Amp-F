@@ -2258,7 +2258,7 @@ export default function AcquireProfilePage() {
 
               {/* With: */}
               <div className="flex flex-col">
-                <div className="flex items-start space-x-2">
+                <div className="flex items-end space-x-2">
                   <Checkbox
                     id="termsAndConditions"
                     className={`mt-1 ${fieldErrors["agreements.termsAndConditionsAccepted"] ? "border-red-500" : "border-[#d0d5dd]"}`}
@@ -2281,7 +2281,7 @@ export default function AcquireProfilePage() {
               </div>
               {/* Similarly, update the other agreement checkboxes */}
               <div className="flex flex-col">
-                <div className="flex items-start space-x-2">
+                <div className="flex items-end space-x-2">
                   <Checkbox
                     id="nda"
                     className={`mt-1 ${fieldErrors["agreements.ndaAccepted"] ? "border-red-500" : "border-[#d0d5dd]"}`}
@@ -2300,7 +2300,7 @@ export default function AcquireProfilePage() {
               </div>
 
               <div className="flex flex-col">
-                <div className="flex items-start space-x-2">
+                <div className="flex items-end space-x-2">
                   <Checkbox
                     id="feeAgreement"
                     className={`mt-1 ${fieldErrors["agreements.feeAgreementAccepted"] ? "border-red-500" : "border-[#d0d5dd]"}`}

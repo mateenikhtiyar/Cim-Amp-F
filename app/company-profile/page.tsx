@@ -2359,7 +2359,7 @@ export default function CompanyProfilePage() {
               <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
                 <div className="space-y-4">
                   <div className="flex flex-col">
-                    <div className="flex items-start space-x-2">
+                    <div className="flex items-end space-x-2">
                       <Checkbox
                         id="termsAndConditions"
                         className={`mt-1 ${fieldErrors["agreements.termsAndConditionsAccepted"] ? "border-red-500" : "border-[#d0d5dd]"}`}
@@ -2382,7 +2382,7 @@ export default function CompanyProfilePage() {
                   </div>
 
                   <div className="flex flex-col">
-                    <div className="flex items-start space-x-2">
+                    <div className="flex items-end space-x-2">
                       <Checkbox
                         id="nda"
                         className={`mt-1 ${fieldErrors["agreements.ndaAccepted"] ? "border-red-500" : "border-[#d0d5dd]"}`}
@@ -2400,7 +2400,7 @@ export default function CompanyProfilePage() {
                   </div>
 
                   <div className="flex flex-col">
-                    <div className="flex items-start space-x-2">
+                    <div className="flex items-end space-x-2">
                       <Checkbox
                         id="feeAgreement"
                         className={`mt-1 ${fieldErrors["agreements.feeAgreementAccepted"] ? "border-red-500" : "border-[#d0d5dd]"}`}
