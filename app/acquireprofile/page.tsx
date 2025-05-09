@@ -24,16 +24,14 @@ import { getIndustryData, type IndustryData, type Sector, type IndustryGroup, ty
 import { submitCompanyProfile } from "@/services/api"
 
 const COMPANY_TYPES = [
-  "Private Equity",
-  "Holding Company",
-  "Family Office",
-  "Independent Sponsor",
+  "Buy Side Mandate",
   "Entrepreneurship through Acquisition",
+  "Family Office",
+  "Holding Company",
+  "Independent Sponsor",
+  "Private Equity",
   "Single Acquisition Search",
   "Strategic Operating Company",
-  "Buy Side Mandate",
-  "Strategic Operating Company",
-  "Buy Side Mandate",
 ]
 
 const CAPITAL_ENTITIES = ["Fund", "Holding Company", "SPV", "Direct Investment"]
@@ -2318,7 +2316,7 @@ export default function AcquireProfilePage() {
                   />
                   <Label htmlFor="termsAndConditions" className="text-[#344054]">
                     I have read and agree to the website{" "}
-                    <span className="text-[#38A4F1] cursor-pointer">terms and conditions</span>
+                    <span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">terms and conditions</span>
                   </Label>
                 </div>
                 {fieldErrors["agreements.termsAndConditionsAccepted"] && (
@@ -2338,7 +2336,7 @@ export default function AcquireProfilePage() {
                     required
                   />
                   <Label htmlFor="nda" className="text-[#344054]">
-                    I have read and agree to the <span className="text-[#38A4F1] cursor-pointer">universal NDA</span> so
+                    I have read and agree to the <span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">universal NDA</span> so
                     that I can go straight to CIM
                   </Label>
                 </div>
@@ -2359,7 +2357,7 @@ export default function AcquireProfilePage() {
                     required
                   />
                   <Label htmlFor="feeAgreement" className="text-[#344054]">
-                    I have read and agree to the <span className="text-[#38A4F1] cursor-pointer">fee agreement</span>
+                    I have read and agree to the <span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">fee agreement</span>
                   </Label>
                 </div>
                 {fieldErrors["agreements.feeAgreementAccepted"] && (
