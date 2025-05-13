@@ -379,8 +379,7 @@ export default function AcquireProfilePage() {
       ebitdaMax: undefined,
       transactionSizeMin: undefined,
       transactionSizeMax: undefined,
-      revenueGrowthMin: undefined,
-      revenueGrowthMax: undefined,
+      revenueGrowth: undefined,
       minStakePercent: undefined,
       minYearsInBusiness: undefined,
       preferredBusinessModels: [],
@@ -1129,15 +1128,6 @@ export default function AcquireProfilePage() {
         "Minimum transaction size cannot be greater than maximum transaction size"
       errors["targetCriteria.transactionSizeMax"] =
         "Maximum transaction size cannot be less than minimum transaction size"
-    }
-
-    if (
-      formData.targetCriteria.revenueGrowthMin !== undefined &&
-      formData.targetCriteria.revenueGrowthMax !== undefined &&
-      formData.targetCriteria.revenueGrowthMin > formData.targetCriteria.revenueGrowthMax
-    ) {
-      errors["targetCriteria.revenueGrowthMin"] = "Minimum revenue growth cannot be greater than maximum revenue growth"
-      errors["targetCriteria.revenueGrowthMax"] = "Maximum revenue growth cannot be less than minimum revenue growth"
     }
 
     // Update the fieldErrors state
@@ -2100,56 +2090,21 @@ export default function AcquireProfilePage() {
               </div>
 
               <div>
-                <Label className="text-[#667085] text-sm mb-1.5 block">3 Year Average Revenue Growth Range (%)</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center">
-                    <Label htmlFor="revenueGrowthMin" className="text-[#667085] text-sm w-10">
-                      Min
-                    </Label>
-                    <Input
-                      id="revenueGrowthMin"
-                      type="text"
-                      className={`border-[#d0d5dd] ${fieldErrors["targetCriteria.revenueGrowthMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                      value={formatNumberWithCommas(formData.targetCriteria.revenueGrowthMin)}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/,/g, "")
-                        if (value === "" || /^\d+$/.test(value)) {
-                          handleNestedChange("targetCriteria", "revenueGrowthMin", value ? Number(value) : undefined)
-                        }
-                      }}
-                    />
-                    {fieldErrors["targetCriteria.revenueGrowthMin"] && (
-                      <p className="text-red-500 text-sm mt-1">{fieldErrors["targetCriteria.revenueGrowthMin"]}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center">
-                    <Label htmlFor="revenueGrowthMax" className="text-[#667085] text-sm w-10">
-                      Max
-                    </Label>
-                    <Input
-                      id="revenueGrowthMax"
-                      type="text"
-                      className={`border-[#d0d5dd] ${fieldErrors["targetCriteria.revenueGrowthMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                      value={formatNumberWithCommas(formData.targetCriteria.revenueGrowthMax)}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/,/g, "")
-                        if (value === "" || /^\d+$/.test(value)) {
-                          handleNestedChange("targetCriteria", "revenueGrowthMax", value ? Number(value) : undefined)
-                        }
-                      }}
-                    />
-                    {fieldErrors["targetCriteria.revenueGrowthMax"] && (
-                      <p className="text-red-500 text-sm mt-1">{fieldErrors["targetCriteria.revenueGrowthMax"]}</p>
-                    )}
-                  </div>
+                <Label className="text-[#667085] text-sm mb-1.5 block">3 Year Average Revenue Growth (%)</Label>
+                <div className="flex items-center">
+                  <Input
+                    id="revenueGrowth"
+                    type="text"
+                    className="border-[#d0d5dd]"
+                    value={formatNumberWithCommas(formData.targetCriteria.revenueGrowth)}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/,/g, "")
+                      if (value === "" || /^\d+$/.test(value)) {
+                        handleNestedChange("targetCriteria", "revenueGrowth", value ? Number(value) : undefined)
+                      }
+                    }}
+                  />
                 </div>
-                {formData.targetCriteria.revenueGrowthMin !== undefined &&
-                  formData.targetCriteria.revenueGrowthMax !== undefined &&
-                  formData.targetCriteria.revenueGrowthMin > formData.targetCriteria.revenueGrowthMax && (
-                    <p className="text-red-500 text-sm mt-1">
-                      Minimum revenue growth cannot be greater than maximum revenue growth
-                    </p>
-                  )}
               </div>
 
               <div>
@@ -2336,8 +2291,9 @@ export default function AcquireProfilePage() {
                     required
                   />
                   <Label htmlFor="nda" className="text-[#344054]">
-                    I have read and agree to the <span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">universal NDA</span> so
-                    that I can go straight to CIM
+                    I have read and agree to the{" "}
+                    <span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">universal NDA</span> so that I
+                    can go straight to CIM
                   </Label>
                 </div>
                 {fieldErrors["agreements.ndaAccepted"] && (
@@ -2357,7 +2313,8 @@ export default function AcquireProfilePage() {
                     required
                   />
                   <Label htmlFor="feeAgreement" className="text-[#344054]">
-                    I have read and agree to the <span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">fee agreement</span>
+                    I have read and agree to the{" "}
+                    <span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">fee agreement</span>
                   </Label>
                 </div>
                 {fieldErrors["agreements.feeAgreementAccepted"] && (

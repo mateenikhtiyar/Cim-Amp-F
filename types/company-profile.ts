@@ -20,8 +20,7 @@ export interface TargetCriteria {
   ebitdaMax?: number
   transactionSizeMin?: number
   transactionSizeMax?: number
-  revenueGrowthMin?: number
-  revenueGrowthMax?: number
+  revenueGrowth?: number
   minStakePercent?: number
   minYearsInBusiness?: number
   preferredBusinessModels: string[]

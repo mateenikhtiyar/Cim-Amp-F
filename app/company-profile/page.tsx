@@ -23,7 +23,6 @@ import {
   LogOut,
   Settings,
   Briefcase,
-  Eye,
   Bell,
 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -450,8 +449,7 @@ export default function CompanyProfilePage() {
       ebitdaMax: undefined,
       transactionSizeMin: undefined,
       transactionSizeMax: undefined,
-      revenueGrowthMin: undefined,
-      revenueGrowthMax: undefined,
+      revenueGrowth: undefined,
       minStakePercent: undefined,
       minYearsInBusiness: undefined,
       preferredBusinessModels: [],
@@ -1209,15 +1207,6 @@ export default function CompanyProfilePage() {
         "Maximum transaction size cannot be less than minimum transaction size"
     }
 
-    if (
-      formData.targetCriteria.revenueGrowthMin !== undefined &&
-      formData.targetCriteria.revenueGrowthMax !== undefined &&
-      formData.targetCriteria.revenueGrowthMin > formData.targetCriteria.revenueGrowthMax
-    ) {
-      errors["targetCriteria.revenueGrowthMin"] = "Minimum revenue growth cannot be greater than maximum revenue growth"
-      errors["targetCriteria.revenueGrowthMax"] = "Maximum revenue growth cannot be less than minimum revenue growth"
-    }
-
     // Update the fieldErrors state
     setFieldErrors(errors)
 
@@ -1629,7 +1618,13 @@ export default function CompanyProfilePage() {
               <span>All Deals</span>
             </Link>
 
-           
+            {/* <Link
+              href="/profile"
+              className="mb-2 flex items-center rounded-md px-4 py-3 text-gray-700 hover:bg-gray-100"
+            >
+              <Eye className="mr-3 h-5 w-5" />
+              <span>View Profile</span>
+            </Link> */}
 
             <Link
               href="/company-profile"
@@ -2222,55 +2217,20 @@ export default function CompanyProfilePage() {
                   </div>
 
                   <div>
-                    <Label className="text-[#667085] text-sm mb-1.5 block">
-                      3 Year Average Revenue Growth Range (%)
-                    </Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="flex items-center">
-                        <Label htmlFor="revenueGrowthMin" className="text-[#667085] text-sm w-10">
-                          Min
-                        </Label>
-                        <Input
-                          id="revenueGrowthMin"
-                          type="text"
-                          className={`border-[#d0d5dd] ${fieldErrors["targetCriteria.revenueGrowthMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-                          value={formatNumberWithCommas(formData.targetCriteria.revenueGrowthMin)}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(/,/g, "")
-                            if (value === "" || /^\d+$/.test(value)) {
-                              handleNestedChange(
-                                "targetCriteria",
-                                "revenueGrowthMin",
-                                value ? Number(value) : undefined,
-                              )
-                            }
-                          }}
-                        />
-                        {fieldErrors["targetCriteria.revenueGrowthMin"] && (
-                          <p className="text-red-500 text-sm mt-1">{fieldErrors["targetCriteria.revenueGrowthMin"]}</p>
-                        )}
-                      </div>
-                      <div className="flex items-center">
-                        <Label htmlFor="revenueGrowthMax" className="text-[#667085] text-sm w-10">
-                          Max
-                        </Label>
-                        <Input
-                          id="revenueGrowthMax"
-                          type="text"
-                          className="border-[#d0d5dd]"
-                          value={formatNumberWithCommas(formData.targetCriteria.revenueGrowthMax)}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(/,/g, "")
-                            if (value === "" || /^\d+$/.test(value)) {
-                              handleNestedChange(
-                                "targetCriteria",
-                                "revenueGrowthMax",
-                                value ? Number(value) : undefined,
-                              )
-                            }
-                          }}
-                        />
-                      </div>
+                    <Label className="text-[#667085] text-sm mb-1.5 block">3 Year Average Revenue Growth (%)</Label>
+                    <div className="flex items-center">
+                      <Input
+                        id="revenueGrowth"
+                        type="text"
+                        className="border-[#d0d5dd]"
+                        value={formatNumberWithCommas(formData.targetCriteria.revenueGrowth)}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/,/g, "")
+                          if (value === "" || /^\d+$/.test(value)) {
+                            handleNestedChange("targetCriteria", "revenueGrowth", value ? Number(value) : undefined)
+                          }
+                        }}
+                      />
                     </div>
                   </div>
 
@@ -2407,8 +2367,6 @@ export default function CompanyProfilePage() {
                   </div>
                 </div>
               </div>
-
-              
 
               {/* Submit Button */}
               <div className="flex justify-end">
