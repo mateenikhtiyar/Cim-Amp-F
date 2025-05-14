@@ -2241,27 +2241,6 @@ export default function AcquireProfilePage() {
           <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
             <h2 className="text-[#2f2b43] text-lg font-medium mb-4">Agreements</h2>
             <div className="space-y-4">
-              {/* Update the agreement checkboxes (find the agreement checkboxes in the JSX) */}
-              {/* For each agreement checkbox, update to show errors */}
-              {/* For example, for the terms and conditions checkbox: */}
-              {/* Replace: */}
-              {/* <div className="flex items-end space-x-2">
-                <Checkbox
-                  id="termsAndConditions"
-                  className="mt-1 border-[#d0d5dd]"
-                  checked={formData.agreements.termsAndConditionsAccepted}
-                  onCheckedChange={(checked) =>
-                    handleNestedChange("agreements", "termsAndConditionsAccepted", checked === true)
-                  }
-                  required
-                />
-                <Label htmlFor="termsAndConditions" className="text-[#344054]">
-                  I have read and agree to the website{" "}
-                  <span className="text-[#38A4F1] cursor-pointer">terms and conditions</span>
-                </Label>
-              </div> */}
-
-              {/* With: */}
               <div className="flex flex-col">
                 <div className="flex items-end space-x-2">
                   <Checkbox
@@ -2275,7 +2254,9 @@ export default function AcquireProfilePage() {
                   />
                   <Label htmlFor="termsAndConditions" className="text-[#344054]">
                     I have read and agree to the website{" "}
-                    <Link  href="/terms" ><span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">terms and conditions</span></Link>
+                    <Link href="/terms" className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">
+                      terms and conditions
+                    </Link>
                   </Label>
                 </div>
                 {fieldErrors["agreements.termsAndConditionsAccepted"] && (
@@ -2284,7 +2265,6 @@ export default function AcquireProfilePage() {
                   </p>
                 )}
               </div>
-              {/* Similarly, update the other agreement checkboxes */}
               <div className="flex flex-col">
                 <div className="flex items-end space-x-2">
                   <Checkbox
@@ -2296,8 +2276,10 @@ export default function AcquireProfilePage() {
                   />
                   <Label htmlFor="nda" className="text-[#344054]">
                     I have read and agree to the{" "}
-                    <Link  href="/universalNDA" ><span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">universal NDA</span></Link> so that I
-                    can go straight to CIM
+                    <Link href="/universalNDA" className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">
+                      universal NDA
+                    </Link>{" "}
+                    so that I can go straight to CIM
                   </Label>
                 </div>
                 {fieldErrors["agreements.ndaAccepted"] && (
@@ -2318,7 +2300,9 @@ export default function AcquireProfilePage() {
                   />
                   <Label htmlFor="feeAgreement" className="text-[#344054]">
                     I have read and agree to the{" "}
-                    <Link  href="/masterfeeagreement" ><span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">fee agreement</span></Link>
+                    <Link href="/masterfeeagreement" className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">
+                      fee agreement
+                    </Link>
                   </Label>
                 </div>
                 {fieldErrors["agreements.feeAgreementAccepted"] && (
