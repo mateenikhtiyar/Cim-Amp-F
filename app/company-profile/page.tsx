@@ -1811,19 +1811,17 @@ export default function CompanyProfilePage() {
                             </Label>
                             <Input
                               id={`contact-name-${index}`}
-                              className={`border-[#d0d5dd] ${fieldErrors[`contacts[${index}].name`] ? "border-red-500 focus-visible:ring-red-500" : ""}
+                              className={`border-[#d0d5dd] ${fieldErrors[`contacts[${index}].name`] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                               value={contact.name}
                               onChange={(e) => handleContactChange(index, "name", e.target.value)}
                               required
                             />
-                            {fieldErrors[\`contacts[${index}].name\`] && (
-                              <p className="text-red-500 text-sm mt-1">{fieldErrors[\`contacts[${index}].name\`]}</p>
+                            {fieldErrors[`contacts[${index}].name`] && (
+                              <p className="text-red-500 text-sm mt-1">{fieldErrors[`contacts[${index}].name`]}</p>
                             )}
                           </div>
                           <div>
-                            <Label htmlFor={\`contact-email-${index}`}
-                              className="text-[#667085] text-sm mb-1.5 block"
-                            >
+                            <Label htmlFor={`contact-email-${index}`} className="text-[#667085] text-sm mb-1.5 block">
                               Email <span className="text-red-500">*</span>
                             </Label>
                             <Input
