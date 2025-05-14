@@ -1811,17 +1811,19 @@ export default function CompanyProfilePage() {
                             </Label>
                             <Input
                               id={`contact-name-${index}`}
-                              className={`border-[#d0d5dd] ${fieldErrors[`contacts[${index}].name`] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                              className={`border-[#d0d5dd] ${fieldErrors[`contacts[${index}].name`] ? "border-red-500 focus-visible:ring-red-500" : ""}
                               value={contact.name}
                               onChange={(e) => handleContactChange(index, "name", e.target.value)}
                               required
                             />
-                            {fieldErrors[`contacts[${index}].name`] && (
-                              <p className="text-red-500 text-sm mt-1">{fieldErrors[`contacts[${index}].name`]}</p>
+                            {fieldErrors[\`contacts[${index}].name\`] && (
+                              <p className="text-red-500 text-sm mt-1">{fieldErrors[\`contacts[${index}].name\`]}</p>
                             )}
                           </div>
                           <div>
-                            <Label htmlFor={`contact-email-${index}`} className="text-[#667085] text-sm mb-1.5 block">
+                            <Label htmlFor={\`contact-email-${index}`}
+                              className="text-[#667085] text-sm mb-1.5 block"
+                            >
                               Email <span className="text-red-500">*</span>
                             </Label>
                             <Input
@@ -2023,10 +2025,10 @@ export default function CompanyProfilePage() {
                             {formData.selectedCurrency === "USD"
                               ? "$"
                               : formData.selectedCurrency === "EUR"
-                              ? "€"
-                              : formData.selectedCurrency === "GBP"
-                              ? "£"
-                              : formData.selectedCurrency}
+                                ? "€"
+                                : formData.selectedCurrency === "GBP"
+                                  ? "£"
+                                  : formData.selectedCurrency}
                           </div>
                           <Input
                             id="revenueMin"
@@ -2056,10 +2058,10 @@ export default function CompanyProfilePage() {
                             {formData.selectedCurrency === "USD"
                               ? "$"
                               : formData.selectedCurrency === "EUR"
-                              ? "€"
-                              : formData.selectedCurrency === "GBP"
-                              ? "£"
-                              : formData.selectedCurrency}
+                                ? "€"
+                                : formData.selectedCurrency === "GBP"
+                                  ? "£"
+                                  : formData.selectedCurrency}
                           </div>
                           <Input
                             id="revenueMax"
@@ -2371,6 +2373,24 @@ export default function CompanyProfilePage() {
                     <Label htmlFor="allowBuyerLikeDeals" className="text-[#344054]">
                       Allow buy side fee deals (charged by seller above CIM Amplify Fees)
                     </Label>
+                  </div>
+                  <div className="mt-4 text-sm text-[#667085] border-t pt-4">
+                    <p>
+                      The{" "}
+                      <Link href="/master-fee-agreement" className="text-[#3aafa9] underline">
+                        Master Fee Agreement
+                      </Link>
+                      ,{" "}
+                      <Link href="/universal-nda" className="text-[#3aafa9] underline">
+                        Universal NDA
+                      </Link>{" "}
+                      and{" "}
+                      <Link href="/terms-conditions" className="text-[#3aafa9] underline">
+                        CIM Amplify Terms and Conditions
+                      </Link>{" "}
+                      were agreed to by {buyerProfile?.fullName || "(insert buyer's name)"} on{" "}
+                      {new Date().toLocaleString() || "(insert date and time of submission)"}.
+                    </p>
                   </div>
                 </div>
               </div>
