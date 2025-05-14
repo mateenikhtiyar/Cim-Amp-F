@@ -3,7 +3,7 @@
 import { Toaster } from "@/components/ui/sonner"
 
 import type React from "react"
-
+import Link from "next/link";
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import type { CompanyProfile } from "@/types/company-profile"
@@ -2275,7 +2275,7 @@ export default function AcquireProfilePage() {
                   />
                   <Label htmlFor="termsAndConditions" className="text-[#344054]">
                     I have read and agree to the website{" "}
-                    <span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">terms and conditions</span>
+                    <Link  href="/terms" ><span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">terms and conditions</span></Link>
                   </Label>
                 </div>
                 {fieldErrors["agreements.termsAndConditionsAccepted"] && (
@@ -2296,7 +2296,7 @@ export default function AcquireProfilePage() {
                   />
                   <Label htmlFor="nda" className="text-[#344054]">
                     I have read and agree to the{" "}
-                    <span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">universal NDA</span> so that I
+                    <Link  href="/universalNDA" ><span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">universal NDA</span></Link> so that I
                     can go straight to CIM
                   </Label>
                 </div>
@@ -2318,7 +2318,7 @@ export default function AcquireProfilePage() {
                   />
                   <Label htmlFor="feeAgreement" className="text-[#344054]">
                     I have read and agree to the{" "}
-                    <span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">fee agreement</span>
+                    <Link  href="/masterfeeagreement" ><span className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">fee agreement</span></Link>
                   </Label>
                 </div>
                 {fieldErrors["agreements.feeAgreementAccepted"] && (
