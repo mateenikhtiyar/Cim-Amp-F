@@ -1872,16 +1872,17 @@ export default function AcquireProfilePage() {
                         {formData.selectedCurrency === "USD"
                           ? "$"
                           : formData.selectedCurrency === "EUR"
-                            ? "€"
-                            : formData.selectedCurrency === "GBP"
-                              ? "£"
-                              : formData.selectedCurrency}
+                          ? "€"
+                          : formData.selectedCurrency === "GBP"
+                          ? "£"
+                          : formData.selectedCurrency}
                       </div>
                       <Input
                         id="revenueMin"
                         type="text"
-                        className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 1 ? "pl-10" : "pl-8"
-                          } ${fieldErrors["targetCriteria.revenueMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        className={`border-[#d0d5dd] ${
+                          formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                        } ${fieldErrors["targetCriteria.revenueMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.revenueMin)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -1904,15 +1905,17 @@ export default function AcquireProfilePage() {
                         {formData.selectedCurrency === "USD"
                           ? "$"
                           : formData.selectedCurrency === "EUR"
-                            ? "€"
-                            : formData.selectedCurrency === "GBP"
-                              ? "£"
-                              : formData.selectedCurrency}
+                          ? "€"
+                          : formData.selectedCurrency === "GBP"
+                          ? "£"
+                          : formData.selectedCurrency}
                       </div>
                       <Input
                         id="revenueMax"
                         type="text"
-                        className={`border-[#d0d5dd] pl-8 ${fieldErrors["targetCriteria.revenueMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        className={`border-[#d0d5dd] ${
+                          formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                        } ${fieldErrors["targetCriteria.revenueMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.revenueMax)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -1946,10 +1949,10 @@ export default function AcquireProfilePage() {
                         {formData.selectedCurrency === "USD"
                           ? "$"
                           : formData.selectedCurrency === "EUR"
-                            ? "€"
-                            : formData.selectedCurrency === "GBP"
-                              ? "£"
-                              : formData.selectedCurrency}
+                          ? "€"
+                          : formData.selectedCurrency === "GBP"
+                          ? "£"
+                          : formData.selectedCurrency}
                       </div>
                       <Input
                         id="ebitdaMin"
@@ -1977,10 +1980,10 @@ export default function AcquireProfilePage() {
                         {formData.selectedCurrency === "USD"
                           ? "$"
                           : formData.selectedCurrency === "EUR"
-                            ? "€"
-                            : formData.selectedCurrency === "GBP"
-                              ? "£"
-                              : formData.selectedCurrency}
+                          ? "€"
+                          : formData.selectedCurrency === "GBP"
+                          ? "£"
+                          : formData.selectedCurrency}
                       </div>
                       <Input
                         id="ebitdaMax"
@@ -2019,10 +2022,10 @@ export default function AcquireProfilePage() {
                         {formData.selectedCurrency === "USD"
                           ? "$"
                           : formData.selectedCurrency === "EUR"
-                            ? "€"
-                            : formData.selectedCurrency === "GBP"
-                              ? "£"
-                              : formData.selectedCurrency}
+                          ? "€"
+                          : formData.selectedCurrency === "GBP"
+                          ? "£"
+                          : formData.selectedCurrency}
                       </div>
                       <Input
                         id="transactionSizeMin"
@@ -2054,10 +2057,10 @@ export default function AcquireProfilePage() {
                         {formData.selectedCurrency === "USD"
                           ? "$"
                           : formData.selectedCurrency === "EUR"
-                            ? "€"
-                            : formData.selectedCurrency === "GBP"
-                              ? "£"
-                              : formData.selectedCurrency}
+                          ? "€"
+                          : formData.selectedCurrency === "GBP"
+                          ? "£"
+                          : formData.selectedCurrency}
                       </div>
                       <Input
                         id="transactionSizeMax"
