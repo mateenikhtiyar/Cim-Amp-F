@@ -1880,7 +1880,8 @@ export default function AcquireProfilePage() {
                       <Input
                         id="revenueMin"
                         type="text"
-                        className={`border-[#d0d5dd] pl-8 ${fieldErrors["targetCriteria.revenueMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 1 ? "pl-10" : "pl-8"
+                          } ${fieldErrors["targetCriteria.revenueMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.revenueMin)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
