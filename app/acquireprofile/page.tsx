@@ -1957,7 +1957,9 @@ export default function AcquireProfilePage() {
                       <Input
                         id="ebitdaMin"
                         type="text"
-                        className={`border-[#d0d5dd] pl-8 ${fieldErrors["targetCriteria.ebitdaMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        className={`border-[#d0d5dd] ${
+                          formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                        } ${fieldErrors["targetCriteria.ebitdaMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.ebitdaMin)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -1988,7 +1990,9 @@ export default function AcquireProfilePage() {
                       <Input
                         id="ebitdaMax"
                         type="text"
-                        className={`border-[#d0d5dd] pl-8 ${fieldErrors["targetCriteria.ebitdaMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        className={`border-[#d0d5dd] ${
+                          formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                        } ${fieldErrors["targetCriteria.ebitdaMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.ebitdaMax)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -2030,7 +2034,9 @@ export default function AcquireProfilePage() {
                       <Input
                         id="transactionSizeMin"
                         type="text"
-                        className={`border-[#d0d5dd] pl-8 ${fieldErrors["targetCriteria.transactionSizeMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        className={`border-[#d0d5dd] ${
+                          formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                        } ${fieldErrors["targetCriteria.transactionSizeMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.transactionSizeMin)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -2065,7 +2071,9 @@ export default function AcquireProfilePage() {
                       <Input
                         id="transactionSizeMax"
                         type="text"
-                        className={`border-[#d0d5dd] pl-8 ${fieldErrors["targetCriteria.transactionSizeMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        className={`border-[#d0d5dd] ${
+                          formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                        } ${fieldErrors["targetCriteria.transactionSizeMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.transactionSizeMax)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
