@@ -2,14 +2,12 @@
 
 import type React from "react"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Search, Eye, LogOut, Settings, Briefcase, ChevronDown, Bell, Upload, X, FileText } from "lucide-react"
+import { Search, Eye, LogOut, Briefcase, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { toast } from "@/components/ui/use-toast"
-import { Toaster } from "@/components/ui/toaster"
 import Link from "next/link"
 
 interface Deal {
@@ -62,8 +60,6 @@ export default function DealsPage() {
   const [dealDetailsOpen, setDealDetailsOpen] = useState(false)
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
-  const [uploadingDocument, setUploadingDocument] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Add buyerProfile state after the existing state declarations
   const [buyerProfile, setBuyerProfile] = useState<BuyerProfile | null>(null)
@@ -244,10 +240,7 @@ export default function DealsPage() {
       // Set flag in localStorage to prevent showing the message again
       localStorage.setItem("profileSubmissionNotified", "true")
 
-      toast({
-        title: "Profile Submitted",
-        description: "Your company profile has been successfully submitted.",
-      })
+      console.log("Profile Submitted: Your company profile has been successfully submitted.")
     }
 
     // Get token and userId from URL parameters
@@ -378,10 +371,7 @@ export default function DealsPage() {
   const handlePassDeal = (dealId: string) => {
     setDeals((prevDeals) => prevDeals.map((deal) => (deal.id === dealId ? { ...deal, status: "passed" } : deal)))
 
-    toast({
-      title: "Deal Passed",
-      description: "The deal has been moved to the passed section.",
-    })
+    console.log("Deal Passed: The deal has been moved to the passed section.")
 
     // Close the deal details modal if it's open
     setDealDetailsOpen(false)
@@ -455,10 +445,7 @@ export default function DealsPage() {
       )
 
       // Show success toast
-      toast({
-        title: "Deal Approved",
-        description: "The deal has been moved to the active section.",
-      })
+      console.log("Deal Approved: The deal has been moved to the active section.")
 
       // Switch to active tab to show the deal
       setActiveTab("active")
@@ -473,83 +460,6 @@ export default function DealsPage() {
     localStorage.removeItem("token")
     localStorage.removeItem("userId")
     router.push("/login")
-  }
-
-  // Function to handle document upload
-  const handleDocumentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files || !event.target.files[0] || !selectedDeal) return
-
-    const file = event.target.files[0]
-    setUploadingDocument(true)
-
-    // Simulate upload process
-    setTimeout(() => {
-      // Add the document to the selected deal
-      const newDocument = {
-        id: `doc-${Date.now()}`,
-        name: file.name,
-        url: "#",
-      }
-
-      // Update the deals state with the new document
-      setDeals((prevDeals) =>
-        prevDeals.map((deal) =>
-          deal.id === selectedDeal.id
-            ? {
-                ...deal,
-                documents: [...(deal.documents || []), newDocument],
-              }
-            : deal,
-        ),
-      )
-
-      // Update the selected deal state
-      setSelectedDeal((prevDeal) => {
-        if (!prevDeal) return null
-        return {
-          ...prevDeal,
-          documents: [...(prevDeal.documents || []), newDocument],
-        }
-      })
-
-      setUploadingDocument(false)
-
-      toast({
-        title: "Document Uploaded",
-        description: `${file.name} has been uploaded successfully.`,
-      })
-    }, 1500)
-  }
-
-  // Function to handle document deletion
-  const handleDeleteDocument = (documentId: string) => {
-    if (!selectedDeal) return
-
-    // Update the deals state by removing the document
-    setDeals((prevDeals) =>
-      prevDeals.map((deal) =>
-        deal.id === selectedDeal.id
-          ? {
-              ...deal,
-              documents: (deal.documents || []).filter((doc) => doc.id !== documentId),
-            }
-          : deal,
-      ),
-    )
-
-    // Update the selected deal state
-    setSelectedDeal((prevDeal) => {
-      if (!prevDeal) return null
-      return {
-        ...prevDeal,
-        documents: (prevDeal.documents || []).filter((doc) => doc.id !== documentId),
-      }
-    })
-
-    toast({
-      title: "Document Deleted",
-      description: "The document has been removed.",
-    })
   }
 
   // Function to get the complete profile picture URL
@@ -669,7 +579,6 @@ export default function DealsPage() {
                   </div>
                 )}
               </div>
-             
             </div>
           </div>
         </div>
@@ -848,7 +757,8 @@ export default function DealsPage() {
           </DialogHeader>
           <div className="py-4">
             <p className="mb-4 text-sm text-gray-600">
-            By clicking "Approve" you reaffirm your previous acceptance of the STRAIGHT TO CIM MASTER NON-DISCLOSURE AGREEMENT and the CIM AMPLIFY MASTER FEE AGREEMENT.
+              By clicking "Approve" you reaffirm your previous acceptance of the STRAIGHT TO CIM MASTER NON-DISCLOSURE
+              AGREEMENT and the CIM AMPLIFY MASTER FEE AGREEMENT.
             </p>
             <p className="text-sm text-gray-600">
               Once you approve, the seller will be notified and can contact you directly.
@@ -938,56 +848,6 @@ export default function DealsPage() {
                     </p>
                   </div>
                 </div>
-
-                <div className="mb-6">
-                  <h3 className="text-lg font-medium mb-3">Documents</h3>
-                  <div className="border border-dashed border-[#3AAFA9] rounded-md p-4">
-                    {selectedDeal.documents && selectedDeal.documents.length > 0 ? (
-                      <div className="space-y-2">
-                        {selectedDeal.documents.map((doc) => (
-                          <div key={doc.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                            <div className="flex items-center">
-                              <FileText className="h-4 w-4 mr-2 text-gray-500" />
-                              <span className="text-sm">{doc.name}</span>
-                            </div>
-                            <button
-                              onClick={() => handleDeleteDocument(doc.id)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <X className="h-4 w-4 text-[#3AAFA9]" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-4">
-                        <p className="text-sm text-gray-500">No documents uploaded yet</p>
-                      </div>
-                    )}
-
-                    <div className="mt-4">
-                      <input type="file" ref={fileInputRef} onChange={handleDocumentUpload} className="hidden" />
-                      <Button
-                        onClick={() => fileInputRef.current?.click()}
-                        variant="outline"
-                        className="w-full flex items-center justify-center"
-                        disabled={uploadingDocument}
-                      >
-                        {uploadingDocument ? (
-                          <div className="flex items-center">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-500 mr-2"></div>
-                            <span>Uploading...</span>
-                          </div>
-                        ) : (
-                          <>
-                            <Upload className="h-4 w-4 mr-2" />
-                            <span>Upload Document</span>
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
               </div>
             )}
           </div>
@@ -1015,8 +875,6 @@ export default function DealsPage() {
           </div>
         </DialogContent>
       </Dialog>
-
-      <Toaster />
     </div>
   )
 }
