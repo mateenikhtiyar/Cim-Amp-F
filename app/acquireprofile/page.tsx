@@ -1872,21 +1872,20 @@ export default function AcquireProfilePage() {
                         {formData.selectedCurrency === "USD"
                           ? "$"
                           : formData.selectedCurrency === "EUR"
-                          ? "€"
-                          : formData.selectedCurrency === "GBP"
-                          ? "£"
-                          : formData.selectedCurrency}
+                            ? "€"
+                            : formData.selectedCurrency === "GBP"
+                              ? "£"
+                              : formData.selectedCurrency}
                       </div>
                       <Input
                         id="revenueMin"
                         type="text"
-                        className={`border-[#d0d5dd] ${
-                          formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
-                        } ${fieldErrors["targetCriteria.revenueMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                          } ${fieldErrors["targetCriteria.revenueMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.revenueMin)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
-                          if (value === "" || /^\d+$/.test(value)) {
+                          if (value === "" || /^-?\d+$/.test(value)) { // Allow negative numbers
                             handleNestedChange("targetCriteria", "revenueMin", value ? Number(value) : undefined)
                           }
                         }}
@@ -1905,17 +1904,16 @@ export default function AcquireProfilePage() {
                         {formData.selectedCurrency === "USD"
                           ? "$"
                           : formData.selectedCurrency === "EUR"
-                          ? "€"
-                          : formData.selectedCurrency === "GBP"
-                          ? "£"
-                          : formData.selectedCurrency}
+                            ? "€"
+                            : formData.selectedCurrency === "GBP"
+                              ? "£"
+                              : formData.selectedCurrency}
                       </div>
                       <Input
                         id="revenueMax"
                         type="text"
-                        className={`border-[#d0d5dd] ${
-                          formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
-                        } ${fieldErrors["targetCriteria.revenueMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                          } ${fieldErrors["targetCriteria.revenueMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.revenueMax)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -1949,17 +1947,16 @@ export default function AcquireProfilePage() {
                         {formData.selectedCurrency === "USD"
                           ? "$"
                           : formData.selectedCurrency === "EUR"
-                          ? "€"
-                          : formData.selectedCurrency === "GBP"
-                          ? "£"
-                          : formData.selectedCurrency}
+                            ? "€"
+                            : formData.selectedCurrency === "GBP"
+                              ? "£"
+                              : formData.selectedCurrency}
                       </div>
                       <Input
                         id="ebitdaMin"
                         type="text"
-                        className={`border-[#d0d5dd] ${
-                          formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
-                        } ${fieldErrors["targetCriteria.ebitdaMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                          } ${fieldErrors["targetCriteria.ebitdaMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.ebitdaMin)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -1982,17 +1979,16 @@ export default function AcquireProfilePage() {
                         {formData.selectedCurrency === "USD"
                           ? "$"
                           : formData.selectedCurrency === "EUR"
-                          ? "€"
-                          : formData.selectedCurrency === "GBP"
-                          ? "£"
-                          : formData.selectedCurrency}
+                            ? "€"
+                            : formData.selectedCurrency === "GBP"
+                              ? "£"
+                              : formData.selectedCurrency}
                       </div>
                       <Input
                         id="ebitdaMax"
                         type="text"
-                        className={`border-[#d0d5dd] ${
-                          formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
-                        } ${fieldErrors["targetCriteria.ebitdaMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                          } ${fieldErrors["targetCriteria.ebitdaMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.ebitdaMax)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -2026,17 +2022,16 @@ export default function AcquireProfilePage() {
                         {formData.selectedCurrency === "USD"
                           ? "$"
                           : formData.selectedCurrency === "EUR"
-                          ? "€"
-                          : formData.selectedCurrency === "GBP"
-                          ? "£"
-                          : formData.selectedCurrency}
+                            ? "€"
+                            : formData.selectedCurrency === "GBP"
+                              ? "£"
+                              : formData.selectedCurrency}
                       </div>
                       <Input
                         id="transactionSizeMin"
                         type="text"
-                        className={`border-[#d0d5dd] ${
-                          formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
-                        } ${fieldErrors["targetCriteria.transactionSizeMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                          } ${fieldErrors["targetCriteria.transactionSizeMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.transactionSizeMin)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -2063,17 +2058,16 @@ export default function AcquireProfilePage() {
                         {formData.selectedCurrency === "USD"
                           ? "$"
                           : formData.selectedCurrency === "EUR"
-                          ? "€"
-                          : formData.selectedCurrency === "GBP"
-                          ? "£"
-                          : formData.selectedCurrency}
+                            ? "€"
+                            : formData.selectedCurrency === "GBP"
+                              ? "£"
+                              : formData.selectedCurrency}
                       </div>
                       <Input
                         id="transactionSizeMax"
                         type="text"
-                        className={`border-[#d0d5dd] ${
-                          formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
-                        } ${fieldErrors["targetCriteria.transactionSizeMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                          } ${fieldErrors["targetCriteria.transactionSizeMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.transactionSizeMax)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
@@ -2262,7 +2256,8 @@ export default function AcquireProfilePage() {
                   />
                   <Label htmlFor="termsAndConditions" className="text-[#344054]">
                     I have read and agree to the website{" "}
-                    <Link href="/terms" className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">
+                    <Link href="/terms" className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer" target="_blank"
+                      rel="noopener noreferrer">
                       terms and conditions
                     </Link>
                   </Label>
@@ -2284,7 +2279,8 @@ export default function AcquireProfilePage() {
                   />
                   <Label htmlFor="nda" className="text-[#344054]">
                     I have read and agree to the{" "}
-                    <Link href="/universalNDA" className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">
+                    <Link href="/universalNDA" className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer" target="_blank"
+                      rel="noopener noreferrer">
                       universal NDA
                     </Link>{" "}
                     so that I can go straight to CIM
@@ -2308,7 +2304,8 @@ export default function AcquireProfilePage() {
                   />
                   <Label htmlFor="feeAgreement" className="text-[#344054]">
                     I have read and agree to the{" "}
-                    <Link href="/masterfeeagreement" className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer">
+                    <Link href="/masterfeeagreement" className="text-[#38A4F1] hover:text-[#2a9d8f] cursor-pointer" target="_blank"
+                      rel="noopener noreferrer">
                       fee agreement
                     </Link>
                   </Label>
