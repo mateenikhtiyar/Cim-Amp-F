@@ -1880,12 +1880,13 @@ export default function AcquireProfilePage() {
                       <Input
                         id="revenueMin"
                         type="text"
-                        className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
-                          } ${fieldErrors["targetCriteria.revenueMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                        className={`border-[#d0d5dd] ${
+                          formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                        } ${fieldErrors["targetCriteria.revenueMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                         value={formatNumberWithCommas(formData.targetCriteria.revenueMin)}
                         onChange={(e) => {
                           const value = e.target.value.replace(/,/g, "")
-                          if (value === "" || /^-?\d+$/.test(value)) { // Allow negative numbers
+                          if (value === "" || /^\d+$/.test(value)) {
                             handleNestedChange("targetCriteria", "revenueMin", value ? Number(value) : undefined)
                           }
                         }}
