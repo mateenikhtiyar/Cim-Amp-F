@@ -27,7 +27,6 @@ import {
 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { toast } from "@/components/ui/use-toast"
-import { Toaster } from "@/components/ui/toaster"
 
 import { getGeoData, type GeoData, type Continent, type Region, type SubRegion } from "@/lib/geography-data"
 import { getIndustryData, type IndustryData, type Sector, type IndustryGroup, type Industry } from "@/lib/industry-data"
@@ -1595,7 +1594,7 @@ export default function CompanyProfilePage() {
                     className="h-8 w-8 rounded-full object-cover"
                     onError={(e) => {
                       // Fallback to placeholder on error
-                      ; (e.target as HTMLImageElement).src = "/placeholder.svg"
+                      ;(e.target as HTMLImageElement).src = "/placeholder.svg"
                     }}
                   />
                 ) : (
@@ -2031,12 +2030,13 @@ export default function CompanyProfilePage() {
                           <Input
                             id="revenueMin"
                             type="text"
-                            className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
-                              } ${fieldErrors["targetCriteria.revenueMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                            className={`border-[#d0d5dd] ${
+                              formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                            } ${fieldErrors["targetCriteria.revenueMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                             value={formatNumberWithCommas(formData.targetCriteria.revenueMin)}
                             onChange={(e) => {
                               const value = e.target.value.replace(/,/g, "")
-                              if (value === "" || /^-?\d+$/.test(value)) { // Allow negative numbers
+                              if (value === "" || /^\d+$/.test(value)) {
                                 handleNestedChange("targetCriteria", "revenueMin", value ? Number(value) : undefined)
                               }
                             }}
@@ -2063,8 +2063,9 @@ export default function CompanyProfilePage() {
                           <Input
                             id="revenueMax"
                             type="text"
-                            className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
-                              } ${fieldErrors["targetCriteria.revenueMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                            className={`border-[#d0d5dd] ${
+                              formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                            } ${fieldErrors["targetCriteria.revenueMax"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                             value={formatNumberWithCommas(formData.targetCriteria.revenueMax)}
                             onChange={(e) => {
                               const value = e.target.value.replace(/,/g, "")
@@ -2101,8 +2102,9 @@ export default function CompanyProfilePage() {
                           <Input
                             id="ebitdaMin"
                             type="text"
-                            className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
-                              } ${fieldErrors["targetCriteria.ebitdaMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                            className={`border-[#d0d5dd] ${
+                              formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                            } ${fieldErrors["targetCriteria.ebitdaMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                             value={formatNumberWithCommas(formData.targetCriteria.ebitdaMin)}
                             onChange={(e) => {
                               const value = e.target.value.replace(/,/g, "")
@@ -2133,8 +2135,7 @@ export default function CompanyProfilePage() {
                           <Input
                             id="ebitdaMax"
                             type="text"
-                            className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
-                              }`}
+                            className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"}`}
                             value={formatNumberWithCommas(formData.targetCriteria.ebitdaMax)}
                             onChange={(e) => {
                               const value = e.target.value.replace(/,/g, "")
@@ -2168,8 +2169,9 @@ export default function CompanyProfilePage() {
                           <Input
                             id="transactionSizeMin"
                             type="text"
-                            className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
-                              } ${fieldErrors["targetCriteria.transactionSizeMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                            className={`border-[#d0d5dd] ${
+                              formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
+                            } ${fieldErrors["targetCriteria.transactionSizeMin"] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                             value={formatNumberWithCommas(formData.targetCriteria.transactionSizeMin)}
                             onChange={(e) => {
                               const value = e.target.value.replace(/,/g, "")
@@ -2206,8 +2208,7 @@ export default function CompanyProfilePage() {
                           <Input
                             id="transactionSizeMax"
                             type="text"
-                            className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"
-                              }`}
+                            className={`border-[#d0d5dd] ${formData.selectedCurrency.length > 2 ? "pl-12" : "pl-8"}`}
                             value={formatNumberWithCommas(formData.targetCriteria.transactionSizeMax)}
                             onChange={(e) => {
                               const value = e.target.value.replace(/,/g, "")
@@ -2377,18 +2378,30 @@ export default function CompanyProfilePage() {
                   <div className="mt-4 text-sm text-[#667085] border-t pt-4">
                     <p>
                       The{" "}
-                      <Link href="/masterfeeagreement" className="text-[#3aafa9] underline" target="_blank"
-                        rel="noopener noreferrer">
+                      <Link
+                        href="/masterfeeagreement"
+                        className="text-[#3aafa9] underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         Master Fee Agreement
                       </Link>
                       ,{" "}
-                      <Link href="/universalNDA" className="text-[#3aafa9] underline" target="_blank"
-                        rel="noopener noreferrer">
+                      <Link
+                        href="/universalNDA"
+                        className="text-[#3aafa9] underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         Universal NDA
                       </Link>{" "}
                       and{" "}
-                      <Link href="/terms" className="text-[#3aafa9] underline" target="_blank"
-                        rel="noopener noreferrer">
+                      <Link
+                        href="/terms"
+                        className="text-[#3aafa9] underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         CIM Amplify Terms and Conditions
                       </Link>{" "}
                       were agreed to by {buyerProfile?.fullName || "(insert buyer's name)"} on{" "}
@@ -2415,7 +2428,6 @@ export default function CompanyProfilePage() {
           </div>
         </main>
       </div>
-      <Toaster />
     </div>
   )
 }
