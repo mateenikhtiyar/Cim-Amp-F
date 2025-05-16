@@ -550,12 +550,12 @@ export default function DealsPage() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <div className="relative">
+            {/* <div className="relative">
               <Bell className="h-5 w-5 text-gray-500" />
               <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
                 2
               </div>
-            </div>
+            </div> */}
 
             <div className="flex items-center">
               <div className="mr-2 text-right">
@@ -690,61 +690,29 @@ export default function DealsPage() {
           </Tabs>
 
           {/* Update the deal cards to match the new design */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {filteredDeals.map((deal) => (
-              <div
-                key={deal.id}
-                className="rounded-lg border border-gray-200 bg-white shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => handleViewDealDetails(deal)}
-              >
-                <div className="flex items-center justify-between border-b border-gray-200 p-4">
-                  <h3 className="text-lg font-medium text-teal-500">{deal.title}</h3>
-                  {/* Status badges removed as requested */}
-                </div>
-
-                <div className="p-4">
-                  <h4 className="mb-2 font-medium text-gray-800">Overview</h4>
-                  <div className="mb-4 space-y-1 text-sm text-gray-600">
-                    <p>Company Description: {deal.companyDescription}</p>
-                    <p>Industry: {deal.industry}</p>
-                    <p>Geography: {deal.geography}</p>
-                    <p>Number of Years in Business: {deal.yearsInBusiness}</p>
-                  </div>
-
-                  <h4 className="mb-2 font-medium text-gray-800">Financial</h4>
-                  <div className="mb-4 grid grid-cols-2 gap-2 text-sm text-gray-600">
-                    <p>Trailing 12-Month Revenue: ${deal.trailingRevenue.toLocaleString()}</p>
-                    <p>Trailing 12-Month EBITDA: ${deal.trailingEbitda.toLocaleString()}</p>
-                    <p>Average 3-YEAR REVENUE GROWTH IN $: ${deal.averageGrowth.toLocaleString()}</p>
-                    <p>Net Income: ${deal.netIncome.toLocaleString()}</p>
-                    <p>Asking Price: ${deal.askingPrice.toLocaleString()}</p>
-                    <p>Business Mode: {deal.businessModel}</p>
-                    <p>Management Future Preferences: {deal.managementPreference}</p>
-                  </div>
-
-                  <h4 className="mb-2 font-medium text-gray-800">Seller Contact Information</h4>
-                  <div className="mb-4 space-y-1 text-sm text-gray-600">
-                    <p>Phone Number: {deal.sellerPhone}</p>
-                    <p>Email: {deal.sellerEmail}</p>
-                  </div>
-
-                  <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
-                    <Button onClick={(e) => handleViewCIMClick(e, deal)} className="bg-teal-500 hover:bg-teal-600">
-                      {deal.status === "active" ? "View CIM" : "Go to CIM"}
-                    </Button>
-                    {deal.status !== "passed" && (
-                      <Button
-                        variant="outline"
-                        className="border-red-200 bg-[#E3515333] text-red-500 hover:bg-red-50"
-                        onClick={() => handlePassDeal(deal.id)}
-                      >
-                        Pass
-                      </Button>
-                    )}
-                  </div>
+          {/* Coming Soon Message */}
+          <div className="flex flex-col items-center justify-center py-16 px-4">
+            <div className="text-center max-w-2xl mx-auto">
+              <div className="mb-8 relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-teal-500 to-teal-300 rounded-lg blur opacity-25"></div>
+                <div className="relative bg-white rounded-lg border border-teal-100 p-8 shadow-xl">
+                  <h2 className="text-4xl font-bold text-teal-500 mb-4">Coming Soon</h2>
+                  <div className="h-1 w-20 bg-teal-500 mx-auto mb-6 rounded-full"></div>
+                  <p className="text-gray-600 text-lg mb-6">
+                    We're working hard to bring you an exciting marketplace of business opportunities.
+                  </p>
+                  <p className="text-gray-500">
+                    Our team is curating high-quality deals that match your investment criteria. Check back soon to
+                    explore available opportunities.
+                  </p>
                 </div>
               </div>
-            ))}
+              <div className="flex justify-center space-x-4">
+                <div className="h-3 w-3 rounded-full bg-teal-500 animate-pulse"></div>
+                <div className="h-3 w-3 rounded-full bg-teal-400 animate-pulse delay-150"></div>
+                <div className="h-3 w-3 rounded-full bg-teal-300 animate-pulse delay-300"></div>
+              </div>
+            </div>
           </div>
         </main>
       </div>
