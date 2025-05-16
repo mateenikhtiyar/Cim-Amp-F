@@ -1574,12 +1574,12 @@ export default function CompanyProfilePage() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <div className="relative">
+            {/* <div className="relative">
               <Bell className="h-5 w-5 text-gray-500" />
               <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white">
                 2
               </div>
-            </div>
+            </div> */}
 
             <div className="flex items-center">
               <div className="mr-2 text-right">
