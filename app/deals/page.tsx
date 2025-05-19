@@ -699,12 +699,9 @@ export default function DealsPage() {
                   <h2 className="text-4xl font-bold text-teal-500 mb-4">Coming Soon</h2>
                   <div className="h-1 w-20 bg-teal-500 mx-auto mb-6 rounded-full"></div>
                   <p className="text-gray-600 text-lg mb-6">
-                    We're working hard to bring you an exciting marketplace of business opportunities.
+                  Thank you for registering your investment criteria! As new deals matching your criteria are added, we will notify you by email. You will also monitor your matched deals directly from this dashboard.
                   </p>
-                  <p className="text-gray-500">
-                    Our team is curating high-quality deals that match your investment criteria. Check back soon to
-                    explore available opportunities.
-                  </p>
+                  
                 </div>
               </div>
               <div className="flex justify-center space-x-4">
