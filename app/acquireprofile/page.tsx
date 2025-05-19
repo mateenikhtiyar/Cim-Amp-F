@@ -1937,7 +1937,7 @@ export default function AcquireProfilePage() {
               </div>
 
               <div>
-                <Label className="text-[#667085] text-sm mb-1.5 block">EBITDA Range</Label>
+                <Label className="text-[#667085] text-sm mb-1.5 block">EBITDA Range (0 Allows for negative EBITDA)</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center">
                     <Label htmlFor="ebitdaMin" className="text-[#667085] text-sm w-10">

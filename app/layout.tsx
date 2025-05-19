@@ -8,9 +8,9 @@ import { DevToolsNotice } from "@/components/dev-tools-notice"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "Company-Profile",
+  title: "Cim-Amplify",
   description: "Company profile form for CIM Amplify",
-    generator: 'v0.dev'
+    generator: 'mubeen'
 }
 
 export default function RootLayout({
