@@ -701,7 +701,7 @@ export default function DealsPage() {
                   <p className="text-gray-600 text-lg mb-6">
                   Thank you for registering your investment criteria! As new deals matching your criteria are added, we will notify you by email. You will also monitor your matched deals directly from this dashboard.
                   </p>
-                  <
+                  
                 </div>
               </div>
               <div className="flex justify-center space-x-4">
